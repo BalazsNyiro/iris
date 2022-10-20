@@ -7,6 +7,7 @@ import (
     "testing"
 )
 
-func Test_tagraw(t *testing.T) {
+func Test_terminal_detect(t *testing.T) {
+    fmt.Println(terminal_detect())
     fmt.Println("iris response:", Page())
 }
