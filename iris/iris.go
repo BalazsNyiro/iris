@@ -7,6 +7,7 @@ import (
     "log"
     "os"
     "os/exec"
+    "strconv"
     "strings"
     "syscall"
     "unsafe"
@@ -25,7 +26,8 @@ type winsize struct {
     Ypixel uint16
 }
 
-func TerminalDimensionsWithSyscall() (uint, uint, uint, uint) {
+// https://stackoverflow.com/questions/16569433/get-terminal-size-in-go
+func TerminalDimensionsWithSyscall() (uint, uint) {
     ws := &winsize{}
     retCode, _, errno := syscall.Syscall(syscall.SYS_IOCTL,
         uintptr(syscall.Stdin),
@@ -35,15 +37,21 @@ func TerminalDimensionsWithSyscall() (uint, uint, uint, uint) {
     if int(retCode) == -1 {
         panic(errno)
     }
-    return uint(ws.Col), uint(ws.Row), uint(ws.Xpixel), uint(ws.Ypixel)
+    return uint(ws.Col), uint(ws.Row)
 }
 
 // https://stackoverflow.com/questions/263890/how-do-i-find-the-width-height-of-a-terminal-window
 // https://stackoverflow.com/questions/16569433/get-terminal-size-in-go
 func TerminalDetect() (int, int) {
     out, _ := shell("stty size")
-    fmt.Println("terminal detect >>>", out)
-    return 1, 2
+    out = strings.TrimSpace(out)
+    split := strings.Split(out, " ")
+    row, err := strconv.Atoi(split[0])
+    col, err2 := strconv.Atoi(split[1])
+    if err != nil || err2 != nil {
+        log.Fatal("stty size, not integer reply:", row, col)
+    }
+    return col, row
 }
 
 // https://zetcode.com/golang/exec-command/
