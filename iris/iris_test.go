@@ -8,10 +8,6 @@ import (
 )
 
 func Test_terminal_detect(t *testing.T) {
-    fmt.Println(TerminalDetect())
+    fmt.Println(TerminalDimensionsSttySize())
     fmt.Println("iris response:", Page())
-}
-
-func Test_TerminalDimensions(t *testing.T) {
-    fmt.Println(TerminalDimensionsWithSyscall())
 }
