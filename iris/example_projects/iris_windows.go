@@ -9,4 +9,5 @@ import "github.com/BalazsNyiro/iris/iris"
 
 func main() {
     fmt.Println(iris.TerminalDetect())
+    fmt.Println(iris.TerminalDimensionsWithSyscall())
 }
