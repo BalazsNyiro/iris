@@ -12,13 +12,13 @@ import (
 
 func Page() string {
     fmt.Println("iris")
-    terminal_detect()
+    TerminalDetect()
     return "page from iris"
 }
 
 // https://stackoverflow.com/questions/263890/how-do-i-find-the-width-height-of-a-terminal-window
 // https://stackoverflow.com/questions/16569433/get-terminal-size-in-go
-func terminal_detect() (int, int) {
+func TerminalDetect() (int, int) {
     out, _ := shell("stty size")
     fmt.Println("terminal detect >>>", out)
     return 1, 2

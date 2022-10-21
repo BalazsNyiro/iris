@@ -8,6 +8,6 @@ import (
 )
 
 func Test_terminal_detect(t *testing.T) {
-    fmt.Println(terminal_detect())
+    fmt.Println(TerminalDetect())
     fmt.Println("iris response:", Page())
 }
