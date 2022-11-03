@@ -60,7 +60,7 @@ func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrNa
 				baseObjectPointer.Parent,
 				baseObjAttrName) * val / 100
 		}
-	} else {
+	} else { // no % in the value
 		val, err := strconv.Atoi(valStr)
 		if err == nil {
 			valCalculated = val

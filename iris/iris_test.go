@@ -34,6 +34,16 @@ func Test_value_string_to_number(t *testing.T) {
 	rootObjHalfTerminal := DocumentCreate("0", "50%", "50%", "50", "20")
 	valuePercentInHalfRoot := valueStringToNumber("20%", &rootObjHalfTerminal, "width")
 	compare_int_pair(valuePercentInHalfRoot, 5, t)
+
+	rootObj3 := DocumentCreate("0", "30%", "40%", "160", "180")
+	child1 := ObjNew("child1", "25%", "50%", "0", "0", &rootObj3)
+	child2 := ObjNew("child2", "50%", "50%", "0", "0", &child1)
+
+	// 160*0.3*0.25*0.5
+	compare_int_pair(child2.attribCalculated("width"), 6, t)
+
+	// 180*0.4*0.5*0.5 = 18.0
+	compare_int_pair(child2.attribCalculated("height"), 18, t)
 }
 
 func compare_int_pair(received, wanted int, t *testing.T) {
