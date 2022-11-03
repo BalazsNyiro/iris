@@ -49,17 +49,17 @@ func (obj DomObj) WidthCalculated() int {
 	return valueStringToNumber(obj.Attr["width"], obj.Parent, "width")
 }
 
-func valueStringToNumber(valStr string, parentPtr *DomObj, parentAttrKey string) int {
+func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrName string) int {
 	valStr = strings.TrimSpace(valStr)
 	valCalculated := 0
 	if strings.Contains(valStr, "%") {
 		valStr = strings.Replace(valStr, "%", "", -1)
 		val, err := strconv.Atoi(valStr)
-		if err == nil && parentPtr != nil {
+		if err == nil && baseObjectPointer != nil {
 			valCalculated = valueStringToNumber(
-				parentPtr.Attr[parentAttrKey],
-				parentPtr.Parent,
-				parentAttrKey) * val / 100
+				baseObjectPointer.Attr[baseObjAttrName],
+				baseObjectPointer.Parent,
+				baseObjAttrName) * val / 100
 		}
 	} else {
 		val, err := strconv.Atoi(valStr)

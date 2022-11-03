@@ -19,13 +19,14 @@ func Test_document_create(t *testing.T) {
 }
 
 */
-func Test_value_calculations(t *testing.T) {
+func Test_value_string_to_number(t *testing.T) {
 	//rootObj := DocumentCreate("0", "50%", "50%", "60", "20")
 
 	// no parent object usage, not a relative % value:
 	value := valueStringToNumber("20", nil, "")
 	compare_int_pair(value, 20, t)
 
+	// % values need to know the parent measures to calculate relations
 	rootObj := DocumentCreate("0", "60", "20", "", "0")
 	valuePercent := valueStringToNumber("20%", &rootObj, "width")
 	compare_int_pair(valuePercent, 12, t)
