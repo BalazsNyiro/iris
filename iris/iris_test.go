@@ -44,6 +44,19 @@ func Test_value_string_to_number(t *testing.T) {
 
 	// 180*0.4*0.5*0.5 = 18.0
 	compare_int_pair(child2.attribCalculated("height"), 18, t)
+
+	// rounded values /////////////////////////////////////////////////
+	rootObjFloat := DocumentCreate("0", "50%", "45%", "14", "50")
+	// 7.5 is the exact value - this is rounded:
+	compare_int_pair(rootObjFloat.attribCalculated("width"), 7, t)
+	// 22.5 is the exact value - this is rounded:
+	compare_int_pair(rootObjFloat.attribCalculated("height"), 22, t)
+
+	// width: 25% of 7 -> 1 because it's less than 2.
+	childFloat1 := ObjNew("childFloat1", "25%", "20%", "0", "0", &rootObjFloat)
+	compare_int_pair(childFloat1.attribCalculated("width"), 1, t)
+	// width: 20% of 22 -> 4 (exact: 4.4)
+	compare_int_pair(childFloat1.attribCalculated("height"), 4, t)
 }
 
 func compare_int_pair(received, wanted int, t *testing.T) {
