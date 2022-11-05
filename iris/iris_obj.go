@@ -31,23 +31,39 @@ type DomObj struct {
 	Parent   *DomObj
 }
 
-func ObjNew(id, width, height, bornX, bornY string, parentPointer *DomObj) DomObj {
+// every object knows about his own rendered output
+func (obj DomObj) render() string {
+	screenDisplayed := ""
+	return screenDisplayed
+}
+
+var FromLeftToRight = "FromLeftToRight"
+var FromTopToDown = "FromTopToDown"
+
+func ObjNew(id, width, height, bornX, bornY, basicBgFiller string, parentPointer *DomObj) DomObj {
 	attr := map[string]string{
 		"id": id, // all id is unique. Equivalent with dom Id
 
-		"width":             width,             // value examples: 20, 20%,
-		"height":            height,            // or it can be empty: ''
-		"bornX":             bornX,             // default unit: character.
-		"bornY":             bornY,             // 20 means: 20 character
-		"bornHorizontalWay": "FromLeftToRight", // or FromRightToLeft
-		"bornVerticalWay":   "FromTopToDown",   // or FromDownToTop
+		"width":             width,           // value examples: 20, 20%,
+		"height":            height,          // or it can be empty: ''
+		"bornX":             bornX,           // default unit: character.
+		"bornY":             bornY,           // 20 means: 20 character
+		"bornHorizontalWay": FromLeftToRight, // or FromRightToLeft
+		"bornVerticalWay":   FromTopToDown,   // or FromDownToTop
+
+		"basicBackgroundFiller": basicBgFiller, // this string represents the object in debug/dev mode
+		// the displayed filler is one char wide. But: it can be longer than once char, with color codes for example
+
 	}
 	return DomObj{Attr: attr, Parent: parentPointer}
 }
+
+// Tested
 func (obj DomObj) attribCalculated(key string) int {
 	return valueStringToNumber(obj.Attr[key], obj.Parent, key)
 }
 
+// Tested
 func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrName string) int {
 	valStr = strings.TrimSpace(valStr)
 	valCalculated := 0
