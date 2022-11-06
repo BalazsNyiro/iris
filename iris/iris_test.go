@@ -23,9 +23,7 @@ func Test_render(t *testing.T) {
 
 	// calculated: width=4, height=2
 	rootObj1 := DocumentCreate("0", "50%", "50%", "8", "4")
-
-	screenReceived := rootObj1.RenderScreenMatrix(true)
-	rendered := ScreenToTxt(screenReceived)
+	rendered := rootObj1.RenderScreenMatrixToTxt(true)
 	wanted := "RRRR\nRRRR"
 	compare_str_pair(rendered, wanted, t)
 }
