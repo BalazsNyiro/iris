@@ -24,7 +24,7 @@ func Test_render(t *testing.T) {
 	// calculated: width=4, height=2
 	rootObj1 := DocumentCreate("0", "50%", "50%", "8", "4")
 	rendered := rootObj1.RenderScreenMatrixToTxt(true)
-	wanted := "RRRR\nRRRR"
+	wanted := "RRRR" + NewlineOsBased() + "RRRR"
 	compare_str_pair(rendered, wanted, t)
 }
 
