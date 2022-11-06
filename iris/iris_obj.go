@@ -1,6 +1,7 @@
 package iris
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -74,6 +75,7 @@ func (obj DomObj) RenderScreenMatrix(useBasicFiller bool) RenderedScreen {
 
 	objWidth := obj.attribCalculated("width")
 	objHeight := obj.attribCalculated("height")
+	fmt.Println("TEST RenderScreenMatrix width, height:", objWidth, objHeight)
 
 	if objWidth < 1 || objHeight < 1 {
 		screenDisplayed := RenderedScreen{}
@@ -96,6 +98,7 @@ func (obj DomObj) RenderScreenMatrix(useBasicFiller bool) RenderedScreen {
 // this function is the raw text output
 func (obj DomObj) RenderScreenMatrixToTxt(useBasicFiller bool) string {
 	screenReceived := obj.RenderScreenMatrix(useBasicFiller)
+	fmt.Println("TEST screen received:", screenReceived)
 	return ScreenToTxt(screenReceived)
 }
 
@@ -151,9 +154,10 @@ func ObjNew(id, width, height, bornXinParentVal, bornYinParentVal, basicBgFiller
 }
 
 func (obj DomObj) WidthFixOrTextBased() int {
-	objWidth := valueStringToNumber(obj.Attr["width"], obj.Parent, "width")
-	if objWidth == 0 { // if not pre-defined width:
+	attribConverted, objWidth := valueStringToNumber(obj.Attr["width"], obj.Parent, "width")
+	if !attribConverted { // if not pre-defined width:
 		objTxt := obj.Attr["text"]
+		objWidth = 0
 		if len(objTxt) > 0 { // find the widest line
 			for _, row := range strings.Split(objTxt, NewlineSeparatorInText()) {
 				if len(row) > objWidth {
@@ -166,9 +170,10 @@ func (obj DomObj) WidthFixOrTextBased() int {
 }
 
 func (obj DomObj) HeightFixOrTextBased() int {
-	objHeight := valueStringToNumber(obj.Attr["height"], obj.Parent, "height")
-	if objHeight == 0 { // if not pre-defined width:
+	attribConverted, objHeight := valueStringToNumber(obj.Attr["height"], obj.Parent, "height")
+	if !attribConverted { // if not pre-defined width:
 		objTxt := obj.Attr["text"]
+		objHeight = 0
 		if len(objTxt) > 0 { // find the num of newlines in the text
 			objHeight = len(strings.Split(objTxt, NewlineSeparatorInText()))
 		}
@@ -204,51 +209,70 @@ func (obj DomObj) PositionsInParent() (int, int, int, int) {
 // Tested
 // return with a numeric attribute value
 func (obj DomObj) attribCalculated(key string) int {
-	if len(obj.Attr[key]) > 0 { // if the Attr is defined, non-empty:
-		return valueStringToNumber(obj.Attr[key], obj.Parent, key)
+	_, keyInAttr := obj.Attr[key]
+	if !keyInAttr {
+		return 0
 	}
+	if len(obj.Attr[key]) == 0 { // if the Attribute value is empty
+		return 0
+	}
+
+	attribVal := 0
 
 	// the attrib is not set, so it depends on the children!
 	// or on the text width
 	if key == "width" || key == "height" {
-		txtLen := len(obj.Attr["text"])
-		if txtLen > 0 {
-			return txtLen
-		} // no txtLen, and no pre-sed width.
+
+		if key == "width" {
+			attribVal = obj.WidthFixOrTextBased()
+		}
+		if key == "height" {
+			attribVal = obj.HeightFixOrTextBased()
+		}
+		// no txtLen, and no pre-sed width.
 		/*
 			x_min, x_max, y_min, y_max := 0, 0, 0, 0
 			for child := range obj.Children {
-
 			}
-
 		*/
+	} else { // something else than width/height attrib reading
+		strAttribConverted, valueConverted := valueStringToNumber(obj.Attr[key], obj.Parent, key)
+		if strAttribConverted {
+			return valueConverted
+		}
+		return 0 // if we have conversion error, return with 0
 	}
 
-	if key == "height" {
-	}
-	return 0 // if the attrib is
+	return attribVal // if the attrib is
 }
 
 // Tested
-func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrName string) int {
+func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrName string) (bool, int) {
 	valStr = strings.TrimSpace(valStr)
 	valCalculated := 0
+	stringConverted := false
 	if strings.Contains(valStr, "%") {
 		valStr = strings.Replace(valStr, "%", "", -1)
-		val, err := strconv.Atoi(valStr)
+		percentVal, err := strconv.Atoi(valStr)
 		if err == nil && baseObjectPointer != nil {
-			valCalculated = valueStringToNumber(
+			strConverted, valCalculated2 := valueStringToNumber(
 				baseObjectPointer.Attr[baseObjAttrName],
 				baseObjectPointer.Parent,
-				baseObjAttrName) * val / 100
+				baseObjAttrName)
+			valCalculated2 = valCalculated2 * percentVal / 100
+			if strConverted {
+				valCalculated = valCalculated2
+				stringConverted = true
+			}
 		}
 	} else { // no % sign
 		if len(valStr) > 0 { // if valStr is defined, not-empty
 			val, err := strconv.Atoi(valStr)
 			if err == nil {
 				valCalculated = val
+				stringConverted = true
 			}
 		}
 	}
-	return valCalculated
+	return stringConverted, valCalculated
 }

@@ -30,19 +30,19 @@ func Test_render(t *testing.T) {
 
 func Test_value_string_to_number(t *testing.T) {
 
-	valueFromEmpty := valueStringToNumber("", nil, "")
+	_, valueFromEmpty := valueStringToNumber("", nil, "")
 	compare_int_pair(valueFromEmpty, 0, t)
 
-	valueNoPercentNoParent := valueStringToNumber("20", nil, "")
+	_, valueNoPercentNoParent := valueStringToNumber("20", nil, "")
 	compare_int_pair(valueNoPercentNoParent, 20, t)
 
 	// % values need to know the parent measures to calculate relations
 	rootObj := DocumentCreate("0", "60", "20", "", "0")
-	valuePercentOfParentAttribute := valueStringToNumber("20%", &rootObj, "width")
+	_, valuePercentOfParentAttribute := valueStringToNumber("20%", &rootObj, "width")
 	compare_int_pair(valuePercentOfParentAttribute, 12, t)
 
 	rootObjHalfTerminal := DocumentCreate("0", "50%", "50%", "50", "20")
-	valuePercentInHalfRoot := valueStringToNumber("20%", &rootObjHalfTerminal, "width")
+	_, valuePercentInHalfRoot := valueStringToNumber("20%", &rootObjHalfTerminal, "width")
 	compare_int_pair(valuePercentInHalfRoot, 5, t)
 
 	rootObj3 := DocumentCreate("0", "30%", "40%", "160", "180")
@@ -67,6 +67,15 @@ func Test_value_string_to_number(t *testing.T) {
 	compare_int_pair(childFloat1.attribCalculated("width"), 1, t)
 	// width: 20% of 22 -> 4 (exact: 4.4)
 	compare_int_pair(childFloat1.attribCalculated("height"), 4, t)
+
+	rootObjWithNewAttrib := DocumentCreate("0", "53%", "45%", "14", "50")
+	rootObjWithNewAttrib.Attr["creation_timestamp"] = "123"
+	compare_int_pair(rootObjWithNewAttrib.attribCalculated("creation_timestamp"), 123, t)
+
+}
+
+func Test_WidthFixOrTextBased(t *testing.T) {
+
 }
 
 // TEST FUNCTIONS ////////////////////////////////////////////////////////////
