@@ -1,7 +1,6 @@
 package iris
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -75,7 +74,7 @@ func (obj DomObj) RenderScreenMatrix(useBasicFiller bool) RenderedScreen {
 
 	objWidth := obj.attribCalculated("width")
 	objHeight := obj.attribCalculated("height")
-	fmt.Println("TEST RenderScreenMatrix width, height:", objWidth, objHeight)
+	// fmt.Println("TEST RenderScreenMatrix width, height:", objWidth, objHeight)
 
 	if objWidth < 1 || objHeight < 1 {
 		screenDisplayed := RenderedScreen{}
@@ -98,7 +97,7 @@ func (obj DomObj) RenderScreenMatrix(useBasicFiller bool) RenderedScreen {
 // this function is the raw text output
 func (obj DomObj) RenderScreenMatrixToTxt(useBasicFiller bool) string {
 	screenReceived := obj.RenderScreenMatrix(useBasicFiller)
-	fmt.Println("TEST screen received:", screenReceived)
+	// fmt.Println("TEST screen received:", screenReceived)
 	return ScreenToTxt(screenReceived)
 }
 
@@ -154,7 +153,7 @@ func ObjNew(id, width, height, bornXinParentVal, bornYinParentVal, basicBgFiller
 }
 
 func (obj DomObj) WidthFixOrTextBased() int {
-	attribConverted, objWidth := valueStringToNumber(obj.Attr["width"], obj.Parent, "width")
+	objWidth, attribConverted := valueStringToNumber(obj.Attr["width"], obj.Parent, "width")
 	if !attribConverted { // if not pre-defined width:
 		objTxt := obj.Attr["text"]
 		objWidth = 0
@@ -170,7 +169,7 @@ func (obj DomObj) WidthFixOrTextBased() int {
 }
 
 func (obj DomObj) HeightFixOrTextBased() int {
-	attribConverted, objHeight := valueStringToNumber(obj.Attr["height"], obj.Parent, "height")
+	objHeight, attribConverted := valueStringToNumber(obj.Attr["height"], obj.Parent, "height")
 	if !attribConverted { // if not pre-defined width:
 		objTxt := obj.Attr["text"]
 		objHeight = 0
@@ -236,7 +235,7 @@ func (obj DomObj) attribCalculated(key string) int {
 			}
 		*/
 	} else { // something else than width/height attrib reading
-		strAttribConverted, valueConverted := valueStringToNumber(obj.Attr[key], obj.Parent, key)
+		valueConverted, strAttribConverted := valueStringToNumber(obj.Attr[key], obj.Parent, key)
 		if strAttribConverted {
 			return valueConverted
 		}
@@ -247,7 +246,7 @@ func (obj DomObj) attribCalculated(key string) int {
 }
 
 // Tested
-func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrName string) (bool, int) {
+func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrName string) (int, bool) {
 	valStr = strings.TrimSpace(valStr)
 	valCalculated := 0
 	stringConverted := false
@@ -255,7 +254,7 @@ func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrNa
 		valStr = strings.Replace(valStr, "%", "", -1)
 		percentVal, err := strconv.Atoi(valStr)
 		if err == nil && baseObjectPointer != nil {
-			strConverted, valCalculated2 := valueStringToNumber(
+			valCalculated2, strConverted := valueStringToNumber(
 				baseObjectPointer.Attr[baseObjAttrName],
 				baseObjectPointer.Parent,
 				baseObjAttrName)
@@ -274,5 +273,5 @@ func valueStringToNumber(valStr string, baseObjectPointer *DomObj, baseObjAttrNa
 			}
 		}
 	}
-	return stringConverted, valCalculated
+	return valCalculated, stringConverted
 }

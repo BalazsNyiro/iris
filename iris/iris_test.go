@@ -30,19 +30,19 @@ func Test_render(t *testing.T) {
 
 func Test_value_string_to_number(t *testing.T) {
 
-	_, valueFromEmpty := valueStringToNumber("", nil, "")
+	valueFromEmpty, _ := valueStringToNumber("", nil, "")
 	compare_int_pair(valueFromEmpty, 0, t)
 
-	_, valueNoPercentNoParent := valueStringToNumber("20", nil, "")
+	valueNoPercentNoParent, _ := valueStringToNumber("20", nil, "")
 	compare_int_pair(valueNoPercentNoParent, 20, t)
 
 	// % values need to know the parent measures to calculate relations
 	rootObj := DocumentCreate("0", "60", "20", "", "0")
-	_, valuePercentOfParentAttribute := valueStringToNumber("20%", &rootObj, "width")
+	valuePercentOfParentAttribute, _ := valueStringToNumber("20%", &rootObj, "width")
 	compare_int_pair(valuePercentOfParentAttribute, 12, t)
 
 	rootObjHalfTerminal := DocumentCreate("0", "50%", "50%", "50", "20")
-	_, valuePercentInHalfRoot := valueStringToNumber("20%", &rootObjHalfTerminal, "width")
+	valuePercentInHalfRoot, _ := valueStringToNumber("20%", &rootObjHalfTerminal, "width")
 	compare_int_pair(valuePercentInHalfRoot, 5, t)
 
 	rootObj3 := DocumentCreate("0", "30%", "40%", "160", "180")
