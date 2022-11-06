@@ -72,8 +72,8 @@ func (obj DomObj) Render() RenderedScreen {
 // these are (x,y) paired point coords
 func (obj DomObj) RenderScreenMatrix(useBasicFiller bool) RenderedScreen {
 
-	objWidth := obj.attribCalculated("width")
-	objHeight := obj.attribCalculated("height")
+	objWidth, _ := obj.attribCalculated("width")
+	objHeight, _ := obj.attribCalculated("height")
 	// fmt.Println("TEST RenderScreenMatrix width, height:", objWidth, objHeight)
 
 	if objWidth < 1 || objHeight < 1 {
@@ -207,16 +207,18 @@ func (obj DomObj) PositionsInParent() (int, int, int, int) {
 
 // Tested
 // return with a numeric attribute value
-func (obj DomObj) attribCalculated(key string) int {
+func (obj DomObj) attribCalculated(key string) (int, bool) {
+	attribCalculationSuccess := false
 	_, keyInAttr := obj.Attr[key]
 	if !keyInAttr {
-		return 0
+		return 0, attribCalculationSuccess
 	}
 	if len(obj.Attr[key]) == 0 { // if the Attribute value is empty
-		return 0
+		return 0, attribCalculationSuccess
 	}
 
 	attribVal := 0
+	// fmt.Println("TEST - key exists, and has a value", key, obj.Attr[key])
 
 	// the attrib is not set, so it depends on the children!
 	// or on the text width
@@ -224,9 +226,11 @@ func (obj DomObj) attribCalculated(key string) int {
 
 		if key == "width" {
 			attribVal = obj.WidthFixOrTextBased()
+			attribCalculationSuccess = true
 		}
 		if key == "height" {
 			attribVal = obj.HeightFixOrTextBased()
+			attribCalculationSuccess = true
 		}
 		// no txtLen, and no pre-sed width.
 		/*
@@ -236,13 +240,17 @@ func (obj DomObj) attribCalculated(key string) int {
 		*/
 	} else { // something else than width/height attrib reading
 		valueConverted, strAttribConverted := valueStringToNumber(obj.Attr[key], obj.Parent, key)
+		// fmt.Println("TEST, something else, not width/height:", key, valueConverted, strAttribConverted)
 		if strAttribConverted {
-			return valueConverted
+			attribVal = valueConverted
+			attribCalculationSuccess = true
+		} else {
+			attribVal = 0 // if we have conversion error, return with 0
+			attribCalculationSuccess = false
 		}
-		return 0 // if we have conversion error, return with 0
 	}
 
-	return attribVal // if the attrib is
+	return attribVal, attribCalculationSuccess // if the attrib is
 }
 
 // Tested

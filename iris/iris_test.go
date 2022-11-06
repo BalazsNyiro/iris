@@ -50,27 +50,34 @@ func Test_value_string_to_number(t *testing.T) {
 	child2 := ObjNew("child2", "50%", "50%", "0", "0", "2", &child1)
 
 	// 160*0.3*0.25*0.5
-	compare_int_pair(child2.attribCalculated("width"), 6, t)
+	valCalculatedW, _ := child2.attribCalculated("width")
+	compare_int_pair(valCalculatedW, 6, t)
 
 	// 180*0.4*0.5*0.5 = 18.0
-	compare_int_pair(child2.attribCalculated("height"), 18, t)
+	valCalculatedH, _ := child2.attribCalculated("height")
+	compare_int_pair(valCalculatedH, 18, t)
 
 	// rounded values /////////////////////////////////////////////////
 	rootObjFloat := DocumentCreate("0", "53%", "45%", "14", "50")
 	// 14*0.53 = 7.5 is the exact value - this is rounded:
-	compare_int_pair(rootObjFloat.attribCalculated("width"), 7, t)
+	attribW, _ := rootObjFloat.attribCalculated("width")
+	compare_int_pair(attribW, 7, t)
 	// 22.5 is the exact value - this is rounded:
-	compare_int_pair(rootObjFloat.attribCalculated("height"), 22, t)
+	attribH, _ := rootObjFloat.attribCalculated("height")
+	compare_int_pair(attribH, 22, t)
 
 	// width: 25% of 7 -> 1 because it's less than 2.
 	childFloat1 := ObjNew("childFloat1", "25%", "20%", "0", "0", "F", &rootObjFloat)
-	compare_int_pair(childFloat1.attribCalculated("width"), 1, t)
+	attribWW, _ := childFloat1.attribCalculated("width")
+	compare_int_pair(attribWW, 1, t)
 	// width: 20% of 22 -> 4 (exact: 4.4)
-	compare_int_pair(childFloat1.attribCalculated("height"), 4, t)
+	attribHH, _ := childFloat1.attribCalculated("height")
+	compare_int_pair(attribHH, 4, t)
 
 	rootObjWithNewAttrib := DocumentCreate("0", "53%", "45%", "14", "50")
 	rootObjWithNewAttrib.Attr["creation_timestamp"] = "123"
-	compare_int_pair(rootObjWithNewAttrib.attribCalculated("creation_timestamp"), 123, t)
+	timestamp, _ := rootObjWithNewAttrib.attribCalculated("creation_timestamp")
+	compare_int_pair(timestamp, 123, t)
 
 }
 
