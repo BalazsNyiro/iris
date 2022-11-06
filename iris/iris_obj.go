@@ -6,8 +6,8 @@ import (
 )
 
 // long, pre-defined values:
-var FromLeftToRight = "FromLeftToRight"
-var FromTopToDown = "FromTopToDown"
+var ValFromLeftToRight = "FromLeftToRight"
+var ValFromTopToDown = "FromTopToDown"
 
 // pre-defined keys:
 var KeyBornXinParent = "bornXinParent"
@@ -15,7 +15,8 @@ var KeyBornYinParent = "bornYinParent"
 var KeyBornHorizontalWay = "bornHorizontalWay"
 var KeyBornVerticalWay = "bornVerticalWay "
 
-func NewlineOsBased() string {
+// when you print the output in terminal you have to use
+func NewLineInTerminalPrinting() string {
 	return "\n"
 }
 
@@ -122,7 +123,7 @@ func ScreenToTxt(screen RenderedScreen) string {
 			out = append(out, screen[x][y])
 		}
 		if y < rowsNum-1 {
-			out = append(out, NewlineOsBased())
+			out = append(out, NewLineInTerminalPrinting())
 		}
 	}
 	return strings.Join(out[:], "")
@@ -135,10 +136,10 @@ func ObjNew(id, width, height, bornXinParentVal, bornYinParentVal, basicBgFiller
 		"width":  width,  // value examples: 20, 20%,
 		"height": height, // or it can be empty: ''
 
-		KeyBornXinParent:     bornXinParentVal, // default unit: character.
-		KeyBornYinParent:     bornYinParentVal, // 20 means: 20 character
-		KeyBornHorizontalWay: FromLeftToRight,  // or FromRightToLeft
-		KeyBornVerticalWay:   FromTopToDown,    // or FromDownToTop
+		KeyBornXinParent:     bornXinParentVal,   // default unit: character.
+		KeyBornYinParent:     bornYinParentVal,   // 20 means: 20 character
+		KeyBornHorizontalWay: ValFromLeftToRight, // or FromRightToLeft
+		KeyBornVerticalWay:   ValFromTopToDown,   // or FromDownToTop
 
 		"basicBackgroundFiller": basicBgFiller, // this string represents the object in debug/dev mode
 		// the displayed filler is one char wide. But: it can be longer than once char, with color codes for example
@@ -154,7 +155,7 @@ func (obj DomObj) WidthFixOrTextBased() int {
 	if objWidth == 0 { // if not pre-defined width:
 		objTxt := obj.Attr["text"]
 		if len(objTxt) > 0 { // find the widest line
-			for _, row := range strings.Split(objTxt, NewlineOsBased()) {
+			for _, row := range strings.Split(objTxt, NewlineSeparatorInText()) {
 				if len(row) > objWidth {
 					objWidth = len(row)
 				}
@@ -183,14 +184,14 @@ func (obj DomObj) PositionsInParent() (int, int, int, int) {
 	objWidth := obj.WidthFixOrTextBased()
 	objHeight := obj.HeightFixOrTextBased()
 
-	if obj.Attr[KeyBornHorizontalWay] == FromLeftToRight {
+	if obj.Attr[KeyBornHorizontalWay] == ValFromLeftToRight {
 		left, _ = toInt(obj.Attr[KeyBornXinParent]) // if left == 2, width = 3,
 		right = left + objWidth - 1                 // then horizontal used elems: 2,3,4 -> rigth = 2 + width - 1
 	} else {
 		right, _ = toInt(obj.Attr[KeyBornXinParent])
 		left = right - objWidth + 1
 	}
-	if obj.Attr[KeyBornVerticalWay] == FromTopToDown {
+	if obj.Attr[KeyBornVerticalWay] == ValFromTopToDown {
 		top, _ = toInt(obj.Attr[KeyBornYinParent])
 		bottom = top + objHeight - 1
 	} else {
