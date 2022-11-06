@@ -21,6 +21,13 @@ func Test_document_create(t *testing.T) {
 */
 func Test_render(t *testing.T) {
 
+	// calculated: width=4, height=2
+	rootObj1 := DocumentCreate("0", "50%", "50%", "8", "4")
+
+	screenReceived := rootObj1.RenderScreenMatrix(true)
+	rendered := ScreenToTxt(screenReceived)
+	wanted := "RRRR\nRRRR"
+	compare_str_pair(rendered, wanted, t)
 }
 
 func Test_value_string_to_number(t *testing.T) {
