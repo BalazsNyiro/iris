@@ -20,68 +20,13 @@ func Test_document_create(t *testing.T) {
 
 */
 func Test_render(t *testing.T) {
-
-	// calculated: width=4, height=2
-	rootObj1 := DocumentCreate("0", "50%", "50%", "8", "4")
-	rendered := rootObj1.RenderScreenMatrixToTxt(true)
-	wanted := "RRRR" + NewLineInTerminalPrinting() + "RRRR"
-	compare_str_pair(rendered, wanted, t)
 }
 
 func Test_value_string_to_number(t *testing.T) {
 
-	valueFromEmpty, _ := valueStringToNumber("", nil, "")
-	compare_int_pair(valueFromEmpty, 0, t)
-
-	valueNoPercentNoParent, _ := valueStringToNumber("20", nil, "")
-	compare_int_pair(valueNoPercentNoParent, 20, t)
-
-	// % values need to know the parent measures to calculate relations
-	rootObj := DocumentCreate("0", "60", "20", "", "0")
-	valuePercentOfParentAttribute, _ := valueStringToNumber("20%", &rootObj, "width")
-	compare_int_pair(valuePercentOfParentAttribute, 12, t)
-
-	rootObjHalfTerminal := DocumentCreate("0", "50%", "50%", "50", "20")
-	valuePercentInHalfRoot, _ := valueStringToNumber("20%", &rootObjHalfTerminal, "width")
-	compare_int_pair(valuePercentInHalfRoot, 5, t)
-
-	rootObj3 := DocumentCreate("0", "30%", "40%", "160", "180")
-	child1 := ObjNew("child1", "25%", "50%", "0", "0", "1", &rootObj3)
-	child2 := ObjNew("child2", "50%", "50%", "0", "0", "2", &child1)
-
-	// 160*0.3*0.25*0.5
-	valCalculatedW, _ := child2.attribCalculated("width")
-	compare_int_pair(valCalculatedW, 6, t)
-
-	// 180*0.4*0.5*0.5 = 18.0
-	valCalculatedH, _ := child2.attribCalculated("height")
-	compare_int_pair(valCalculatedH, 18, t)
-
-	// rounded values /////////////////////////////////////////////////
-	rootObjFloat := DocumentCreate("0", "53%", "45%", "14", "50")
-	// 14*0.53 = 7.5 is the exact value - this is rounded:
-	attribW, _ := rootObjFloat.attribCalculated("width")
-	compare_int_pair(attribW, 7, t)
-	// 22.5 is the exact value - this is rounded:
-	attribH, _ := rootObjFloat.attribCalculated("height")
-	compare_int_pair(attribH, 22, t)
-
-	// width: 25% of 7 -> 1 because it's less than 2.
-	childFloat1 := ObjNew("childFloat1", "25%", "20%", "0", "0", "F", &rootObjFloat)
-	attribWW, _ := childFloat1.attribCalculated("width")
-	compare_int_pair(attribWW, 1, t)
-	// width: 20% of 22 -> 4 (exact: 4.4)
-	attribHH, _ := childFloat1.attribCalculated("height")
-	compare_int_pair(attribHH, 4, t)
-
-	rootObjWithNewAttrib := DocumentCreate("0", "53%", "45%", "14", "50")
-	rootObjWithNewAttrib.Attr["creation_timestamp"] = "123"
-	timestamp, _ := rootObjWithNewAttrib.attribCalculated("creation_timestamp")
-	compare_int_pair(timestamp, 123, t)
-
 }
 
-func Test_WidthFixOrTextBased(t *testing.T) {
+func Test_Empty(t *testing.T) {
 
 }
 
