@@ -19,13 +19,19 @@ func Test_document_create(t *testing.T) {
 }
 
 */
-func Test_render(t *testing.T) {
+
+func Test_new_window(t *testing.T) {
+	windowsState := WindowsNewState(4, 2)
+	winTerminalWidth := windowsState["Terminal"][KeyWidth]
+	// compare_str_pair(winTerminalWidth, "5", t)
+	_ = winTerminalWidth
 }
 
-func Test_value_string_to_number(t *testing.T) {
-
+func Test_ScreenNew(t *testing.T) {
+	screen := ScreenEmpty(3, 2)
+	compare_int_pair(len(screen), 3, t)    // it has 3 columns
+	compare_int_pair(len(screen[0]), 2, t) // it has 2 rows in a column
 }
-
 func Test_Empty(t *testing.T) {
 
 }
