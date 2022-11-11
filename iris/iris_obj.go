@@ -31,8 +31,6 @@ I store everything in strings.
 type Window map[string]string
 type Windows map[string]Window
 
-var KeyWidth = "width"
-var KeyHeight = "height"
 var KeyXleft = "xLeft"
 var KeyXright = "xRight"
 var KeyYtop = "yTop"

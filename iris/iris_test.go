@@ -21,9 +21,13 @@ func Test_document_create(t *testing.T) {
 */
 
 func Test_new_window(t *testing.T) {
-	windowsState := WindowsNewState(4, 2)
-	winTerminalWidth := windowsState["Terminal"][KeyWidth]
-	// compare_str_pair(winTerminalWidth, "5", t)
+	windows := WindowsNewState(4, 2)
+	// this windows fills the parent terminal,
+	// so the right/bottom coords are equal with width/height
+	winTerminalWidth := windows["Terminal"][KeyXright]
+	winTerminalHeight := windows["Terminal"][KeyYbottom]
+	compare_str_pair(winTerminalWidth, "3", t)
+	compare_str_pair(winTerminalHeight, "1", t)
 	_ = winTerminalWidth
 }
 
