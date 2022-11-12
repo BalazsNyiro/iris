@@ -9,14 +9,20 @@ func NewLine() string { return "\n" }
 
 // Attr     map[string]string
 type coord [2]int
-type RenderedScreen map[coord]string
+type pixels map[coord]string
+type RenderedScreen struct {
+	pixels pixels
+	width  int
+	height int
+	name   string
+}
 
-func ScreenEmpty(width, height int, defaultScreenFiller string) RenderedScreen {
-	screen := RenderedScreen{}
+func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedScreen {
+	screen := RenderedScreen{width: width, height: height, name: name, pixels: pixels{}}
 	for x := 0; x < width; x++ { // build columns
 		for y := 0; y < height; y++ {
 			coordinate := coord{x, y}
-			screen[coordinate] = defaultScreenFiller
+			screen.pixels[coordinate] = defaultScreenFiller
 		}
 	}
 	return screen
@@ -43,6 +49,7 @@ var KeyXrightCalculated = "xRightCalculated"
 var KeyYtopCalculated = "yTopCalculated"
 var KeyYbottomCalculated = "yBottomCalculated"
 var KeyDebugWindowFillerChar = "debugWindowFillerChar"
+var KeyWinId = "winId"
 
 func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 	Win := Windows{}
@@ -64,7 +71,7 @@ func Atoi(txt string) int {
 func (win Window) RenderToScreen() RenderedScreen {
 	width := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
 	height := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
-	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar])
+	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
 	return screen
 }
 
@@ -90,6 +97,8 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 
 		// TODO: fun:function_name(params) - user can call functions to calculate
 		// the position. example: move coordinates based on current seconds.
+
+		KeyWinId: id,
 
 		KeyXleft:   keyXleft,
 		KeyXright:  keyXright,

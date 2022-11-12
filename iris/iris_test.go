@@ -32,9 +32,9 @@ func Test_new_window(t *testing.T) {
 }
 
 func Test_ScreenNew(t *testing.T) {
-	screen := ScreenEmpty(3, 2, "S")
-	compare_int_pair(len(screen), 6, t) // 6 elems are in the screen
-	compare_str_pair(screen[coord{0, 0}], "S", t)
+	screen := ScreenEmpty(3, 2, "S", "Test_ScreenNew")
+	compare_int_pair(len(screen.pixels), 6, t) // 6 elems are in the screen
+	compare_str_pair(screen.pixels[coord{0, 0}], "S", t)
 }
 func Test_Empty(t *testing.T) {
 
