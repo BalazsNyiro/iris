@@ -32,9 +32,9 @@ func Test_new_window(t *testing.T) {
 }
 
 func Test_ScreenNew(t *testing.T) {
-	screen := ScreenEmpty(3, 2)
-	compare_int_pair(len(screen), 3, t)    // it has 3 columns
-	compare_int_pair(len(screen[0]), 2, t) // it has 2 rows in a column
+	screen := ScreenEmpty(3, 2, "S")
+	compare_int_pair(len(screen), 6, t) // 6 elems are in the screen
+	compare_str_pair(screen[coord{0, 0}], "S", t)
 }
 func Test_Empty(t *testing.T) {
 

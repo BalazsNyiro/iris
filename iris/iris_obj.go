@@ -7,17 +7,17 @@ import (
 
 func NewLine() string { return "\n" }
 
-type RenderedColumn []string
-type RenderedScreen []RenderedColumn // there are vertical columns next to each other.
+// Attr     map[string]string
+type coord [2]int
+type RenderedScreen map[coord]string
 
-func ScreenEmpty(width, height int) RenderedScreen {
+func ScreenEmpty(width, height int, defaultScreenFiller string) RenderedScreen {
 	screen := RenderedScreen{}
 	for x := 0; x < width; x++ { // build columns
-		column := RenderedColumn{}
 		for y := 0; y < height; y++ {
-			column = append(column, "")
+			coordinate := coord{x, y}
+			screen[coordinate] = defaultScreenFiller
 		}
-		screen = append(screen, column)
 	}
 	return screen
 }
@@ -61,10 +61,10 @@ func Atoi(txt string) int {
 	fmt.Println("Atoi error: ", error)
 	return 0
 }
-func (win Window) RenderToScreenMatrix() RenderedScreen {
+func (win Window) RenderToScreen() RenderedScreen {
 	width := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
 	height := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
-	screen := ScreenEmpty(width, height)
+	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar])
 	return screen
 }
 
