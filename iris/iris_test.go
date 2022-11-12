@@ -28,7 +28,12 @@ func Test_new_window(t *testing.T) {
 	winTerminalHeight := windows["Terminal"][KeyYbottom]
 	compare_str_pair(winTerminalWidth, "3", t)
 	compare_str_pair(winTerminalHeight, "1", t)
-	_ = winTerminalWidth
+
+	winRenderedScreen := windows["Terminal"].RenderToScreen()
+	wantedRendered := "" +
+		"TTTT" + NewLine() +
+		"TTTT"
+	compare_str_pair(winRenderedScreen.toString(), wantedRendered, t)
 }
 
 func Test_ScreenNew(t *testing.T) {

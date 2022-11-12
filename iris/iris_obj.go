@@ -58,7 +58,7 @@ type Windows map[string]Window
 
 func (win Window) RenderToScreen() RenderedScreen {
 	width := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
-	height := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
+	height := Atoi(win[KeyYbottom]) - Atoi(win[KeyYtop]) + 1
 	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
 	return screen
 }
