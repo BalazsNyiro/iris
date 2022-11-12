@@ -36,13 +36,44 @@ func (screen RenderedScreen) toString() string {
 
 func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedScreen {
 	screen := RenderedScreen{width: width, height: height, name: name, pixels: pixels{}}
-	for x := 0; x < width; x++ {
-		for y := 0; y < height; y++ {
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			coordinate := coord{x, y}
 			screen.pixels[coordinate] = defaultScreenFiller
 		}
 	}
 	return screen
+}
+
+func ScreensComposeToScreen(windows Windows, winNames []string) RenderedScreen {
+	widthMax, heightMax := 0, 0
+
+	screens := []RenderedScreen{}
+	for _, winName := range winNames {
+		screens = append(screens, windows[winName].RenderToScreen())
+	}
+
+	for _, screen := range screens {
+		if screen.width > widthMax {
+			widthMax = screen.width
+		}
+		if screen.height > heightMax {
+			heightMax = screen.height
+		}
+	}
+
+	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", pixels: pixels{}}
+
+	for _, screen := range screens {
+		for y := 0; y < screen.height; y++ {
+			for x := 0; x < screen.width; x++ {
+				coordinate := coord{x, y}
+				composed.pixels[coordinate] = screen.pixels[coordinate]
+			}
+		}
+
+	}
+	return composed
 }
 
 /*
@@ -57,6 +88,7 @@ type Window map[string]string
 type Windows map[string]Window
 
 func (win Window) RenderToScreen() RenderedScreen {
+	// TODO: use calculated width/height when they are ready!
 	width := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
 	height := Atoi(win[KeyYbottom]) - Atoi(win[KeyYtop]) + 1
 	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])

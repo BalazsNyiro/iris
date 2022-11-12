@@ -34,6 +34,18 @@ func Test_new_window(t *testing.T) {
 		"TTTT" + NewLine() +
 		"TTTT"
 	compare_str_pair(winRenderedScreen.toString(), wantedRendered, t)
+
+	////////////////////////// children ////////////////////////////////
+	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")
+	childRenderedScreen := windows["Child"].RenderToScreen()
+	wantedChildRendered := "CC"
+	compare_str_pair(childRenderedScreen.toString(), wantedChildRendered, t)
+
+	screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"})
+	wantedComposedRendered := "" +
+		"CCTT" + NewLine() +
+		"TTTT"
+	compare_str_pair(screenComposed.toString(), wantedComposedRendered, t)
 }
 
 func Test_ScreenNew(t *testing.T) {
