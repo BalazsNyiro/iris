@@ -3,6 +3,7 @@ package iris
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 func NewLine() string { return "\n" }
@@ -11,15 +12,31 @@ func NewLine() string { return "\n" }
 type coord [2]int
 type pixels map[coord]string
 type RenderedScreen struct {
-	pixels pixels
+	name   string
 	width  int
 	height int
-	name   string
+	pixels pixels
 }
+
+func (screen RenderedScreen) toString() string {
+	out := []string{}
+	for y := 0; y < screen.height; y++ {
+		if len(out) > 0 {
+			out = append(out, NewLine())
+		}
+		for x := 0; x < screen.width; x++ {
+			coordinate := coord{x, y}
+			out = append(out, screen.pixels[coordinate])
+		}
+	}
+	return strings.Join(out, "")
+}
+
+////////////////////////////////////////////////////////////////////////////////////
 
 func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedScreen {
 	screen := RenderedScreen{width: width, height: height, name: name, pixels: pixels{}}
-	for x := 0; x < width; x++ { // build columns
+	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			coordinate := coord{x, y}
 			screen.pixels[coordinate] = defaultScreenFiller
@@ -34,8 +51,19 @@ I store everything in strings.
  ' ' space is an id separator, don't use space in any win id name
  Windows id characters: [a-zA-Z0-9_-]
 */
+
+//////////////////////////// WINDOWS ////////////////////////////////////////////////////////
 type Window map[string]string
 type Windows map[string]Window
+
+func (win Window) RenderToScreen() RenderedScreen {
+	width := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
+	height := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
+	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
+	return screen
+}
+
+//////////////////////////// WINDOWS ////////////////////////////////////////////////////////
 
 var KeyXleft = "xLeft"
 var KeyXright = "xRight"
@@ -67,12 +95,6 @@ func Atoi(txt string) int {
 	}
 	fmt.Println("Atoi error: ", error)
 	return 0
-}
-func (win Window) RenderToScreen() RenderedScreen {
-	width := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
-	height := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
-	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
-	return screen
 }
 
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
