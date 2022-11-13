@@ -12,4 +12,6 @@ func main() {
 	fmt.Println("stty:", widthStty, heightStty)
 	widthSys, heightSys := iris.TerminalDimensionsWithSyscall()
 	fmt.Println("syscall:", widthSys, heightSys)
+
+	iris.UserInterfaceStart()
 }
