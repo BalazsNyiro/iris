@@ -11,7 +11,7 @@ import (
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 100
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
-func UserInterfaceStart() {
+func UserInterfaceStart(windows Windows) {
 
 	///////////////////////////////////////////////////
 	// keypress detection is based on this example:
@@ -40,13 +40,23 @@ func UserInterfaceStart() {
 	}(ch_terminal_size_change_detect)
 
 	for {
+		screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"})
+		fmt.Println(screenComposed.toString())
+
+		action := ""
 		select { //                https://gobyexample.com/select
 		case stdin, _ := <-ch_user_input: //  the message is coming...
 			fmt.Println("Keys pressed:", stdin)
+			if stdin == "q" {
+				action = "quit"
+			}
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)
 		default: //               or not coming
 			fmt.Println("No user input..")
+		}
+		if action == "quit" {
+			break
 		}
 		time.Sleep(time.Millisecond * time.Duration(TimeIntervalUserInterfaceRefreshTimeMillisec))
 
