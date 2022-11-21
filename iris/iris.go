@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -53,10 +54,14 @@ func UserInterfaceStart(windows Windows) {
 			if stdin == "q" {
 				action = "quit"
 			}
-			if stdin == "l" {
+			// vim navigation keys
+			if strings.Contains("lhjk", stdin) {
 				winActiveId := windows["prgState"]["winActiveId"]
-				windows[winActiveId][KeyXleftCalculated] = "5"
-				windows[winActiveId][KeyXrightCalculated] = "5"
+				fmt.Println("win active id", winActiveId)
+				if stdin == "l" {
+					windows[winActiveId][KeyXleftCalculated] = "5"
+					windows[winActiveId][KeyXrightCalculated] = "5"
+				}
 			}
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)
