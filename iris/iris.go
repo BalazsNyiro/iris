@@ -44,7 +44,7 @@ func UserInterfaceStart(windows Windows) {
 	for {
 		fmt.Print(screen_cursor_pos_home())
 		screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"})
-		fmt.Println(screenComposed.toString())
+		fmt.Print(screenComposed.toString())
 
 		action := ""
 		select { //                https://gobyexample.com/select
@@ -52,6 +52,11 @@ func UserInterfaceStart(windows Windows) {
 			fmt.Println("Keys pressed:", stdin)
 			if stdin == "q" {
 				action = "quit"
+			}
+			if stdin == "l" {
+				winActiveId := windows["prgState"]["winActiveId"]
+				windows[winActiveId][KeyXleftCalculated] = "5"
+				windows[winActiveId][KeyXrightCalculated] = "5"
 			}
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)

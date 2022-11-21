@@ -29,7 +29,7 @@ func Test_new_window(t *testing.T) {
 	compare_str_pair(winTerminalWidth, "3", t)
 	compare_str_pair(winTerminalHeight, "1", t)
 
-	winRenderedScreen := windows["Terminal"].RenderToScreen()
+	winRenderedScreen := windows["Terminal"].RenderToScreenOfWin()
 	wantedRendered := "" +
 		"TTTT" + NewLine() +
 		"TTTT"
@@ -37,7 +37,7 @@ func Test_new_window(t *testing.T) {
 
 	////////////////////////// children ////////////////////////////////
 	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")
-	childRenderedScreen := windows["Child"].RenderToScreen()
+	childRenderedScreen := windows["Child"].RenderToScreenOfWin()
 	wantedChildRendered := "CC"
 	compare_str_pair(childRenderedScreen.toString(), wantedChildRendered, t)
 
