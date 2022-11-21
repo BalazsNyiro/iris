@@ -39,7 +39,10 @@ func UserInterfaceStart(windows Windows) {
 		}
 	}(ch_terminal_size_change_detect)
 
+	screen_clear()
+
 	for {
+		fmt.Print(screen_cursor_pos_home())
 		screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"})
 		fmt.Println(screenComposed.toString())
 

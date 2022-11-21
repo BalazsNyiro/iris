@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -83,4 +84,13 @@ func shellCore(commandAndParams, input string) (string, error) {
 		log.Println(err)
 	}
 	return out.String(), err
+}
+
+func os_detect() string {
+	os := runtime.GOOS
+	if strings.Contains("windows|darwin|linux", os) {
+		return os
+	}
+	return "linux" // if we have an exotic os, we will handle it as linux
+	// return "unknown"
 }
