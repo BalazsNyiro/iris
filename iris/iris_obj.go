@@ -68,10 +68,12 @@ func ScreensComposeToScreen(windows Windows, winNames []string) RenderedScreen {
 
 	for _, winName := range winNames {
 		screen := windows[winName].RenderToScreenOfWin()
-		for y := 0; y < screen.height; y++ {
-			for x := 0; x < screen.width; x++ {
-				coordInWinLocal := coord{x, y}
-				coordInRootTerminal := coord{Atoi(windows[winName][KeyXleftCalculated]), Atoi(windows[winName][KeyYtopCalculated])}
+		for yInWin := 0; yInWin < screen.height; yInWin++ {
+			for xInWin := 0; xInWin < screen.width; xInWin++ {
+				coordInWinLocal := coord{xInWin, yInWin}
+				coordInRootTerminal := coord{
+					Atoi(windows[winName][KeyXleftCalculated]) + xInWin,
+					Atoi(windows[winName][KeyYtopCalculated]) + yInWin}
 				composed.pixels[coordInRootTerminal] = screen.pixels[coordInWinLocal]
 			}
 		}
