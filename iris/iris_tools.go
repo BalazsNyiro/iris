@@ -3,6 +3,7 @@ package iris
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -93,4 +94,17 @@ func os_detect() string {
 	}
 	return "linux" // if we have an exotic os, we will handle it as linux
 	// return "unknown"
+}
+
+func Itoa(i int) str {
+	return strconv.Itoa(i)
+}
+
+func Atoi(txt string) int {
+	num, error := strconv.Atoi(txt)
+	if error == nil {
+		return num
+	}
+	fmt.Println("Atoi error: ", error)
+	return 0
 }

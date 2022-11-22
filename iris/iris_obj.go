@@ -1,7 +1,6 @@
 package iris
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -132,15 +131,6 @@ func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 	)
 }
 
-func Atoi(txt string) int {
-	num, error := strconv.Atoi(txt)
-	if error == nil {
-		return num
-	}
-	fmt.Println("Atoi error: ", error)
-	return 0
-}
-
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
 	windows[id] = Window{
 
@@ -172,12 +162,12 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 		KeyYbottom: keyYbottom,
 
 		// here you can see calculated fix positions only, the actual positions
-		KeyXleftCalculated:       "0",
-		KeyXrightCalculated:      "1",
-		KeyYtopCalculated:        "0",
-		KeyYbottomCalculated:     "1",
-		KeyWidthCalculated:       "1",
-		KeyHeightCalculated:      "1",
+		KeyXleftCalculated:       keyXleft,  // initially, before first calculation
+		KeyXrightCalculated:      keyXright, // use these values
+		KeyYtopCalculated:        keyYtop,
+		KeyYbottomCalculated:     keyYbottom,
+		KeyWidthCalculated:       Itoa(Atoi(keyXright) - Atoi(keyXleft) + 1),
+		KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
 		KeyDebugWindowFillerChar: debugWindowFiller,
 	}
 	return windows
