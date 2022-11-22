@@ -14,6 +14,8 @@ import (
 	"unsafe"
 )
 
+var Digits = "0123456789"
+
 type winsize struct {
 	Row    uint16
 	Col    uint16
@@ -96,10 +98,37 @@ func os_detect() string {
 	// return "unknown"
 }
 
-func Itoa(i int) str {
+func IsNumber(txt string) bool {
+	plusMinusDetected := false
+	normalCharDetected := false
+	txt = strings.TrimSpace(txt)
+	if len(txt) == 0 {
+		return false // empty string is not a number
+	}
+	for id, rune := range txt {
+		if id == 0 && (rune == '+' || rune == '-') {
+			plusMinusDetected = true
+			continue
+		}
+		if !strings.Contains(Digits, string(rune)) {
+			return false
+		} else {
+			normalCharDetected = true
+		}
+	}
+	// only plusMinus is detected
+	if plusMinusDetected && !normalCharDetected {
+		return false
+	}
+	return true
+}
+
+// wrapper, not tested
+func Itoa(i int) string {
 	return strconv.Itoa(i)
 }
 
+// wrapper, not tested
 func Atoi(txt string) int {
 	num, error := strconv.Atoi(txt)
 	if error == nil {

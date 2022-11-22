@@ -103,6 +103,17 @@ func (win Window) RenderToScreenOfWin() RenderedScreen {
 	return screen
 }
 
+/*
+func CalculateCoord(value string) string {
+
+}
+
+func CalculateCoords(win Window) Window {
+
+}
+
+*/
+
 //////////////////////////// WINDOWS ////////////////////////////////////////////////////////
 
 var KeyXleft = "xLeft"
