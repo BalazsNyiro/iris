@@ -44,6 +44,7 @@ func UserInterfaceStart(windows Windows) {
 
 	for {
 		fmt.Print(screen_cursor_pos_home())
+		windows = CalculateAllWindowCoords(windows)
 		screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"})
 		fmt.Print(screenComposed.toString())
 
@@ -59,8 +60,16 @@ func UserInterfaceStart(windows Windows) {
 				winActiveId := windows["prgState"]["winActiveId"]
 				fmt.Println("win active id", winActiveId)
 				if stdin == "l" {
-					windows[winActiveId][KeyXleftCalculated] = "5"
-					windows[winActiveId][KeyXrightCalculated] = "5"
+					windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "+", "1")
+				}
+				if stdin == "h" {
+					windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "-", "1")
+				}
+				if stdin == "j" {
+					windows[winActiveId][KeyYshift] = StrMath(windows[winActiveId][KeyYshift], "+", "1")
+				}
+				if stdin == "k" {
+					windows[winActiveId][KeyYshift] = StrMath(windows[winActiveId][KeyYshift], "-", "1")
 				}
 			}
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...

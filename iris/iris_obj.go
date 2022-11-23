@@ -1,6 +1,7 @@
 package iris
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -103,11 +104,18 @@ func (win Window) RenderToScreenOfWin() RenderedScreen {
 	return screen
 }
 
-/*
-func CalculateCoord(value string) string {
-
+func CalculateAllWindowCoords(windows Windows) Windows {
+	for winName, _ := range windows {
+		fmt.Println("Calc winName", winName)
+		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft]), "+", windows[winName][KeyXshift])
+		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright]), "+", windows[winName][KeyXshift])
+		windows[winName][KeyYtopCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYtop]), "+", windows[winName][KeyYshift])
+		windows[winName][KeyYbottomCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYbottom]), "+", windows[winName][KeyYshift])
+	}
+	return windows
 }
 
+/*
 func CalculateCoords(win Window) Window {
 
 }
@@ -116,10 +124,20 @@ func CalculateCoords(win Window) Window {
 
 //////////////////////////// WINDOWS ////////////////////////////////////////////////////////
 
+// they can contain complex expressions that has to be calculated
 var KeyXleft = "xLeft"
 var KeyXright = "xRight"
 var KeyYtop = "yTop"
 var KeyYbottom = "yBottom"
+
+// shift: fix simple coord modifier
+// the window has 1 shift value so it's a global for the 4 corner
+var KeyXshift = "xShift"
+var KeyYshift = "yShift"
+
+// Calculated = (ExpressionResult + shift)
+// example: KeyXleftCalculated  = KeyXleft + keyXshift
+// example: KeyXrightCalculated  = KeyXright + keyXshift
 
 var KeyWidthCalculated = "widthCalculated"
 var KeyHeightCalculated = "heightCalculated"
@@ -142,6 +160,11 @@ func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 	)
 }
 
+// TODO: write this once
+func CoordExpressionEval(coordString string) string {
+	// coordString := "(Terminal.KeyXleftCalculated + OtherWin.KeyYtopCalculated)/2:
+	return "0"
+}
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
 	windows[id] = Window{
 
@@ -171,6 +194,9 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 		KeyXright:  keyXright,
 		KeyYtop:    keyYtop,
 		KeyYbottom: keyYbottom,
+
+		KeyXshift: "0",
+		KeyYshift: "0",
 
 		// here you can see calculated fix positions only, the actual positions
 		KeyXleftCalculated:       keyXleft,  // initially, before first calculation

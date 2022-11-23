@@ -19,6 +19,23 @@ func Test_document_create(t *testing.T) {
 }
 
 */
+func Test_CalculateAllWindowCoords(t *testing.T) {
+	windows := WindowsNewState(4, 2)
+	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")
+	// we have 2 windows here: "Terminal" (default) and "Child"
+
+	compare_str_pair("CalcAll 1", windows["Child"][KeyXleftCalculated], "0", t)
+	windows["Child"][KeyXshift] = StrMath(windows["Child"][KeyXshift], "+", "1")
+	windows = CalculateAllWindowCoords(windows)
+	compare_str_pair("CalcAll 1", windows["Child"][KeyXleftCalculated], "1", t)
+	/*
+		windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "+", "1")
+		windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "-", "1")
+		windows[winActiveId][KeyYshift] = StrMath(windows[winActiveId][KeyYshift], "+", "1")
+		windows[winActiveId][KeyYshift] = StrMath(windows[winActiveId][KeyYshift], "-", "1")
+	*/
+}
+
 func Test_StrMath(t *testing.T) {
 	compare_str_pair("StrMath ", StrMath("1", "+", "2"), "3", t)
 	compare_str_pair("StrMath ", StrMath("2", "-", "3"), "-1", t)
