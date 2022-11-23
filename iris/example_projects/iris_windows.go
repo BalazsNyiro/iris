@@ -15,6 +15,7 @@ func main() {
 
 	windows := iris.WindowsNewState(widthSys, heightSys)
 	windows = iris.WinNew(windows, "Child", "0", "0", "1", "0", "C")
+	windows["prgState"]["winActiveId"] = "Child"
 
 	iris.UserInterfaceStart(windows)
 }

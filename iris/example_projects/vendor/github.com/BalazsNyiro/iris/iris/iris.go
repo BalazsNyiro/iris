@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -39,9 +40,13 @@ func UserInterfaceStart(windows Windows) {
 		}
 	}(ch_terminal_size_change_detect)
 
+	screen_clear()
+
 	for {
+		fmt.Print(screen_cursor_pos_home())
+		windows = CalculateAllWindowCoords(windows)
 		screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"})
-		fmt.Println(screenComposed)
+		fmt.Print(screenComposed.toString())
 
 		action := ""
 		select { //                https://gobyexample.com/select
@@ -49,6 +54,23 @@ func UserInterfaceStart(windows Windows) {
 			fmt.Println("Keys pressed:", stdin)
 			if stdin == "q" {
 				action = "quit"
+			}
+			// vim navigation keys
+			if strings.Contains("lhjk", stdin) {
+				winActiveId := windows["prgState"]["winActiveId"]
+				fmt.Println("win active id", winActiveId)
+				if stdin == "l" {
+					windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "+", "1")
+				}
+				if stdin == "h" {
+					windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "-", "1")
+				}
+				if stdin == "j" {
+					windows[winActiveId][KeyYshift] = StrMath(windows[winActiveId][KeyYshift], "+", "1")
+				}
+				if stdin == "k" {
+					windows[winActiveId][KeyYshift] = StrMath(windows[winActiveId][KeyYshift], "-", "1")
+				}
 			}
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)

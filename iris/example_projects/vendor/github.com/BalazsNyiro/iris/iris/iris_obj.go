@@ -48,12 +48,13 @@ func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedSc
 func ScreensComposeToScreen(windows Windows, winNames []string) RenderedScreen {
 	widthMax, heightMax := 0, 0
 
-	screens := []RenderedScreen{}
+	// This part is to find the max width/height only. //////////////
+	screensOfWindows := []RenderedScreen{}
 	for _, winName := range winNames {
-		screens = append(screens, windows[winName].RenderToScreen())
+		screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin())
 	}
 
-	for _, screen := range screens {
+	for _, screen := range screensOfWindows {
 		if screen.width > widthMax {
 			widthMax = screen.width
 		}
@@ -61,19 +62,27 @@ func ScreensComposeToScreen(windows Windows, winNames []string) RenderedScreen {
 			heightMax = screen.height
 		}
 	}
+	// This part is to find the max width/height only. //////////////
 
 	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", pixels: pixels{}}
 
-	for _, screen := range screens {
-		for y := 0; y < screen.height; y++ {
-			for x := 0; x < screen.width; x++ {
-				coordinate := coord{x, y}
-				composed.pixels[coordinate] = screen.pixels[coordinate]
+	for _, winName := range winNames {
+		screen := windows[winName].RenderToScreenOfWin()
+		for yInWin := 0; yInWin < screen.height; yInWin++ {
+			for xInWin := 0; xInWin < screen.width; xInWin++ {
+				coordInWinLocal := coord{xInWin, yInWin}
+				coordInRootTerminal := coord{
+					Atoi(windows[winName][KeyXleftCalculated]) + xInWin,
+					Atoi(windows[winName][KeyYtopCalculated]) + yInWin}
+				composed.pixels[coordInRootTerminal] = screen.pixels[coordInWinLocal]
 			}
 		}
 
 	}
 	return composed
+	// winScreenLocal is a small screen that represents only the window
+	// winScreenLocal := windows[winName].RenderToScreenOfWin()
+	// screenTerminalSized := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
 }
 
 /*
@@ -87,7 +96,7 @@ I store everything in strings.
 type Window map[string]string
 type Windows map[string]Window
 
-func (win Window) RenderToScreen() RenderedScreen {
+func (win Window) RenderToScreenOfWin() RenderedScreen {
 	// TODO: use calculated width/height when they are ready!
 	width := Atoi(win[KeyXright]) - Atoi(win[KeyXleft]) + 1
 	height := Atoi(win[KeyYbottom]) - Atoi(win[KeyYtop]) + 1
@@ -95,12 +104,40 @@ func (win Window) RenderToScreen() RenderedScreen {
 	return screen
 }
 
+func CalculateAllWindowCoords(windows Windows) Windows {
+	for winName, _ := range windows {
+		fmt.Println("Calc winName", winName)
+		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft]), "+", windows[winName][KeyXshift])
+		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright]), "+", windows[winName][KeyXshift])
+		windows[winName][KeyYtopCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYtop]), "+", windows[winName][KeyYshift])
+		windows[winName][KeyYbottomCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYbottom]), "+", windows[winName][KeyYshift])
+	}
+	return windows
+}
+
+/*
+func CalculateCoords(win Window) Window {
+
+}
+
+*/
+
 //////////////////////////// WINDOWS ////////////////////////////////////////////////////////
 
+// they can contain complex expressions that has to be calculated
 var KeyXleft = "xLeft"
 var KeyXright = "xRight"
 var KeyYtop = "yTop"
 var KeyYbottom = "yBottom"
+
+// shift: fix simple coord modifier
+// the window has 1 shift value so it's a global for the 4 corner
+var KeyXshift = "xShift"
+var KeyYshift = "yShift"
+
+// Calculated = (ExpressionResult + shift)
+// example: KeyXleftCalculated  = KeyXleft + keyXshift
+// example: KeyXrightCalculated  = KeyXright + keyXshift
 
 var KeyWidthCalculated = "widthCalculated"
 var KeyHeightCalculated = "heightCalculated"
@@ -113,22 +150,21 @@ var KeyWinId = "winId"
 
 func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 	Win := Windows{}
-	return WinNew(Win, "Terminal", "0", "0",
+	// prgState contains all general data
+	Win2 := WinNew(Win, "prgState", "-1", "-1", "0", "0", "S")
+	Win2["prgState"]["winActiveId"] = ""
+	return WinNew(Win2, "Terminal", "0", "0",
 		strconv.Itoa(terminalWidth-1),
 		strconv.Itoa(terminalHeight-1),
 		"T",
 	)
 }
 
-func Atoi(txt string) int {
-	num, error := strconv.Atoi(txt)
-	if error == nil {
-		return num
-	}
-	fmt.Println("Atoi error: ", error)
-	return 0
+// TODO: write this once
+func CoordExpressionEval(coordString string) string {
+	// coordString := "(Terminal.KeyXleftCalculated + OtherWin.KeyYtopCalculated)/2:
+	return "0"
 }
-
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
 	windows[id] = Window{
 
@@ -159,13 +195,16 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 		KeyYtop:    keyYtop,
 		KeyYbottom: keyYbottom,
 
+		KeyXshift: "0",
+		KeyYshift: "0",
+
 		// here you can see calculated fix positions only, the actual positions
-		KeyXleftCalculated:       "",
-		KeyXrightCalculated:      "",
-		KeyYtopCalculated:        "",
-		KeyYbottomCalculated:     "",
-		KeyWidthCalculated:       "",
-		KeyHeightCalculated:      "",
+		KeyXleftCalculated:       keyXleft,  // initially, before first calculation
+		KeyXrightCalculated:      keyXright, // use these values
+		KeyYtopCalculated:        keyYtop,
+		KeyYbottomCalculated:     keyYbottom,
+		KeyWidthCalculated:       Itoa(Atoi(keyXright) - Atoi(keyXleft) + 1),
+		KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
 		KeyDebugWindowFillerChar: debugWindowFiller,
 	}
 	return windows

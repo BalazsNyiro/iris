@@ -3,14 +3,18 @@ package iris
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
 	"unsafe"
 )
+
+var Digits = "0123456789"
 
 type winsize struct {
 	Row    uint16
@@ -83,4 +87,77 @@ func shellCore(commandAndParams, input string) (string, error) {
 		log.Println(err)
 	}
 	return out.String(), err
+}
+
+func OsDetect() string {
+	os := runtime.GOOS
+	if strings.Contains("windows|darwin|linux", os) {
+		return os
+	}
+	return "linux" // if we have an exotic os, we will handle it as linux
+	// return "unknown"
+}
+
+func IsNumber(txt string) bool {
+	plusMinusDetected := false
+	normalCharDetected := false
+	txt = strings.TrimSpace(txt)
+	if len(txt) == 0 {
+		return false // empty string is not a number
+	}
+	for id, rune := range txt {
+		if id == 0 && (rune == '+' || rune == '-') {
+			plusMinusDetected = true
+			continue
+		}
+		if !strings.Contains(Digits, string(rune)) {
+			return false
+		} else {
+			normalCharDetected = true
+		}
+	}
+	// only plusMinus is detected
+	if plusMinusDetected && !normalCharDetected {
+		return false
+	}
+	return true
+}
+
+// wrapper, not tested
+func Itoa(i int) string {
+	return strconv.Itoa(i)
+}
+
+// wrapper, not tested
+func Atoi(txt string) int {
+	num, error := strconv.Atoi(txt)
+	if error == nil {
+		return num
+	}
+	fmt.Println("Atoi error: ", error)
+	return 0
+}
+
+// TESTED
+func StrMath(a, operator, b string) string {
+	a_int := Atoi(a)
+	b_int := Atoi(b)
+	if operator == "-" {
+		return Itoa(a_int - b_int)
+	}
+	if operator == "+" {
+		return Itoa(a_int + b_int)
+	}
+	if operator == "*" {
+		return Itoa(a_int * b_int)
+	}
+	if operator == "/" {
+		if b_int != 0 {
+			return Itoa(a_int / b_int)
+		} else {
+			fmt.Println("zero division", a_int, operator, b_int)
+		}
+	}
+	fmt.Println("Math Error: ", a_int, operator, b_int)
+	return "0"
 }
