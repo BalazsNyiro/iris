@@ -19,6 +19,16 @@ func Test_document_create(t *testing.T) {
 }
 
 */
+func Test_StrMath(t *testing.T) {
+	compare_str_pair("StrMath ", StrMath("1", "+", "2"), "3", t)
+	compare_str_pair("StrMath ", StrMath("2", "-", "3"), "-1", t)
+	compare_str_pair("StrMath ", StrMath("2", "*", "-3"), "-6", t)
+	compare_str_pair("StrMath ", StrMath("6", "/", "-3"), "-2", t)
+
+	// I don't want to stop at zero division so it's not an error for me
+	compare_str_pair("StrMath ", StrMath("6", "/", "0"), "0", t)
+	compare_str_pair("StrMath ", StrMath("0", "/", "6"), "0", t)
+}
 
 func Test_IsNumber(t *testing.T) {
 
@@ -36,7 +46,7 @@ func Test_IsNumber(t *testing.T) {
 	received := IsNumber(" -1")
 	compare_bool_pair("IsNumber 10", received, true, t)
 	compare_bool_pair("IsNumber 11", IsNumber(" -1-"), false, t)
-
+	compare_bool_pair("IsNumber 12", IsNumber("2a"), false, t)
 }
 
 func Test_new_window(t *testing.T) {

@@ -89,7 +89,7 @@ func shellCore(commandAndParams, input string) (string, error) {
 	return out.String(), err
 }
 
-func os_detect() string {
+func OsDetect() string {
 	os := runtime.GOOS
 	if strings.Contains("windows|darwin|linux", os) {
 		return os
@@ -136,4 +136,28 @@ func Atoi(txt string) int {
 	}
 	fmt.Println("Atoi error: ", error)
 	return 0
+}
+
+// TESTED
+func StrMath(a, operator, b string) string {
+	a_int := Atoi(a)
+	b_int := Atoi(b)
+	if operator == "-" {
+		return Itoa(a_int - b_int)
+	}
+	if operator == "+" {
+		return Itoa(a_int + b_int)
+	}
+	if operator == "*" {
+		return Itoa(a_int * b_int)
+	}
+	if operator == "/" {
+		if b_int != 0 {
+			return Itoa(a_int / b_int)
+		} else {
+			fmt.Println("zero division", a_int, operator, b_int)
+		}
+	}
+	fmt.Println("Math Error: ", a_int, operator, b_int)
+	return "0"
 }
