@@ -19,6 +19,25 @@ func Test_document_create(t *testing.T) {
 }
 
 */
+
+func Test_CoordExpressionEval(t *testing.T) {
+	windows := WindowsNewState(4, 2)
+
+	expression := "1"
+	result := CoordExpressionEval(expression, windows)
+	compare_str_pair("eval1", result, "1", t)
+
+	expression = "win:Terminal:" + KeyXrightCalculated
+	result = CoordExpressionEval(expression, windows)
+	compare_str_pair("eval2", result, "1", t)
+	/*
+		expression = "1 + 2"
+		result = CoordExpressionEval(expression)
+		compare_str_pair("eval2", result, "3", t)
+
+	*/
+}
+
 func Test_CalculateAllWindowCoords(t *testing.T) {
 	windows := WindowsNewState(4, 2)
 	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")

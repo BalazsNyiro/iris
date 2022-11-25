@@ -161,3 +161,10 @@ func StrMath(a, operator, b string) string {
 	fmt.Println("Math Error: ", a_int, operator, b_int)
 	return "0"
 }
+
+func str_double_spaces_remove(txt string) string {
+	for strings.Contains(txt, "  ") {
+		txt = strings.Replace(txt, "  ", " ", -1)
+	}
+	return txt
+}

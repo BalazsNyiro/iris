@@ -107,10 +107,10 @@ func (win Window) RenderToScreenOfWin() RenderedScreen {
 func CalculateAllWindowCoords(windows Windows) Windows {
 	for winName, _ := range windows {
 		fmt.Println("Calc winName", winName)
-		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft]), "+", windows[winName][KeyXshift])
-		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright]), "+", windows[winName][KeyXshift])
-		windows[winName][KeyYtopCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYtop]), "+", windows[winName][KeyYshift])
-		windows[winName][KeyYbottomCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYbottom]), "+", windows[winName][KeyYshift])
+		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
+		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright], windows), "+", windows[winName][KeyXshift])
+		windows[winName][KeyYtopCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYtop], windows), "+", windows[winName][KeyYshift])
+		windows[winName][KeyYbottomCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYbottom], windows), "+", windows[winName][KeyYshift])
 	}
 	return windows
 }
@@ -161,9 +161,32 @@ func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 }
 
 // TODO: write this once
-func CoordExpressionEval(coordString string) string {
-	// coordString := "(Terminal.KeyXleftCalculated + OtherWin.KeyYtopCalculated)/2:
-	return "0"
+func CoordExpressionEval(exp string, windows Windows) string {
+	// minimum 1 space between expression elems
+	// win:WindowsName:Attribute
+	// fun:min ( )
+	// example "( win:Terminal:KeyXleftCalculated + win:OtherWin:KeyYtopCalculated ) / 2:
+	exp = strings.TrimSpace(exp)
+	exp = str_double_spaces_remove(exp)
+
+	tokens := strings.Split(exp, " ")
+
+	// replace all windows elem into fix values
+	for id, token := range tokens {
+		token = strings.TrimSpace(token)
+		fmt.Println("token A", id, token)
+		if len(token) > 4 && token[0:4] == "win:" {
+			splitted := strings.Split(token, ":")
+			winName := splitted[1]
+			Attrib := splitted[2]
+			value := windows[winName][Attrib]
+			tokens[id] = value
+		}
+		fmt.Println("token B", id, tokens[id])
+	}
+	// TODO: do the work with operators and calculate the result into the first token elem
+	// FIXME: what happens with ( ) pairs?
+	return tokens[0]
 }
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
 	windows[id] = Window{
