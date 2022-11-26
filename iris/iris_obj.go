@@ -161,6 +161,7 @@ func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 }
 
 // if the next operator is "": there is no more operator
+// TESTED
 func OperatorNext(tokens []string) int {
 	// math operator precedence: * / are the first
 	for id, token := range tokens {
@@ -188,7 +189,7 @@ func CoordExpressionEval(exp string, windows Windows) string {
 	// fun:min ( )
 	// example "( win:Terminal:KeyXleftCalculated + win:OtherWin:KeyYtopCalculated ) / 2:
 	exp = strings.TrimSpace(exp)
-	exp = str_double_spaces_remove(exp)
+	exp = StrDoubleSpacesRemove(exp)
 
 	tokens := strings.Split(exp, " ")
 
@@ -235,16 +236,7 @@ func CoordExpressionEval(exp string, windows Windows) string {
 			return "0" // if the expression has syntax error, return with 0
 		}
 
-		// remove not used elems: /////////////////
-		tokensNoEmpty := []string{}
-		for _, token := range tokens {
-			token = strings.TrimSpace(token)
-			if len(token) > 0 {
-				tokensNoEmpty = append(tokensNoEmpty, token)
-			}
-		}
-		tokens = tokensNoEmpty
-		////////////////////////////////////////////
+		tokens = StrListRemoveEmptyElems(tokens, true)
 
 		id = OperatorNext(tokens)
 	}
@@ -254,6 +246,7 @@ func CoordExpressionEval(exp string, windows Windows) string {
 	// so tokens has one value only
 	return tokens[0]
 }
+
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
 	windows[id] = Window{
 

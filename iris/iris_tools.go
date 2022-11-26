@@ -98,6 +98,7 @@ func OsDetect() string {
 	// return "unknown"
 }
 
+// TESTED
 func IsNumber(txt string) bool {
 	plusMinusDetected := false
 	normalCharDetected := false
@@ -162,9 +163,24 @@ func StrMath(a, operator, b string) string {
 	return "0"
 }
 
-func str_double_spaces_remove(txt string) string {
+// TESTED
+func StrDoubleSpacesRemove(txt string) string {
 	for strings.Contains(txt, "  ") {
 		txt = strings.Replace(txt, "  ", " ", -1)
 	}
 	return txt
+}
+
+// TESTED
+func StrListRemoveEmptyElems(list []string, useTrim bool) []string {
+	cleaned := []string{}
+	for _, elem := range list {
+		if useTrim {
+			elem = strings.TrimSpace(elem)
+		}
+		if len(elem) > 0 {
+			cleaned = append(cleaned, elem)
+		}
+	}
+	return cleaned
 }

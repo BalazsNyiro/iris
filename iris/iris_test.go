@@ -20,6 +20,20 @@ func Test_document_create(t *testing.T) {
 
 */
 
+func Test_CleanStringLists(t *testing.T) {
+	elems := []string{"a", "b", "", "c", ""}
+	cleaned := StrListRemoveEmptyElems(elems, true)
+	compare_str_lists("cleanStringList1", cleaned, []string{"a", "b", "c"}, t)
+}
+
+func Test_DoubleSpaceRemove(t *testing.T) {
+	compare_str_pair(
+		"double space remove",
+		StrDoubleSpacesRemove("a   b     c"),
+		"a b c",
+		t)
+}
+
 func Test_OperatorPrecedence(t *testing.T) {
 	idNextOp := OperatorNext([]string{"1", "+", "2"})
 	compare_int_pair("operatorPrecedence1", idNextOp, 1, t)
@@ -154,6 +168,16 @@ func compare_str_pair(source, received, wanted string, t *testing.T) {
 			source, received, wanted)
 	}
 }
+
+func compare_str_lists(source string, received, wanted []string, t *testing.T) {
+	if len(received) != len(wanted) {
+		t.Fatalf("\nERROR STR LIST, different lengths - (%v) - received: %v\n  wanted: %v", source, received, wanted)
+	}
+	for id, _ := range received {
+		compare_str_pair(source, received[id], wanted[id], t)
+	}
+}
+
 func compare_bool_pair(source string, received, wanted bool, t *testing.T) {
 	if received != wanted {
 		t.Fatalf("\nERROR BOOL (%v) - received: %v\n  wanted: %v",
