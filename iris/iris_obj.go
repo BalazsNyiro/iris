@@ -198,7 +198,6 @@ func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string {
 	return tokens
 }
 
-// FIXME: use smaller sub-functions, not a huge monolitic fun
 func CoordExpressionEval(exp string, windows Windows) string {
 	// FIXME: () handling
 	fmt.Println("======= simple expression eval:", exp, "==========")
@@ -219,14 +218,14 @@ func CoordExpressionEval(exp string, windows Windows) string {
 		fmt.Println(">>> operator:", operator)
 		// if tokens has the next param for the operator:
 		if strings.Contains("+,-,*,/", operator) {
-			if len(tokens) > (id + 1) {
-				valueLeft := tokens[id-1]
-				valueRight := tokens[id+1]
-				fmt.Println("  ", valueLeft, operator, valueRight)
-
-				tokens[id-1] = ""
+			idValueRight := id + 1
+			idValueLeft := id - 1
+			if (idValueLeft >= 0) && (len(tokens) > idValueRight) {
+				valueLeft := tokens[idValueLeft]
+				valueRight := tokens[idValueRight]
+				tokens[idValueLeft] = "" // clean params, overwrite operator with result
 				tokens[id] = StrMath(valueLeft, operator, valueRight)
-				tokens[id+1] = ""
+				tokens[idValueRight] = ""
 			} else {
 				fmt.Println("missing operator parameter:", operator)
 				return "0" // if the param is missing, return with 0
@@ -236,9 +235,7 @@ func CoordExpressionEval(exp string, windows Windows) string {
 			fmt.Println("unknown operator:", operator)
 			return "0" // if the expression has syntax error, return with 0
 		}
-
 		tokens = StrListRemoveEmptyElems(tokens, true)
-
 		id = TokenOperatorNext(tokens)
 	}
 
