@@ -20,6 +20,16 @@ func Test_document_create(t *testing.T) {
 
 */
 
+func Test_OperatorPrecedence(t *testing.T) {
+	idNextOp := OperatorNext([]string{"1", "+", "2"})
+	compare_int_pair("operatorPrecedence1", idNextOp, 1, t)
+
+	idNextOp = OperatorNext([]string{"1", "+", "2", "*", "3"})
+	compare_int_pair("operatorPrecedence2", idNextOp, 3, t)
+
+	idNextOp = OperatorNext([]string{"1", "+", "5", "-", "3", "/", "3"})
+	compare_int_pair("operatorPrecedence2", idNextOp, 5, t)
+}
 func Test_CoordExpressionEval(t *testing.T) {
 	windows := WindowsNewState(4, 2)
 
@@ -29,13 +39,15 @@ func Test_CoordExpressionEval(t *testing.T) {
 
 	expression = "win:Terminal:" + KeyXrightCalculated
 	result = CoordExpressionEval(expression, windows)
-	compare_str_pair("eval2", result, "1", t)
-	/*
-		expression = "1 + 2"
-		result = CoordExpressionEval(expression)
-		compare_str_pair("eval2", result, "3", t)
+	compare_str_pair("eval2", result, "3", t)
 
-	*/
+	expression = "1 + 2"
+	result = CoordExpressionEval(expression, windows)
+	compare_str_pair("eval3", result, "3", t)
+
+	expression = "win:Terminal:" + KeyXrightCalculated + " - 2 * 2"
+	result = CoordExpressionEval(expression, windows)
+	compare_str_pair("eval4", result, "-1", t)
 }
 
 func Test_CalculateAllWindowCoords(t *testing.T) {

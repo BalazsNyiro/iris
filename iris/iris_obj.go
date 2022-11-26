@@ -160,8 +160,29 @@ func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 	)
 }
 
+// if the next operator is "": there is no more operator
+func OperatorNext(tokens []string) int {
+	// math operator precedence: * / are the first
+	for id, token := range tokens {
+		token = strings.TrimSpace(token)
+		if len(token) == 1 && strings.Contains("*,/", token) {
+			return id
+		}
+	}
+	for id, token := range tokens {
+		token = strings.TrimSpace(token)
+		if len(token) == 1 && strings.Contains("+,-", token) {
+			return id
+		}
+	}
+	return -1
+}
+
 // TODO: write this once
 func CoordExpressionEval(exp string, windows Windows) string {
+	// FIXME: () handling
+	fmt.Println("======= simple expression eval =======")
+
 	// minimum 1 space between expression elems
 	// win:WindowsName:Attribute
 	// fun:min ( )
@@ -174,19 +195,70 @@ func CoordExpressionEval(exp string, windows Windows) string {
 	// replace all windows elem into fix values
 	for id, token := range tokens {
 		token = strings.TrimSpace(token)
-		fmt.Println("token A", id, token)
-		if len(token) > 4 && token[0:4] == "win:" {
+		if len(token) > 4 && token[0:4] == "win:" { // win:Terminal:xRightCalculated
 			splitted := strings.Split(token, ":")
 			winName := splitted[1]
-			Attrib := splitted[2]
-			value := windows[winName][Attrib]
-			tokens[id] = value
+			attrib := splitted[2]
+
+			tokens[id] = "0" // set the normal value if key/attrib exists:
+			if winObj, keyInMap := windows[winName]; keyInMap {
+				if valueAttrib, attribInMap := winObj[attrib]; attribInMap {
+					tokens[id] = valueAttrib
+				}
+			}
 		}
-		fmt.Println("token B", id, tokens[id])
 	}
-	// TODO: do the work with operators and calculate the result into the first token elem
-	// FIXME: what happens with ( ) pairs?
-	return tokens[0]
+
+	// if a token == "" then it is deleted
+	// calculate all operator, and remove left/right values
+	id := OperatorNext(tokens)
+	for id > -1 {
+		operator := tokens[id]
+		fmt.Println(">>> operator:", operator)
+		// if tokens has the next param for the operator:
+		if strings.Contains("+,-,*,/", operator) {
+			if len(tokens) > (id + 1) {
+				valueLeft := tokens[id-1]
+				valueRight := tokens[id+1]
+				fmt.Println("  ", valueLeft, operator, valueRight)
+
+				tokens[id-1] = ""
+				tokens[id] = StrMath(valueLeft, operator, valueRight)
+				tokens[id+1] = ""
+			} else {
+				fmt.Println("missing operator parameter:", operator)
+				return "0" // if the param is missing, return with 0
+			}
+
+		} else { // unknown operator
+			fmt.Println("unknown operator:", operator)
+			return "0" // if the expression has syntax error, return with 0
+		}
+
+		// remove not used elems: /////////////////
+		tokensNoEmpty := []string{}
+		for _, token := range tokens {
+			token = strings.TrimSpace(token)
+			if len(token) > 0 {
+				tokensNoEmpty = append(tokensNoEmpty, token)
+			}
+		}
+		tokens = tokensNoEmpty
+		////////////////////////////////////////////
+
+		id = OperatorNext(tokens)
+	}
+
+	// at this point there is no more operator in tokens
+	// and all operator value is calculated.
+	// return with the first value in tokens.
+	for _, token := range tokens {
+		token = strings.TrimSpace(token)
+		if len(token) > 0 {
+			return token
+		}
+	}
+	return "0"
 }
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
 	windows[id] = Window{
