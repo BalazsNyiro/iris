@@ -178,7 +178,7 @@ func OperatorNext(tokens []string) int {
 	return -1
 }
 
-// TODO: write this once
+// FIXME: use smaller sub-functions, not a huge monolitic fun
 func CoordExpressionEval(exp string, windows Windows) string {
 	// FIXME: () handling
 	fmt.Println("======= simple expression eval =======")
@@ -251,14 +251,8 @@ func CoordExpressionEval(exp string, windows Windows) string {
 
 	// at this point there is no more operator in tokens
 	// and all operator value is calculated.
-	// return with the first value in tokens.
-	for _, token := range tokens {
-		token = strings.TrimSpace(token)
-		if len(token) > 0 {
-			return token
-		}
-	}
-	return "0"
+	// so tokens has one value only
+	return tokens[0]
 }
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
 	windows[id] = Window{
