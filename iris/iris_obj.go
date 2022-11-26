@@ -162,7 +162,7 @@ func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 
 // if the next operator is "": there is no more operator
 // TESTED
-func OperatorNext(tokens []string) int {
+func TokenOperatorNext(tokens []string) int {
 	// math operator precedence: * / are the first
 	for id, token := range tokens {
 		token = strings.TrimSpace(token)
@@ -179,23 +179,9 @@ func OperatorNext(tokens []string) int {
 	return -1
 }
 
-// FIXME: use smaller sub-functions, not a huge monolitic fun
-func CoordExpressionEval(exp string, windows Windows) string {
-	// FIXME: () handling
-	fmt.Println("======= simple expression eval =======")
-
-	// minimum 1 space between expression elems
-	// win:WindowsName:Attribute
-	// fun:min ( )
-	// example "( win:Terminal:KeyXleftCalculated + win:OtherWin:KeyYtopCalculated ) / 2:
-	exp = strings.TrimSpace(exp)
-	exp = StrDoubleSpacesRemove(exp)
-
-	tokens := strings.Split(exp, " ")
-
-	// replace all windows elem into fix values
+func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string {
+	tokens = StrListRemoveEmptyElems(tokens, true)
 	for id, token := range tokens {
-		token = strings.TrimSpace(token)
 		if len(token) > 4 && token[0:4] == "win:" { // win:Terminal:xRightCalculated
 			splitted := strings.Split(token, ":")
 			winName := splitted[1]
@@ -209,10 +195,25 @@ func CoordExpressionEval(exp string, windows Windows) string {
 			}
 		}
 	}
+	return tokens
+}
+
+// FIXME: use smaller sub-functions, not a huge monolitic fun
+func CoordExpressionEval(exp string, windows Windows) string {
+	// FIXME: () handling
+	fmt.Println("======= simple expression eval =======")
+
+	// minimum 1 space between expression elems
+	// win:WindowsName:Attribute
+	// fun:min ( )
+	// example "( win:Terminal:KeyXleftCalculated + win:OtherWin:KeyYtopCalculated ) / 2:
+
+	tokens := strings.Split(exp, " ")
+	tokens = TokenReplaceWinPlaceholders(windows, tokens)
 
 	// if a token == "" then it is deleted
 	// calculate all operator, and remove left/right values
-	id := OperatorNext(tokens)
+	id := TokenOperatorNext(tokens)
 	for id > -1 {
 		operator := tokens[id]
 		fmt.Println(">>> operator:", operator)
@@ -238,7 +239,7 @@ func CoordExpressionEval(exp string, windows Windows) string {
 
 		tokens = StrListRemoveEmptyElems(tokens, true)
 
-		id = OperatorNext(tokens)
+		id = TokenOperatorNext(tokens)
 	}
 
 	// at this point there is no more operator in tokens

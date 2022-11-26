@@ -35,13 +35,13 @@ func Test_DoubleSpaceRemove(t *testing.T) {
 }
 
 func Test_OperatorPrecedence(t *testing.T) {
-	idNextOp := OperatorNext([]string{"1", "+", "2"})
+	idNextOp := TokenOperatorNext([]string{"1", "+", "2"})
 	compare_int_pair("operatorPrecedence1", idNextOp, 1, t)
 
-	idNextOp = OperatorNext([]string{"1", "+", "2", "*", "3"})
+	idNextOp = TokenOperatorNext([]string{"1", "+", "2", "*", "3"})
 	compare_int_pair("operatorPrecedence2", idNextOp, 3, t)
 
-	idNextOp = OperatorNext([]string{"1", "+", "5", "-", "3", "/", "3"})
+	idNextOp = TokenOperatorNext([]string{"1", "+", "5", "-", "3", "/", "3"})
 	compare_int_pair("operatorPrecedence2", idNextOp, 5, t)
 }
 func Test_CoordExpressionEval(t *testing.T) {
