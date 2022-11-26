@@ -201,7 +201,7 @@ func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string {
 // FIXME: use smaller sub-functions, not a huge monolitic fun
 func CoordExpressionEval(exp string, windows Windows) string {
 	// FIXME: () handling
-	fmt.Println("======= simple expression eval =======")
+	fmt.Println("======= simple expression eval:", exp, "==========")
 
 	// minimum 1 space between expression elems
 	// win:WindowsName:Attribute
