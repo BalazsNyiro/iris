@@ -185,6 +185,7 @@ func StrListRemoveEmptyElems(list []string, useTrim bool) []string {
 	return cleaned
 }
 
+// TESTED
 func ExprOperatorIsValid(operatorChecked string) bool {
 	for _, operatorKnown := range strings.Split("+,-,*,/", ",") {
 		if operatorChecked == operatorKnown {
@@ -192,4 +193,16 @@ func ExprOperatorIsValid(operatorChecked string) bool {
 		}
 	}
 	return false
+}
+
+func debug_info_save(win Windows) {
+
+	f, _ := os.Create("debug_iris.txt")
+	defer f.Close()
+
+	for key, val := range win["prgState"] {
+		message := fmt.Sprintf("%s: %s\n", key, val)
+		data := []byte(message)
+		f.Write(data)
+	}
 }

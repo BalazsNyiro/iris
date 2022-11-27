@@ -106,7 +106,7 @@ func (win Window) RenderToScreenOfWin() RenderedScreen {
 
 func CalculateAllWindowCoords(windows Windows) Windows {
 	for winName, _ := range windows {
-		fmt.Println("Calc winName", winName)
+		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
 		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright], windows), "+", windows[winName][KeyXshift])
 		windows[winName][KeyYtopCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyYtop], windows), "+", windows[winName][KeyYshift])
@@ -201,6 +201,8 @@ func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string {
 	}
 	return tokens
 }
+
+// TESTED
 func ParametersCollect(tokens []string, tokenId int) (string, string, int, int, string) {
 	errMsg := ""
 	valueLeft := ""
@@ -230,13 +232,13 @@ func ParametersCollect(tokens []string, tokenId int) (string, string, int, int, 
 }
 
 func CoordExpressionEval(exp string, windows Windows) string {
-	// FIXME: () handling
+	// TODO: () handling
 	fmt.Println("======= simple expression eval:", exp, "==========")
 
 	// minimum 1 space between expression elems
 	// win:WindowsName:Attribute
 	// fun:min ( )
-	// example "( win:Terminal:KeyXleftCalculated + win:OtherWin:KeyYtopCalculated ) / 2:
+	// example "win:Terminal:KeyXleftCalculated + win:OtherWin:KeyYtopCalculated / 2:
 
 	tokens := strings.Split(exp, " ")
 	tokens = TokenReplaceWinPlaceholders(windows, tokens)
