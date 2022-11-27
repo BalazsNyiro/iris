@@ -219,10 +219,9 @@ func CoordExpressionEval(exp string, windows Windows) string {
 	id, operator := TokenOperatorNext(tokens)
 	for id > -1 {
 		fmt.Println(">>> operator:", operator)
-		// if tokens has the next param for the operator:
-		if strings.Contains("+,-,*,/", operator) {
-			idValueRight := id + 1
-			idValueLeft := id - 1
+		if ExprOperatorIsValid(operator) {
+			idValueRight := id + 1 // if tokens has the
+			idValueLeft := id - 1  // next param for the operator:
 			if (idValueLeft >= 0) && (len(tokens) > idValueRight) {
 				valueLeft := tokens[idValueLeft]
 				valueRight := tokens[idValueRight]

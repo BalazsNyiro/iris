@@ -19,6 +19,15 @@ func Test_document_create(t *testing.T) {
 }
 
 */
+func Test_ExprOperatorIsValid(t *testing.T) {
+	compare_bool_pair("expr operator is valid 1a", ExprOperatorIsValid(""), false, t)
+	compare_bool_pair("expr operator is valid 1a", ExprOperatorIsValid("?"), false, t)
+	compare_bool_pair("expr operator is valid 1b", ExprOperatorIsValid("++"), false, t)
+	compare_bool_pair("expr operator is valid 2", ExprOperatorIsValid("+"), true, t)
+	compare_bool_pair("expr operator is valid 2", ExprOperatorIsValid("-"), true, t)
+	compare_bool_pair("expr operator is valid 2", ExprOperatorIsValid("*"), true, t)
+	compare_bool_pair("expr operator is valid 2", ExprOperatorIsValid("/"), true, t)
+}
 
 func Test_CleanStringLists(t *testing.T) {
 	elems := []string{"a", "b", "", "c", ""}

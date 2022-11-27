@@ -184,3 +184,12 @@ func StrListRemoveEmptyElems(list []string, useTrim bool) []string {
 	}
 	return cleaned
 }
+
+func ExprOperatorIsValid(operatorChecked string) bool {
+	for _, operatorKnown := range strings.Split("+,-,*,/", ",") {
+		if operatorChecked == operatorKnown {
+			return true
+		}
+	}
+	return false
+}
