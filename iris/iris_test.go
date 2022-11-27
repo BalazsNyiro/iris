@@ -35,14 +35,17 @@ func Test_DoubleSpaceRemove(t *testing.T) {
 }
 
 func Test_OperatorPrecedence(t *testing.T) {
-	idNextOp := TokenOperatorNext([]string{"1", "+", "2"})
-	compare_int_pair("operatorPrecedence1", idNextOp, 1, t)
+	operatorNextId, operatorNext := TokenOperatorNext([]string{"1", "+", "2"})
+	compare_int_pair("operatorPrecedence1i", operatorNextId, 1, t)
+	compare_str_pair("operatorPrecedence1s", operatorNext, "+", t)
 
-	idNextOp = TokenOperatorNext([]string{"1", "+", "2", "*", "3"})
-	compare_int_pair("operatorPrecedence2", idNextOp, 3, t)
+	operatorNextId, operatorNext = TokenOperatorNext([]string{"1", "+", "2", "*", "3"})
+	compare_int_pair("operatorPrecedence2i", operatorNextId, 3, t)
+	compare_str_pair("operatorPrecedence2s", operatorNext, "*", t)
 
-	idNextOp = TokenOperatorNext([]string{"1", "+", "5", "-", "3", "/", "3"})
-	compare_int_pair("operatorPrecedence2", idNextOp, 5, t)
+	operatorNextId, operatorNext = TokenOperatorNext([]string{"1", "+", "5", "-", "3", "/", "3"})
+	compare_int_pair("operatorPrecedence3i", operatorNextId, 5, t)
+	compare_str_pair("operatorPrecedence3s", operatorNext, "/", t)
 }
 func Test_CoordExpressionEval(t *testing.T) {
 	windows := WindowsNewState(4, 2)

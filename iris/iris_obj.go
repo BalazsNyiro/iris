@@ -162,21 +162,25 @@ func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 
 // if the next operator is "": there is no more operator
 // TESTED
-func TokenOperatorNext(tokens []string) int {
+func TokenOperatorNext(tokens []string) (int, string) {
+	operatorNext := "unknown"
+	tokens = StrListRemoveEmptyElems(tokens, true)
 	// math operator precedence: * / are the first
 	for id, token := range tokens {
 		token = strings.TrimSpace(token)
 		if len(token) == 1 && strings.Contains("*,/", token) {
-			return id
+			operatorNext = token
+			return id, operatorNext
 		}
 	}
 	for id, token := range tokens {
 		token = strings.TrimSpace(token)
 		if len(token) == 1 && strings.Contains("+,-", token) {
-			return id
+			operatorNext = token
+			return id, operatorNext
 		}
 	}
-	return -1
+	return -1, operatorNext
 }
 
 func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string {
@@ -212,9 +216,8 @@ func CoordExpressionEval(exp string, windows Windows) string {
 
 	// if a token == "" then it is deleted
 	// calculate all operator, and remove left/right values
-	id := TokenOperatorNext(tokens)
+	id, operator := TokenOperatorNext(tokens)
 	for id > -1 {
-		operator := tokens[id]
 		fmt.Println(">>> operator:", operator)
 		// if tokens has the next param for the operator:
 		if strings.Contains("+,-,*,/", operator) {
@@ -236,7 +239,7 @@ func CoordExpressionEval(exp string, windows Windows) string {
 			return "0" // if the expression has syntax error, return with 0
 		}
 		tokens = StrListRemoveEmptyElems(tokens, true)
-		id = TokenOperatorNext(tokens)
+		id, operator = TokenOperatorNext(tokens)
 	}
 
 	// at this point there is no more operator in tokens
