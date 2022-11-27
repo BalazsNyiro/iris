@@ -200,6 +200,7 @@ func debug_info_save(win Windows) {
 	f, _ := os.Create("debug_iris.txt")
 	defer f.Close()
 
+	f.Write([]byte("===============\n"))
 	for key, val := range win["prgState"] {
 		message := fmt.Sprintf("%s: %s\n", key, val)
 		data := []byte(message)
