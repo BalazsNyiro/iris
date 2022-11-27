@@ -219,24 +219,24 @@ func CoordExpressionEval(exp string, windows Windows) string {
 	id, operator := TokenOperatorNext(tokens)
 	for id > -1 {
 		fmt.Println(">>> operator:", operator)
-		if ExprOperatorIsValid(operator) {
-			idValueRight := id + 1 // if tokens has the
-			idValueLeft := id - 1  // next param for the operator:
-			if (idValueLeft >= 0) && (len(tokens) > idValueRight) {
-				valueLeft := tokens[idValueLeft]
-				valueRight := tokens[idValueRight]
-				tokens[idValueLeft] = "" // clean params, overwrite operator with result
-				tokens[id] = StrMath(valueLeft, operator, valueRight)
-				tokens[idValueRight] = ""
-			} else {
-				fmt.Println("missing operator parameter:", operator)
-				return "0" // if the param is missing, return with 0
-			}
-
-		} else { // unknown operator
+		if !ExprOperatorIsValid(operator) {
 			fmt.Println("unknown operator:", operator)
 			return "0" // if the expression has syntax error, return with 0
 		}
+
+		idValueRight := id + 1 // if tokens has the
+		idValueLeft := id - 1  // next param for the operator:
+		if (idValueLeft >= 0) && (len(tokens) > idValueRight) {
+			valueLeft := tokens[idValueLeft]
+			valueRight := tokens[idValueRight]
+			tokens[idValueLeft] = "" // clean params, overwrite operator with result
+			tokens[id] = StrMath(valueLeft, operator, valueRight)
+			tokens[idValueRight] = ""
+		} else {
+			fmt.Println("missing operator parameter:", operator)
+			return "0" // if the param is missing, return with 0
+		}
+
 		tokens = StrListRemoveEmptyElems(tokens, true)
 		id, operator = TokenOperatorNext(tokens)
 	}
