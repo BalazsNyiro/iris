@@ -19,6 +19,27 @@ func Test_document_create(t *testing.T) {
 }
 
 */
+func Test_parameterCollect(t *testing.T) {
+	tokens := []string{"1", "*", "2"}
+	valueLeft, valueRight, idValueLeft, idValueRight, idError := ParametersCollect(tokens, 1)
+	compare_str_pair("paramCollect1", valueLeft, "1", t)
+	compare_str_pair("paramCollect1", valueRight, "2", t)
+	compare_int_pair("paramCollect1", idValueLeft, 0, t)
+	compare_int_pair("paramCollect1", idValueRight, 2, t)
+	compare_str_pair("paramCollect1", idError, "", t)
+
+	tokens = []string{"1", "*"} // missing right param
+	valueLeft, valueRight, idValueLeft, idValueRight, idError = ParametersCollect(tokens, 1)
+	compare_str_pair("paramCollect2", valueLeft, "", t)
+	compare_str_pair("paramCollect2", valueRight, "", t)
+	compare_bool_pair("paramCollect2", len(idError) > 0, true, t)
+
+	tokens = []string{"*", "2"} // missing left param
+	valueLeft, valueRight, idValueLeft, idValueRight, idError = ParametersCollect(tokens, 0)
+	compare_str_pair("paramCollect2", valueLeft, "", t)
+	compare_str_pair("paramCollect2", valueRight, "", t)
+	compare_bool_pair("paramCollect2", len(idError) > 0, true, t)
+}
 func Test_ExprOperatorIsValid(t *testing.T) {
 	compare_bool_pair("expr operator is valid 1a", ExprOperatorIsValid(""), false, t)
 	compare_bool_pair("expr operator is valid 1a", ExprOperatorIsValid("?"), false, t)
