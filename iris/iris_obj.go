@@ -201,6 +201,33 @@ func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string {
 	}
 	return tokens
 }
+func ParametersCollect(tokens []string, tokenId int) (string, string, int, int, string) {
+	errMsg := ""
+	valueLeft := ""
+	valueRight := ""
+
+	idValueLeft, idValueRight := tokenId-1, tokenId+1
+	if idValueLeft < 0 {
+		errMsg = errMsg + "express param left id < 0:" + Itoa(idValueLeft) + ";"
+	}
+	if idValueRight < 0 {
+		errMsg = errMsg + "express param right id < 0:" + Itoa(idValueRight) + ";"
+	}
+	idMax := len(tokens) - 1
+	idMaxStr := Itoa(idMax)
+	if idValueLeft > idMax {
+		errMsg = errMsg + "express param left id > len(tokens)-1:" + Itoa(idValueLeft) + " len tokens: " + idMaxStr + ";"
+	}
+	if idValueRight > idMax {
+		errMsg = errMsg + "express param right id > len(tokens)-1:" + Itoa(idValueRight) + " len tokens: " + idMaxStr + ";"
+	}
+	if errMsg == "" {
+		valueLeft = tokens[idValueLeft]
+		valueRight = tokens[idValueRight]
+	}
+
+	return valueLeft, valueRight, idValueLeft, idValueRight, errMsg
+}
 
 func CoordExpressionEval(exp string, windows Windows) string {
 	// FIXME: () handling
@@ -224,18 +251,15 @@ func CoordExpressionEval(exp string, windows Windows) string {
 			return "0" // if the expression has syntax error, return with 0
 		}
 
-		idValueRight := id + 1 // if tokens has the
-		idValueLeft := id - 1  // next param for the operator:
-		if (idValueLeft >= 0) && (len(tokens) > idValueRight) {
-			valueLeft := tokens[idValueLeft]
-			valueRight := tokens[idValueRight]
-			tokens[idValueLeft] = "" // clean params, overwrite operator with result
-			tokens[id] = StrMath(valueLeft, operator, valueRight)
-			tokens[idValueRight] = ""
-		} else {
-			fmt.Println("missing operator parameter:", operator)
+		valueLeft, valueRight, idValueLeft, idValueRight, idError := ParametersCollect(tokens, id)
+		if idError != "" {
+			fmt.Println("operator parameter error:", idError)
 			return "0" // if the param is missing, return with 0
 		}
+
+		tokens[idValueLeft] = "" // clean params, overwrite operator with result
+		tokens[id] = StrMath(valueLeft, operator, valueRight)
+		tokens[idValueRight] = ""
 
 		tokens = StrListRemoveEmptyElems(tokens, true)
 		id, operator = TokenOperatorNext(tokens)
