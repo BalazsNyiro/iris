@@ -242,14 +242,16 @@ func windows_keep_publics(windows Windows) Windows {
 }
 
 // windows Names -> windows Names: remove internal/non-public window names
-func win_names_keep_publics(winNames []string) []string {
+func win_names_keep_publics(winNames []string, sort_the_names bool) []string {
 	publicNames := []string{}
 	for _, name := range winNames {
 		if win_name_is_publics(name) {
 			publicNames = append(publicNames, name)
 		}
 	}
-	sort.Strings(publicNames)
+	if sort_the_names {
+		sort.Strings(publicNames)
+	}
 	return publicNames
 }
 

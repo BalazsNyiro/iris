@@ -47,7 +47,13 @@ func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedSc
 
 func ScreensComposeToScreen(windows Windows, winNamesToComposite []string) RenderedScreen {
 	widthMax, heightMax := 0, 0
-	winNamesToComposite = win_names_keep_publics(winNamesToComposite)
+
+	// FIXME: windows rendering is based on Name list order.
+	// it means if you change the order, a win can overlap another one.
+	// maybe it would be better to give a LayerNum into the windows and render them based on that value??
+
+	// keep the original order because the later rendered win overlaps the previous ones
+	winNamesToComposite = win_names_keep_publics(winNamesToComposite, false)
 
 	// This part is to find the max width/height only. //////////////
 	screensOfWindows := []RenderedScreen{}
