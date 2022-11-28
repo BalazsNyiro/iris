@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -98,6 +99,7 @@ func OsDetect() string {
 	// return "unknown"
 }
 
+// TESTED
 func IsNumber(txt string) bool {
 	plusMinusDetected := false
 	normalCharDetected := false
@@ -160,4 +162,104 @@ func StrMath(a, operator, b string) string {
 	}
 	fmt.Println("Math Error: ", a_int, operator, b_int)
 	return "0"
+}
+
+// TESTED
+func StrDoubleSpacesRemove(txt string) string {
+	for strings.Contains(txt, "  ") {
+		txt = strings.Replace(txt, "  ", " ", -1)
+	}
+	return txt
+}
+
+// TESTED
+func StrListRemoveEmptyElems(list []string, useTrim bool) []string {
+	cleaned := []string{}
+	for _, elem := range list {
+		if useTrim {
+			elem = strings.TrimSpace(elem)
+		}
+		if len(elem) > 0 {
+			cleaned = append(cleaned, elem)
+		}
+	}
+	return cleaned
+}
+
+// TESTED
+func ExprOperatorIsValid(operatorChecked string) bool {
+	for _, operatorKnown := range strings.Split("+,-,*,/", ",") {
+		if operatorChecked == operatorKnown {
+			return true
+		}
+	}
+	return false
+}
+
+func debug_info_save(windows Windows) {
+
+	f, _ := os.Create("debug_iris.txt")
+	defer f.Close()
+
+	f.Write([]byte("===============\n"))
+	for key, val := range windows["prgState"] {
+		message := fmt.Sprintf("%s: %s\n", key, val)
+		data := []byte(message)
+		f.Write(data)
+	}
+	for _, winName := range windows_get_win_names_publics_sorted(windows) {
+		winInfo := windows[winName]
+		data := []byte(fmt.Sprintf("win public: %s (%s, %s)\n",
+			winName,
+			winInfo[KeyXleftCalculated],
+			winInfo[KeyYtopCalculated]))
+		f.Write(data)
+	}
+}
+
+// collect win names, I want to sort it!
+func windows_get_win_names_publics_sorted(windows Windows) []string {
+	winNames := []string{}
+	for winName, _ := range windows {
+		if win_name_is_publics(winName) {
+			winNames = append(winNames, winName)
+		}
+	}
+	sort.Strings(winNames)
+	return winNames
+}
+
+// from windows -> windows public list
+// map keys are always unsorted!
+func windows_keep_publics(windows Windows) Windows {
+	windows_publics := Windows{}
+	for winName, value := range windows {
+		if win_name_is_publics(winName) {
+			windows_publics[winName] = value
+		}
+	}
+	return windows_publics
+}
+
+// windows Names -> windows Names: remove internal/non-public window names
+func win_names_keep_publics(winNames []string, sort_the_names bool) []string {
+	publicNames := []string{}
+	for _, name := range winNames {
+		if win_name_is_publics(name) {
+			publicNames = append(publicNames, name)
+		}
+	}
+	if sort_the_names {
+		sort.Strings(publicNames)
+	}
+	return publicNames
+}
+
+// window name is public?
+func win_name_is_publics(winName string) bool {
+	public := true
+	if winName == "prgState" { // prgState is an internal key-value storage
+		public = false
+	}
+	return public
 }

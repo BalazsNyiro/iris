@@ -1,0 +1,4 @@
+===============
+winActiveId: Child
+win public: Child (6, 6)
+win public: Terminal (0, 0)

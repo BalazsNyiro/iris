@@ -58,7 +58,7 @@ func UserInterfaceStart(windows Windows) {
 			// vim navigation keys
 			if strings.Contains("lhjk", stdin) {
 				winActiveId := windows["prgState"]["winActiveId"]
-				fmt.Println("win active id", winActiveId)
+				debug_info_save(windows)
 				if stdin == "l" {
 					windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "+", "1")
 				}
