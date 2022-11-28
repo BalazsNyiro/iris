@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -206,7 +207,8 @@ func debug_info_save(windows Windows) {
 		data := []byte(message)
 		f.Write(data)
 	}
-	for winName, winInfo := range windows_keep_publics(windows) {
+	for _, winName := range windows_get_win_names_publics_sorted(windows) {
+		winInfo := windows[winName]
 		data := []byte(fmt.Sprintf("win public: %s (%s, %s)\n",
 			winName,
 			winInfo[KeyXleftCalculated],
@@ -215,6 +217,20 @@ func debug_info_save(windows Windows) {
 	}
 }
 
+// collect win names, I want to sort it!
+func windows_get_win_names_publics_sorted(windows Windows) []string {
+	winNames := []string{}
+	for winName, _ := range windows {
+		if win_name_is_publics(winName) {
+			winNames = append(winNames, winName)
+		}
+	}
+	sort.Strings(winNames)
+	return winNames
+}
+
+// from windows -> windows public list
+// map keys are always unsorted!
 func windows_keep_publics(windows Windows) Windows {
 	windows_publics := Windows{}
 	for winName, value := range windows {
@@ -225,7 +241,7 @@ func windows_keep_publics(windows Windows) Windows {
 	return windows_publics
 }
 
-// remove internal/non-public window names
+// windows Names -> windows Names: remove internal/non-public window names
 func win_names_keep_publics(winNames []string) []string {
 	publicNames := []string{}
 	for _, name := range winNames {
@@ -233,9 +249,11 @@ func win_names_keep_publics(winNames []string) []string {
 			publicNames = append(publicNames, name)
 		}
 	}
+	sort.Strings(publicNames)
 	return publicNames
 }
 
+// window name is public?
 func win_name_is_publics(winName string) bool {
 	public := true
 	if winName == "prgState" { // prgState is an internal key-value storage
