@@ -207,3 +207,22 @@ func debug_info_save(win Windows) {
 		f.Write(data)
 	}
 }
+
+// remove internal/non-public window names
+func win_names_keep_publics(winNames []string) []string {
+	publicNames := []string{}
+	for _, name := range winNames {
+		if win_name_is_publics(name) {
+			publicNames = append(publicNames, name)
+		}
+	}
+	return publicNames
+}
+
+func win_name_is_publics(winName string) bool {
+	public := true
+	if winName == "prgState" { // prgState is an internal key-value storage
+		public = false
+	}
+	return public
+}

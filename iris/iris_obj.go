@@ -45,12 +45,13 @@ func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedSc
 	return screen
 }
 
-func ScreensComposeToScreen(windows Windows, winNames []string) RenderedScreen {
+func ScreensComposeToScreen(windows Windows, winNamesToComposite []string) RenderedScreen {
 	widthMax, heightMax := 0, 0
+	winNamesToComposite = win_names_keep_publics(winNamesToComposite)
 
 	// This part is to find the max width/height only. //////////////
 	screensOfWindows := []RenderedScreen{}
-	for _, winName := range winNames {
+	for _, winName := range winNamesToComposite {
 		screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin())
 	}
 
@@ -66,7 +67,7 @@ func ScreensComposeToScreen(windows Windows, winNames []string) RenderedScreen {
 
 	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", pixels: pixels{}}
 
-	for _, winName := range winNames {
+	for _, winName := range winNamesToComposite {
 		screen := windows[winName].RenderToScreenOfWin()
 		for yInWin := 0; yInWin < screen.height; yInWin++ {
 			for xInWin := 0; xInWin < screen.width; xInWin++ {
@@ -96,6 +97,7 @@ I store everything in strings.
 type Window map[string]string
 type Windows map[string]Window
 
+// TESTED in Test_new_window
 func (win Window) RenderToScreenOfWin() RenderedScreen {
 	// TODO: use calculated width/height when they are ready!
 	width := Atoi(win[KeyXrightCalculated]) - Atoi(win[KeyXleftCalculated]) + 1
@@ -104,8 +106,12 @@ func (win Window) RenderToScreenOfWin() RenderedScreen {
 	return screen
 }
 
+// TESTED
 func CalculateAllWindowCoords(windows Windows) Windows {
 	for winName, _ := range windows {
+		if !win_name_is_publics(winName) {
+			continue
+		}
 		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
 		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright], windows), "+", windows[winName][KeyXshift])
@@ -114,13 +120,6 @@ func CalculateAllWindowCoords(windows Windows) Windows {
 	}
 	return windows
 }
-
-/*
-func CalculateCoords(win Window) Window {
-
-}
-
-*/
 
 //////////////////////////// WINDOWS ////////////////////////////////////////////////////////
 
@@ -148,6 +147,7 @@ var KeyYbottomCalculated = "yBottomCalculated"
 var KeyDebugWindowFillerChar = "debugWindowFillerChar"
 var KeyWinId = "winId"
 
+// TESTED in Test_new_window
 func WindowsNewState(terminalWidth, terminalHeight int) Windows {
 	Win := Windows{}
 	// prgState contains all general data
@@ -231,6 +231,7 @@ func ParametersCollect(tokens []string, tokenId int) (string, string, int, int, 
 	return valueLeft, valueRight, idValueLeft, idValueRight, errMsg
 }
 
+// TESTED
 func CoordExpressionEval(exp string, windows Windows) string {
 	// TODO: () handling
 	fmt.Println("======= simple expression eval:", exp, "==========")
@@ -273,47 +274,54 @@ func CoordExpressionEval(exp string, windows Windows) string {
 	return tokens[0]
 }
 
+// TESTED
 func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
-	windows[id] = Window{
+	if id == "prgState" {
+		// program state is not a real window,
+		// it stores the current settings
+		windows[id] = Window{}
+	} else {
+		windows[id] = Window{
 
-		// RULES:
-		// the coords are 0 based. so (0, 0) represents the top-left coord.
+			// RULES:
+			// the coords are 0 based. so (0, 0) represents the top-left coord.
 
-		// the not calculated values can be fix or relative values (20%) for example,
-		// or later complex functions
-		// the positions can be simple fix numbers: 20
+			// the not calculated values can be fix or relative values (20%) for example,
+			// or later complex functions
+			// the positions can be simple fix numbers: 20
 
-		/////////// COMPLEX EXPRESSIONS ///////////////////////////////
-		// complex expressions: "win:id_without_space * 0.8 - win:id2 / 2"
-		// known operators: * / + -
-		// minimum one space is mandatory between all elems as a separator
-		// win:  a win id: [a-zA-Z0-9-_.]
+			/////////// COMPLEX EXPRESSIONS ///////////////////////////////
+			// complex expressions: "win:id_without_space * 0.8 - win:id2 / 2"
+			// known operators: * / + -
+			// minimum one space is mandatory between all elems as a separator
+			// win:  a win id: [a-zA-Z0-9-_.]
 
-		// IMPORTANT: All four coord values can have different expressions!
-		// it means you can use more parent windows as parents, or other values,
-		// the time for example.
+			// IMPORTANT: All four coord values can have different expressions!
+			// it means you can use more parent windows as parents, or other values,
+			// the time for example.
 
-		// TODO: fun:function_name(params) - user can call functions to calculate
-		// the position. example: move coordinates based on current seconds.
+			// TODO: fun:function_name(params) - user can call functions to calculate
+			// the position. example: move coordinates based on current seconds.
 
-		KeyWinId: id,
+			KeyWinId: id,
 
-		KeyXleft:   keyXleft,
-		KeyXright:  keyXright,
-		KeyYtop:    keyYtop,
-		KeyYbottom: keyYbottom,
+			KeyXleft:   keyXleft,
+			KeyXright:  keyXright,
+			KeyYtop:    keyYtop,
+			KeyYbottom: keyYbottom,
 
-		KeyXshift: "0",
-		KeyYshift: "0",
+			KeyXshift: "0",
+			KeyYshift: "0",
 
-		// here you can see calculated fix positions only, the actual positions
-		KeyXleftCalculated:       keyXleft,  // initially, before first calculation
-		KeyXrightCalculated:      keyXright, // use these values
-		KeyYtopCalculated:        keyYtop,
-		KeyYbottomCalculated:     keyYbottom,
-		KeyWidthCalculated:       Itoa(Atoi(keyXright) - Atoi(keyXleft) + 1),
-		KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
-		KeyDebugWindowFillerChar: debugWindowFiller,
+			// here you can see calculated fix positions only, the actual positions
+			KeyXleftCalculated:       keyXleft,  // initially, before first calculation
+			KeyXrightCalculated:      keyXright, // use these values
+			KeyYtopCalculated:        keyYtop,
+			KeyYbottomCalculated:     keyYbottom,
+			KeyWidthCalculated:       Itoa(Atoi(keyXright) - Atoi(keyXleft) + 1),
+			KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
+			KeyDebugWindowFillerChar: debugWindowFiller,
+		}
 	}
 	return windows
 }
