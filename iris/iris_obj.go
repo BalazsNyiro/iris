@@ -108,10 +108,7 @@ func (win Window) RenderToScreenOfWin() RenderedScreen {
 
 // TESTED
 func CalculateAllWindowCoords(windows Windows) Windows {
-	for winName, _ := range windows {
-		if !win_name_is_publics(winName) {
-			continue
-		}
+	for winName, _ := range windows_keep_publics(windows) {
 		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
 		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright], windows), "+", windows[winName][KeyXshift])

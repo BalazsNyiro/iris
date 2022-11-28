@@ -195,17 +195,34 @@ func ExprOperatorIsValid(operatorChecked string) bool {
 	return false
 }
 
-func debug_info_save(win Windows) {
+func debug_info_save(windows Windows) {
 
 	f, _ := os.Create("debug_iris.txt")
 	defer f.Close()
 
 	f.Write([]byte("===============\n"))
-	for key, val := range win["prgState"] {
+	for key, val := range windows["prgState"] {
 		message := fmt.Sprintf("%s: %s\n", key, val)
 		data := []byte(message)
 		f.Write(data)
 	}
+	for winName, winInfo := range windows_keep_publics(windows) {
+		data := []byte(fmt.Sprintf("win public: %s (%s, %s)\n",
+			winName,
+			winInfo[KeyXleftCalculated],
+			winInfo[KeyYtopCalculated]))
+		f.Write(data)
+	}
+}
+
+func windows_keep_publics(windows Windows) Windows {
+	windows_publics := Windows{}
+	for winName, value := range windows {
+		if win_name_is_publics(winName) {
+			windows_publics[winName] = value
+		}
+	}
+	return windows_publics
 }
 
 // remove internal/non-public window names
