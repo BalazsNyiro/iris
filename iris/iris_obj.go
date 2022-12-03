@@ -45,7 +45,7 @@ func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedSc
 	return screen
 }
 
-func ScreensComposeToScreen(windows Windows, winNamesToComposite []string) RenderedScreen {
+func ScreensComposeToScreen(windows Windows, winNamesToComposite []string, screenFiller string) RenderedScreen {
 	widthMax, heightMax := 0, 0
 
 	// FIXME: windows rendering is based on Name list order.
@@ -57,8 +57,8 @@ func ScreensComposeToScreen(windows Windows, winNamesToComposite []string) Rende
 
 	// This part is to find the max width/height only. //////////////
 	screensOfWindows := []RenderedScreen{}
-	for _, winName := range winNamesToComposite {
-		screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin())
+	for _, winName := range winNamesToComposite { // default filler: we want to detect the width/height only
+		screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin("default"))
 	}
 
 	for _, screen := range screensOfWindows {
@@ -74,7 +74,7 @@ func ScreensComposeToScreen(windows Windows, winNamesToComposite []string) Rende
 	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", pixels: pixels{}}
 
 	for _, winName := range winNamesToComposite {
-		screen := windows[winName].RenderToScreenOfWin()
+		screen := windows[winName].RenderToScreenOfWin(screenFiller)
 		for yInWin := 0; yInWin < screen.height; yInWin++ {
 			for xInWin := 0; xInWin < screen.width; xInWin++ {
 				coordInWinLocal := coord{xInWin, yInWin}
@@ -87,9 +87,6 @@ func ScreensComposeToScreen(windows Windows, winNamesToComposite []string) Rende
 
 	}
 	return composed
-	// winScreenLocal is a small screen that represents only the window
-	// winScreenLocal := windows[winName].RenderToScreenOfWin()
-	// screenTerminalSized := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
 }
 
 /*
@@ -104,11 +101,13 @@ type Window map[string]string
 type Windows map[string]Window
 
 // TESTED in Test_new_window
-func (win Window) RenderToScreenOfWin() RenderedScreen {
-	// TODO: use calculated width/height when they are ready!
+func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
+	if screenFillerChar == "debug" {
+		screenFillerChar = win[KeyDebugWindowFillerChar]
+	}
 	width := Atoi(win[KeyXrightCalculated]) - Atoi(win[KeyXleftCalculated]) + 1
 	height := Atoi(win[KeyYbottomCalculated]) - Atoi(win[KeyYtopCalculated]) + 1
-	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
+	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
 	return screen
 }
 

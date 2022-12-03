@@ -45,7 +45,7 @@ func UserInterfaceStart(windows Windows) {
 	for {
 		fmt.Print(screen_cursor_pos_home())
 		windows = CalculateAllWindowCoords(windows)
-		screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"})
+		screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"}, " ")
 		fmt.Print(screenComposed.toString())
 
 		action := ""
