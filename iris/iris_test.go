@@ -174,8 +174,8 @@ func Test_new_window(t *testing.T) {
 
 func Test_ScreenNew(t *testing.T) {
 	screen := ScreenEmpty(3, 2, "S", "Test_ScreenNew")
-	compare_int_pair("ScreenNew 1", len(screen.pixels), 6, t) // 6 elems are in the screen
-	compare_str_pair("ScreenNew 1", screen.pixels[coord{0, 0}], "S", t)
+	compare_int_pair("ScreenNew 1", len(screen.matrixCharsRendered), 6, t) // 6 elems are in the screen
+	compare_str_pair("ScreenNew 1", screen.matrixCharsRendered[Coord{0, 0}], "S", t)
 
 	wantedRendered := "" +
 		"SSS" + NewLine() +
