@@ -104,7 +104,7 @@ func Test_CalculateAllWindowCoords(t *testing.T) {
 
 	compare_str_pair("CalcAll 1", windows["Child"][KeyXleftCalculated], "0", t)
 	windows["Child"][KeyXshift] = StrMath(windows["Child"][KeyXshift], "+", "1")
-	windows = CalculateAllWindowCoords(windows)
+	windows = WinCoordsCalculate(windows)
 	compare_str_pair("CalcAll 1", windows["Child"][KeyXleftCalculated], "1", t)
 	/*
 		windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "+", "1")
@@ -165,7 +165,7 @@ func Test_new_window(t *testing.T) {
 	wantedChildRendered := "CC"
 	compare_str_pair("new win 4", childRenderedScreen.toString(), wantedChildRendered, t)
 
-	screenComposed := ScreensComposeToScreen(windows, []string{"Terminal", "Child"}, "debug")
+	screenComposed := ScreensCompose(windows, []string{"Terminal", "Child"}, "debug")
 	wantedComposedRendered := "" +
 		"CCTT" + NewLine() +
 		"TTTT"
@@ -175,7 +175,7 @@ func Test_new_window(t *testing.T) {
 func Test_ScreenNew(t *testing.T) {
 	screen := ScreenEmpty(3, 2, "S", "Test_ScreenNew")
 	compare_int_pair("ScreenNew 1", len(screen.matrixCharsRendered), 6, t) // 6 elems are in the screen
-	compare_str_pair("ScreenNew 1", screen.matrixCharsRendered[Coord{0, 0}], "S", t)
+	compare_str_pair("ScreenNew 1", screen.matrixCharsRendered[Coord{0, 0}].character, "S", t)
 
 	wantedRendered := "" +
 		"SSS" + NewLine() +

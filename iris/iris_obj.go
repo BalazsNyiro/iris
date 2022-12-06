@@ -13,13 +13,23 @@ type Coord [2]int
 
 // a rendered char can have ANSI settings so a single displayed char
 // with foreground and background settings can be a long string
-type matrixCharsRenderedWithFgBgSettings map[Coord]string
+type CharRenderedWithFgBgSettings struct {
+	colorFgRGB string
+	colorBgRGB string
+	character  string
+}
+
+func (c CharRenderedWithFgBgSettings) toString() string {
+	return c.character
+}
+
+type MatrixCharsRenderedWithFgBgSettings map[Coord]CharRenderedWithFgBgSettings
 
 type RenderedScreen struct {
 	name                string
 	width               int
 	height              int
-	matrixCharsRendered matrixCharsRenderedWithFgBgSettings
+	matrixCharsRendered MatrixCharsRenderedWithFgBgSettings
 }
 
 func (screen RenderedScreen) toString() string {
@@ -30,7 +40,7 @@ func (screen RenderedScreen) toString() string {
 		}
 		for x := 0; x < screen.width; x++ {
 			coordinate := Coord{x, y}
-			out = append(out, screen.matrixCharsRendered[coordinate])
+			out = append(out, screen.matrixCharsRendered[coordinate].toString())
 		}
 	}
 	return strings.Join(out, "")
@@ -39,11 +49,11 @@ func (screen RenderedScreen) toString() string {
 ////////////////////////////////////////////////////////////////////////////////////
 
 func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedScreen {
-	screen := RenderedScreen{width: width, height: height, name: name, matrixCharsRendered: matrixCharsRenderedWithFgBgSettings{}}
+	screen := RenderedScreen{width: width, height: height, name: name, matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			coordinate := Coord{x, y}
-			screen.matrixCharsRendered[coordinate] = defaultScreenFiller
+			screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: defaultScreenFiller}
 		}
 	}
 	return screen
@@ -54,7 +64,7 @@ func ScreenSrcLoad(screen RenderedScreen, width, height int, src, srcType string
 	return screen
 }
 
-func ScreensComposeToScreen(windows Windows, winNamesToComposite []string, screenFiller string) RenderedScreen {
+func ScreensCompose(windows Windows, winNamesToComposite []string, screenFiller string) RenderedScreen {
 	widthMax, heightMax := 0, 0
 
 	// FIXME: windows rendering is based on Name list order.
@@ -64,22 +74,22 @@ func ScreensComposeToScreen(windows Windows, winNamesToComposite []string, scree
 	// keep the original order because the later rendered win overlaps the previous ones
 	winNamesToComposite = win_names_keep_publics(winNamesToComposite, false)
 
-	// This part is to find the max width/height only. //////////////
-	screensOfWindows := []RenderedScreen{}
-	for _, winName := range winNamesToComposite { // default filler: we want to detect the width/height only
-		screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin("default"))
-	}
-
-	for _, screen := range screensOfWindows {
-		if screen.width > widthMax {
-			widthMax = screen.width
+	if true { // This part is to find the max width/height only. //////////////
+		screensOfWindows := []RenderedScreen{}
+		for _, winName := range winNamesToComposite { // default filler: we want to detect the width/height only
+			screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin("default"))
 		}
-		if screen.height > heightMax {
-			heightMax = screen.height
+		for _, screen := range screensOfWindows {
+			if screen.width > widthMax {
+				widthMax = screen.width
+			}
+			if screen.height > heightMax {
+				heightMax = screen.height
+			}
 		}
 	} // This part is to find the max width/height only. //////////////
 
-	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", matrixCharsRendered: matrixCharsRenderedWithFgBgSettings{}}
+	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
 
 	for _, winName := range winNamesToComposite {
 		screen := windows[winName].RenderToScreenOfWin(screenFiller)
@@ -121,7 +131,7 @@ func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
 }
 
 // TESTED
-func CalculateAllWindowCoords(windows Windows) Windows {
+func WinCoordsCalculate(windows Windows) Windows {
 	for winName, _ := range windows_keep_publics(windows) {
 		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
