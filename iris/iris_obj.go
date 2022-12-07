@@ -58,9 +58,24 @@ func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedSc
 	}
 	return screen
 }
+
+// TODO: TEST IT
 func ScreenSrcLoad(screen RenderedScreen, width, height int, src, srcType string, lineBreakIfTxtTooLong bool) RenderedScreen {
 	// based on srcType and src the screen is modified here
-
+	if srcType == "simpleText" {
+		y := 0
+		x := 0
+		for _, runeNow := range src {
+			if lineBreakIfTxtTooLong && x > width && y < height-1 {
+				x = 0
+				y = y + 1
+			}
+			if y < height && x < width {
+				coordinate := Coord{x, y}
+				screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: string(runeNow)}
+			}
+		}
+	}
 	return screen
 }
 
@@ -126,7 +141,8 @@ func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
 	width := Atoi(win[KeyXrightCalculated]) - Atoi(win[KeyXleftCalculated]) + 1
 	height := Atoi(win[KeyYbottomCalculated]) - Atoi(win[KeyYtopCalculated]) + 1
 	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
-	screen = ScreenSrcLoad(screen, width, height, win[KeyWinContentSrc], win[KeyWinContentType], true)
+	autoLineBreakAtWinEnd := true
+	screen = ScreenSrcLoad(screen, width, height, win[KeyWinContentSrc], win[KeyWinContentType], autoLineBreakAtWinEnd)
 	return screen
 }
 

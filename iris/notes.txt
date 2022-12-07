@@ -1,4 +1,5 @@
-Plan:
+Tasks:
+  - TEST: ScreenSrcLoad
   - in ScreenSrcLoad from src/srcType display the source in the screen
   - collect functions and build up a program plan
 
