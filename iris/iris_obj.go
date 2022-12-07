@@ -73,6 +73,7 @@ func ScreenSrcLoad(screen RenderedScreen, width, height int, src, srcType string
 			if y < height && x < width {
 				coordinate := Coord{x, y}
 				screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: string(runeNow)}
+				x = x + 1
 			}
 		}
 	}
