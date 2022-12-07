@@ -9,13 +9,27 @@ import (
 func NewLine() string { return "\n" }
 
 // Attr     map[string]string
-type coord [2]int
-type pixels map[coord]string
+type Coord [2]int
+
+// a rendered char can have ANSI settings so a single displayed char
+// with foreground and background settings can be a long string
+type CharRenderedWithFgBgSettings struct {
+	colorFgRGB string
+	colorBgRGB string
+	character  string
+}
+
+func (c CharRenderedWithFgBgSettings) toString() string {
+	return c.character
+}
+
+type MatrixCharsRenderedWithFgBgSettings map[Coord]CharRenderedWithFgBgSettings
+
 type RenderedScreen struct {
-	name   string
-	width  int
-	height int
-	pixels pixels
+	name                string
+	width               int
+	height              int
+	matrixCharsRendered MatrixCharsRenderedWithFgBgSettings
 }
 
 func (screen RenderedScreen) toString() string {
@@ -25,8 +39,8 @@ func (screen RenderedScreen) toString() string {
 			out = append(out, NewLine())
 		}
 		for x := 0; x < screen.width; x++ {
-			coordinate := coord{x, y}
-			out = append(out, screen.pixels[coordinate])
+			coordinate := Coord{x, y}
+			out = append(out, screen.matrixCharsRendered[coordinate].toString())
 		}
 	}
 	return strings.Join(out, "")
@@ -35,17 +49,38 @@ func (screen RenderedScreen) toString() string {
 ////////////////////////////////////////////////////////////////////////////////////
 
 func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedScreen {
-	screen := RenderedScreen{width: width, height: height, name: name, pixels: pixels{}}
+	screen := RenderedScreen{width: width, height: height, name: name, matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			coordinate := coord{x, y}
-			screen.pixels[coordinate] = defaultScreenFiller
+			coordinate := Coord{x, y}
+			screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: defaultScreenFiller}
 		}
 	}
 	return screen
 }
 
-func ScreensComposeToScreen(windows Windows, winNamesToComposite []string) RenderedScreen {
+// TODO: TEST IT
+func ScreenSrcLoad(screen RenderedScreen, width, height int, src, srcType string, lineBreakIfTxtTooLong bool) RenderedScreen {
+	// based on srcType and src the screen is modified here
+	if srcType == "simpleText" {
+		y := 0
+		x := 0
+		for _, runeNow := range src {
+			if lineBreakIfTxtTooLong && x > width && y < height-1 {
+				x = 0
+				y = y + 1
+			}
+			if y < height && x < width {
+				coordinate := Coord{x, y}
+				screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: string(runeNow)}
+				x = x + 1
+			}
+		}
+	}
+	return screen
+}
+
+func ScreensCompose(windows Windows, winNamesToComposite []string, screenFiller string) RenderedScreen {
 	widthMax, heightMax := 0, 0
 
 	// FIXME: windows rendering is based on Name list order.
@@ -55,41 +90,37 @@ func ScreensComposeToScreen(windows Windows, winNamesToComposite []string) Rende
 	// keep the original order because the later rendered win overlaps the previous ones
 	winNamesToComposite = win_names_keep_publics(winNamesToComposite, false)
 
-	// This part is to find the max width/height only. //////////////
-	screensOfWindows := []RenderedScreen{}
-	for _, winName := range winNamesToComposite {
-		screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin())
-	}
-
-	for _, screen := range screensOfWindows {
-		if screen.width > widthMax {
-			widthMax = screen.width
+	if true { // This part is to find the max width/height only. //////////////
+		screensOfWindows := []RenderedScreen{}
+		for _, winName := range winNamesToComposite { // default filler: we want to detect the width/height only
+			screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin("default"))
 		}
-		if screen.height > heightMax {
-			heightMax = screen.height
+		for _, screen := range screensOfWindows {
+			if screen.width > widthMax {
+				widthMax = screen.width
+			}
+			if screen.height > heightMax {
+				heightMax = screen.height
+			}
 		}
-	}
-	// This part is to find the max width/height only. //////////////
+	} // This part is to find the max width/height only. //////////////
 
-	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", pixels: pixels{}}
+	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
 
 	for _, winName := range winNamesToComposite {
-		screen := windows[winName].RenderToScreenOfWin()
+		screen := windows[winName].RenderToScreenOfWin(screenFiller)
 		for yInWin := 0; yInWin < screen.height; yInWin++ {
 			for xInWin := 0; xInWin < screen.width; xInWin++ {
-				coordInWinLocal := coord{xInWin, yInWin}
-				coordInRootTerminal := coord{
+				coordInWinLocal := Coord{xInWin, yInWin}
+				coordInRootTerminal := Coord{
 					Atoi(windows[winName][KeyXleftCalculated]) + xInWin,
 					Atoi(windows[winName][KeyYtopCalculated]) + yInWin}
-				composed.pixels[coordInRootTerminal] = screen.pixels[coordInWinLocal]
+				composed.matrixCharsRendered[coordInRootTerminal] = screen.matrixCharsRendered[coordInWinLocal]
 			}
 		}
 
 	}
 	return composed
-	// winScreenLocal is a small screen that represents only the window
-	// winScreenLocal := windows[winName].RenderToScreenOfWin()
-	// screenTerminalSized := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
 }
 
 /*
@@ -104,16 +135,20 @@ type Window map[string]string
 type Windows map[string]Window
 
 // TESTED in Test_new_window
-func (win Window) RenderToScreenOfWin() RenderedScreen {
-	// TODO: use calculated width/height when they are ready!
+func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
+	if screenFillerChar == "debug" {
+		screenFillerChar = win[KeyDebugWindowFillerChar]
+	}
 	width := Atoi(win[KeyXrightCalculated]) - Atoi(win[KeyXleftCalculated]) + 1
 	height := Atoi(win[KeyYbottomCalculated]) - Atoi(win[KeyYtopCalculated]) + 1
-	screen := ScreenEmpty(width, height, win[KeyDebugWindowFillerChar], KeyWinId+":"+win[KeyWinId])
+	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
+	autoLineBreakAtWinEnd := true
+	screen = ScreenSrcLoad(screen, width, height, win[KeyWinContentSrc], win[KeyWinContentType], autoLineBreakAtWinEnd)
 	return screen
 }
 
 // TESTED
-func CalculateAllWindowCoords(windows Windows) Windows {
+func WinCoordsCalculate(windows Windows) Windows {
 	for winName, _ := range windows_keep_publics(windows) {
 		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
@@ -132,7 +167,7 @@ var KeyXright = "xRight"
 var KeyYtop = "yTop"
 var KeyYbottom = "yBottom"
 
-// shift: fix simple coord modifier
+// shift: fix simple Coord modifier
 // the window has 1 shift value so it's a global for the 4 corner
 var KeyXshift = "xShift"
 var KeyYshift = "yShift"
@@ -149,6 +184,8 @@ var KeyYtopCalculated = "yTopCalculated"
 var KeyYbottomCalculated = "yBottomCalculated"
 var KeyDebugWindowFillerChar = "debugWindowFillerChar"
 var KeyWinId = "winId"
+var KeyWinContentSrc = "winContentSrc"
+var KeyWinContentType = "winContentType"
 
 // TESTED in Test_new_window
 func WindowsNewState(terminalWidth, terminalHeight int) Windows {
@@ -287,7 +324,7 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 		windows[id] = Window{
 
 			// RULES:
-			// the coords are 0 based. so (0, 0) represents the top-left coord.
+			// the coords are 0 based. so (0, 0) represents the top-left Coord.
 
 			// the not calculated values can be fix or relative values (20%) for example,
 			// or later complex functions
@@ -299,7 +336,7 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			// minimum one space is mandatory between all elems as a separator
 			// win:  a win id: [a-zA-Z0-9-_.]
 
-			// IMPORTANT: All four coord values can have different expressions!
+			// IMPORTANT: All four Coord values can have different expressions!
 			// it means you can use more parent windows as parents, or other values,
 			// the time for example.
 
@@ -324,6 +361,8 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			KeyWidthCalculated:       Itoa(Atoi(keyXright) - Atoi(keyXleft) + 1),
 			KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
 			KeyDebugWindowFillerChar: debugWindowFiller,
+			KeyWinContentSrc:         "",
+			KeyWinContentType:        "simpleText",
 		}
 	}
 	return windows

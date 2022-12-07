@@ -14,7 +14,8 @@ func main() {
 	fmt.Println("syscall:", widthSys, heightSys)
 
 	windows := iris.WindowsNewState(widthSys, heightSys)
-	windows = iris.WinNew(windows, "Child", "0", "0", "1", "0", "C")
+	windows = iris.WinNew(windows, "Child", "0", "0", "8", "4", "C")
+	windows["Child"][iris.KeyWinContentSrc] = "apple\norange\nbanana"
 	windows["prgState"]["winActiveId"] = "Child"
 
 	iris.UserInterfaceStart(windows)
