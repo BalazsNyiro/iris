@@ -56,7 +56,7 @@ func UserInterfaceStart(windows Windows) {
 		action := ""
 		select { //                https://gobyexample.com/select
 		case stdin, _ := <-ch_user_input: //  the message is coming...
-			fmt.Println("Keys pressed:", stdin)
+			// fmt.Println("Keys pressed:", stdin)
 			if stdin == "q" {
 				action = "quit"
 			}
@@ -80,7 +80,7 @@ func UserInterfaceStart(windows Windows) {
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)
 		default: //               or not coming
-			fmt.Println("No user input..")
+			_ = ""
 		}
 		if action == "quit" {
 			break
