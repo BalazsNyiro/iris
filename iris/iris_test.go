@@ -7,17 +7,17 @@ import (
 // author: Balazs Nyiro, balazs.nyiro.ca@gmail.com
 
 /*
-func Test_terminal_detect(t *testing.T) {
-	widthStty, heightStty := TerminalDimensionsSttySize()
-	fmt.Println("test stty:", widthStty, heightStty)
-	widthSys, heightSys := TerminalDimensionsWithSyscall()
-	fmt.Println("test syscall:", widthSys, heightSys)
-}
-func Test_document_create(t *testing.T) {
-	rootObj := DocumentCreate("0", "50%", "50%", "40", "20")
+	func Test_terminal_detect(t *testing.T) {
+		widthStty, heightStty := TerminalDimensionsSttySize()
+		fmt.Println("test stty:", widthStty, heightStty)
+		widthSys, heightSys := TerminalDimensionsWithSyscall()
+		fmt.Println("test syscall:", widthSys, heightSys)
+	}
+
+	func Test_document_create(t *testing.T) {
+		rootObj := DocumentCreate("0", "50%", "50%", "40", "20")
 
 }
-
 */
 func Test_parameterCollect(t *testing.T) {
 	tokens := []string{"1", "*", "2"}
@@ -142,6 +142,18 @@ func Test_IsNumber(t *testing.T) {
 	compare_bool_pair("IsNumber 10", received, true, t)
 	compare_bool_pair("IsNumber 11", IsNumber(" -1-"), false, t)
 	compare_bool_pair("IsNumber 12", IsNumber("2a"), false, t)
+}
+
+func Test_RenderToScreenOfWin(t *testing.T) {
+	windows := WindowsNewState(5, 5)
+	windows = WinNew(windows, "Child", "1", "1", "3", "3", "C")
+	windows = WinSourceLoad(windows, "Child", "abcdefghijklmnopq")       // the input test is long but the displayed
+	childRenderedScreen := windows["Child"].RenderToScreenOfWin("debug") // area is only 3x3 char
+	wantedChildRendered := "" +
+		"abc" + NewLine() +
+		"def" + NewLine() +
+		"ghi"
+	compare_str_pair("RenderToScreenOfWin", childRenderedScreen.toString(), wantedChildRendered, t)
 }
 
 func Test_new_window(t *testing.T) {

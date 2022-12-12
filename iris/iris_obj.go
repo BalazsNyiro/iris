@@ -59,7 +59,7 @@ func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedSc
 	return screen
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////
 func ScreenSrcLoad(screen RenderedScreen, width, height int, src, srcType string, lineBreakIfTxtTooLong bool) RenderedScreen {
 	// based on srcType and src the screen is modified here
 	if srcType == "simpleText" {
@@ -68,12 +68,12 @@ func ScreenSrcLoad(screen RenderedScreen, width, height int, src, srcType string
 	return screen
 }
 
-// TODO: TEST IT
+// TESTED in
 func ScreenSrcLoadSimpleText(screen RenderedScreen, width, height int, src string, lineBreakIfTxtTooLong bool) RenderedScreen {
 	y := 0
-	x := 0
-	for _, runeNow := range src {
-		if lineBreakIfTxtTooLong && x > width && y < height-1 {
+	x := 0                        // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
+	for _, runeNow := range src { // counting. so if x == width then you have to move into the next line.
+		if lineBreakIfTxtTooLong && (x == width) && (y < height-1) {
 			x = 0
 			y = y + 1
 		}
@@ -138,7 +138,7 @@ I store everything in strings.
  Windows id characters: [a-zA-Z0-9_-]
 */
 
-//////////////////////////// WINDOWS ////////////////////////////////////////////////////////
+// ////////////////////////// WINDOWS ////////////////////////////////////////////////////////
 type Window map[string]string
 type Windows map[string]Window
 
@@ -155,6 +155,12 @@ func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
 	screen = ScreenSrcLoad(screen, width, height, win[KeyWinContentSrc], win[KeyWinContentType], autoLineBreakAtWinEnd)
 
 	return screen
+}
+
+// TESTED
+func WinSourceLoad(windows Windows, winName, src string) Windows {
+	windows[winName][KeyWinContentSrc] = src
+	return windows
 }
 
 // TESTED
