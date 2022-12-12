@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var TimeIntervalUserInterfaceRefreshTimeMillisec = 100
+var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
 func UserInterfaceStart(windows Windows) {
@@ -42,16 +42,21 @@ func UserInterfaceStart(windows Windows) {
 
 	screen_clear()
 
+	screenComposedStr_prev := ""
+
 	for {
-		fmt.Print(screen_cursor_pos_home())
 		windows = WinCoordsCalculate(windows)
 		screenComposed := ScreensCompose(windows, []string{"Terminal", "Child"}, " ")
-		fmt.Print(screenComposed.toString())
+		screenComposedStr := screenComposed.toString()
+		if screenComposedStr != screenComposedStr_prev {
+			fmt.Print(screen_cursor_pos_home())
+			fmt.Print(screenComposedStr)
+		}
 
 		action := ""
 		select { //                https://gobyexample.com/select
 		case stdin, _ := <-ch_user_input: //  the message is coming...
-			fmt.Println("Keys pressed:", stdin)
+			// fmt.Println("Keys pressed:", stdin)
 			if stdin == "q" {
 				action = "quit"
 			}
@@ -75,12 +80,13 @@ func UserInterfaceStart(windows Windows) {
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)
 		default: //               or not coming
-			fmt.Println("No user input..")
+			_ = ""
 		}
 		if action == "quit" {
 			break
 		}
 		time.Sleep(time.Millisecond * time.Duration(TimeIntervalUserInterfaceRefreshTimeMillisec))
 
+		screenComposedStr_prev = screenComposedStr
 	}
 }

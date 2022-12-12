@@ -59,26 +59,32 @@ func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedSc
 	return screen
 }
 
-// TODO: TEST IT
+// //////////////////////////////////////////////////////////////////////////////////////
 func ScreenSrcLoad(screen RenderedScreen, width, height int, src, srcType string, lineBreakIfTxtTooLong bool) RenderedScreen {
 	// based on srcType and src the screen is modified here
 	if srcType == "simpleText" {
-		y := 0
-		x := 0
-		for _, runeNow := range src {
-			if lineBreakIfTxtTooLong && x > width && y < height-1 {
-				x = 0
-				y = y + 1
-			}
-			if y < height && x < width {
-				coordinate := Coord{x, y}
-				screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: string(runeNow)}
-				x = x + 1
-			}
-		}
+		return ScreenSrcLoadSimpleText(screen, width, height, src, lineBreakIfTxtTooLong)
 	}
 	return screen
 }
+
+// TESTED in
+func ScreenSrcLoadSimpleText(screen RenderedScreen, width, height int, src string, lineBreakIfTxtTooLong bool) RenderedScreen {
+	y := 0
+	x := 0                        // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
+	for _, runeNow := range src { // counting. so if x == width then you have to move into the next line.
+		if lineBreakIfTxtTooLong && (x == width) && (y < height-1) {
+			x = 0
+			y = y + 1
+		}
+		if y < height && x < width {
+			coordinate := Coord{x, y}
+			screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: string(runeNow)}
+			x = x + 1
+		}
+	}
+	return screen
+} ////////////////////////////////////////////////////////////////////////////////////////
 
 func ScreensCompose(windows Windows, winNamesToComposite []string, screenFiller string) RenderedScreen {
 	widthMax, heightMax := 0, 0
@@ -109,16 +115,18 @@ func ScreensCompose(windows Windows, winNamesToComposite []string, screenFiller 
 
 	for _, winName := range winNamesToComposite {
 		screen := windows[winName].RenderToScreenOfWin(screenFiller)
+
+		// read the values only once, avoid to be changed in the for loop
+		winLocalXLeftCalculated := Atoi(windows[winName][KeyXleftCalculated])
+		winLocalYTopCalculated := Atoi(windows[winName][KeyYtopCalculated])
+
 		for yInWin := 0; yInWin < screen.height; yInWin++ {
 			for xInWin := 0; xInWin < screen.width; xInWin++ {
 				coordInWinLocal := Coord{xInWin, yInWin}
-				coordInRootTerminal := Coord{
-					Atoi(windows[winName][KeyXleftCalculated]) + xInWin,
-					Atoi(windows[winName][KeyYtopCalculated]) + yInWin}
+				coordInRootTerminal := Coord{winLocalXLeftCalculated + xInWin, winLocalYTopCalculated + yInWin}
 				composed.matrixCharsRendered[coordInRootTerminal] = screen.matrixCharsRendered[coordInWinLocal]
 			}
 		}
-
 	}
 	return composed
 }
@@ -130,7 +138,7 @@ I store everything in strings.
  Windows id characters: [a-zA-Z0-9_-]
 */
 
-//////////////////////////// WINDOWS ////////////////////////////////////////////////////////
+// ////////////////////////// WINDOWS ////////////////////////////////////////////////////////
 type Window map[string]string
 type Windows map[string]Window
 
@@ -141,10 +149,18 @@ func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
 	}
 	width := Atoi(win[KeyXrightCalculated]) - Atoi(win[KeyXleftCalculated]) + 1
 	height := Atoi(win[KeyYbottomCalculated]) - Atoi(win[KeyYtopCalculated]) + 1
-	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
 	autoLineBreakAtWinEnd := true
+
+	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
 	screen = ScreenSrcLoad(screen, width, height, win[KeyWinContentSrc], win[KeyWinContentType], autoLineBreakAtWinEnd)
+
 	return screen
+}
+
+// TESTED
+func WinSourceLoad(windows Windows, winName, src string) Windows {
+	windows[winName][KeyWinContentSrc] = src
+	return windows
 }
 
 // TESTED
@@ -274,7 +290,7 @@ func ParametersCollect(tokens []string, tokenId int) (string, string, int, int, 
 // TESTED
 func CoordExpressionEval(exp string, windows Windows) string {
 	// TODO: () handling
-	fmt.Println("======= simple expression eval:", exp, "==========")
+	// fmt.Println("======= simple expression eval:", exp, "==========")
 
 	// minimum 1 space between expression elems
 	// win:WindowsName:Attribute
