@@ -290,7 +290,7 @@ func ParametersCollect(tokens []string, tokenId int) (string, string, int, int, 
 // TESTED
 func CoordExpressionEval(exp string, windows Windows) string {
 	// TODO: () handling
-	fmt.Println("======= simple expression eval:", exp, "==========")
+	// fmt.Println("======= simple expression eval:", exp, "==========")
 
 	// minimum 1 space between expression elems
 	// win:WindowsName:Attribute

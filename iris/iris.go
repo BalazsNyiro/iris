@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var TimeIntervalUserInterfaceRefreshTimeMillisec = 100
+var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
 func UserInterfaceStart(windows Windows) {
