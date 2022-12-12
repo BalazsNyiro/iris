@@ -42,11 +42,16 @@ func UserInterfaceStart(windows Windows) {
 
 	screen_clear()
 
+	screenComposedStr_prev := ""
+
 	for {
-		fmt.Print(screen_cursor_pos_home())
 		windows = WinCoordsCalculate(windows)
 		screenComposed := ScreensCompose(windows, []string{"Terminal", "Child"}, " ")
-		fmt.Print(screenComposed.toString())
+		screenComposedStr := screenComposed.toString()
+		if screenComposedStr != screenComposedStr_prev {
+			fmt.Print(screen_cursor_pos_home())
+			fmt.Print(screenComposedStr)
+		}
 
 		action := ""
 		select { //                https://gobyexample.com/select
@@ -82,5 +87,6 @@ func UserInterfaceStart(windows Windows) {
 		}
 		time.Sleep(time.Millisecond * time.Duration(TimeIntervalUserInterfaceRefreshTimeMillisec))
 
+		screenComposedStr_prev = screenComposedStr
 	}
 }
