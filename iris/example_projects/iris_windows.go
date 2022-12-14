@@ -18,13 +18,16 @@ func main() {
 
 /*
 So what is a GUI?
-
-- sender: it displays something to the user
-- receiver: the user can give back new info
+  - sender: it displays something to the user
+  - receiver: the user can give back new info
 
   the user input can be:
     - SELECTED with a SELECTOR from a displayed collection (list, buttons, pie chart, horizontal/vertical menu system)
     - SELECTED with a SELECTOR from a hidden collection (shortcuts, key combinations that can start something in the bg program)
     - INSERTED into a text field
-    -
+
+  The GUI LOOP:
+    - iris: display informations, states
+    - user: state changer interactions (menu selection?)
+    - user: send states and commands back to the program.
 */
