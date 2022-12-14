@@ -158,8 +158,9 @@ func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
 }
 
 // TESTED
-func WinSourceLoad(windows Windows, winName, src string) Windows {
-	windows[winName][KeyWinContentSrc] = src
+func WinSourceLoad(windows Windows, winName, contentType, contentSrc string) Windows {
+	windows[winName][KeyWinContentSrc] = contentSrc
+	windows[winName][KeyWinContentType] = contentType // options: "simpleText"
 	return windows
 }
 
@@ -378,7 +379,7 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
 			KeyDebugWindowFillerChar: debugWindowFiller,
 			KeyWinContentSrc:         "",
-			KeyWinContentType:        "simpleText",
+			KeyWinContentType:        "",
 		}
 	}
 	return windows

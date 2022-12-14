@@ -147,8 +147,8 @@ func Test_IsNumber(t *testing.T) {
 func Test_RenderToScreenOfWin(t *testing.T) {
 	windows := WindowsNewState(5, 5)
 	windows = WinNew(windows, "Child", "1", "1", "3", "3", "C")
-	windows = WinSourceLoad(windows, "Child", "abcdefghijklmnopq")       // the input test is long but the displayed
-	childRenderedScreen := windows["Child"].RenderToScreenOfWin("debug") // area is only 3x3 char
+	windows = WinSourceLoad(windows, "Child", "simpleText", "abcdefghijklmnopq") // the input test is long but the displayed
+	childRenderedScreen := windows["Child"].RenderToScreenOfWin("debug")         // area is only 3x3 char
 	wantedChildRendered := "" +
 		"abc" + NewLine() +
 		"def" + NewLine() +
