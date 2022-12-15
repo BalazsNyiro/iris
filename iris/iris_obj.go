@@ -159,8 +159,8 @@ func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
 
 // TESTED
 func WinSourceLoad(windows Windows, winName, contentType, contentSrc string) Windows {
-	windows[winName][KeyWinContentSrc] = contentSrc
 	windows[winName][KeyWinContentType] = contentType // options: "simpleText"
+	windows[winName][KeyWinContentSrc] = contentSrc
 	return windows
 }
 
