@@ -1,16 +1,17 @@
 package main
 
 // run: go run iris_windows.go
-
-// run: go run jyp_example_usage.go
+import "fmt"
+import "github.com/BalazsNyiro/iris/iris"
 
 func main() {
+	fmt.Println("iris example...")
 	widthSys, heightSys := iris.TerminalDimensionsWithSyscall()
 	fmt.Println("syscall:", widthSys, heightSys)
 
 	windows, windowsChars := iris.WindowsNewState(widthSys, heightSys)
 	windows = iris.WinNew(windows, "Child", "0", "0", "8", "4", "C")
-	windows = iris.WinSourceLoad(windows, "Child", "simpleText", "apple orange banana")
+	windowsChars = iris.WinSourceLoad(windowsChars, "Child", "simpleText", "apple orange banana")
 	windows["prgState"]["winActiveId"] = "Child"
 
 	iris.UserInterfaceStart(windows, windowsChars)
