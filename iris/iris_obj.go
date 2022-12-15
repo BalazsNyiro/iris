@@ -60,19 +60,14 @@ func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedSc
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////
-func ScreenSrcLoad(screen RenderedScreen, width, height int, src, srcType string, lineBreakIfTxtTooLong bool) RenderedScreen {
+func ScreenSrcLoad(screen RenderedScreen, width, height int, windowChars WindowChars, lineBreakIfTxtTooLong bool) RenderedScreen {
 	// based on srcType and src the screen is modified here
-	if srcType == "simpleText" {
-		return ScreenSrcLoadSimpleText(screen, width, height, src, lineBreakIfTxtTooLong)
-	}
-	return screen
-}
 
-// TESTED in
-func ScreenSrcLoadSimpleText(screen RenderedScreen, width, height int, src string, lineBreakIfTxtTooLong bool) RenderedScreen {
 	y := 0
-	x := 0                        // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
-	for _, runeNow := range src { // counting. so if x == width then you have to move into the next line.
+	x := 0 // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
+
+	for _, charObj := range windowChars { // counting. so if x == width then you have to move into the next line.
+		runeNow := charObj.CharVal
 		if lineBreakIfTxtTooLong && (x == width) && (y < height-1) {
 			x = 0
 			y = y + 1
@@ -86,7 +81,7 @@ func ScreenSrcLoadSimpleText(screen RenderedScreen, width, height int, src strin
 	return screen
 } ////////////////////////////////////////////////////////////////////////////////////////
 
-func ScreensCompose(windows Windows, winNamesToComposite []string, screenFiller string) RenderedScreen {
+func ScreensCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, screenFiller string) RenderedScreen {
 	widthMax, heightMax := 0, 0
 
 	// FIXME: windows rendering is based on Name list order.
@@ -99,7 +94,7 @@ func ScreensCompose(windows Windows, winNamesToComposite []string, screenFiller 
 	if true { // This part is to find the max width/height only. //////////////
 		screensOfWindows := []RenderedScreen{}
 		for _, winName := range winNamesToComposite { // default filler: we want to detect the width/height only
-			screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin("default"))
+			screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin(windowsChars, "default"))
 		}
 		for _, screen := range screensOfWindows {
 			if screen.width > widthMax {
@@ -114,7 +109,7 @@ func ScreensCompose(windows Windows, winNamesToComposite []string, screenFiller 
 	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
 
 	for _, winName := range winNamesToComposite {
-		screen := windows[winName].RenderToScreenOfWin(screenFiller)
+		screen := windows[winName].RenderToScreenOfWin(windowsChars, screenFiller)
 
 		// read the values only once, avoid to be changed in the for loop
 		winLocalXLeftCalculated := Atoi(windows[winName][KeyXleftCalculated])
@@ -142,8 +137,13 @@ I store everything in strings.
 type Window map[string]string
 type Windows map[string]Window
 
+// I use a separated structure to store char objects because 'Window' can be a free key/value map with this solution.
+// If I insert the Chars into Window, I have to define a rigid struct, and I'd like to avoid that.
+type WindowChars []CharObj
+type WindowsChars map[string]WindowChars
+
 // TESTED in Test_new_window
-func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
+func (win Window) RenderToScreenOfWin(windowsChars WindowsChars, screenFillerChar string) RenderedScreen {
 	if screenFillerChar == "debug" {
 		screenFillerChar = win[KeyDebugWindowFillerChar]
 	}
@@ -152,16 +152,25 @@ func (win Window) RenderToScreenOfWin(screenFillerChar string) RenderedScreen {
 	autoLineBreakAtWinEnd := true
 
 	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
-	screen = ScreenSrcLoad(screen, width, height, win[KeyWinContentSrc], win[KeyWinContentType], autoLineBreakAtWinEnd)
+	winId := win[KeyWinId] // read the id out from the window
+	screen = ScreenSrcLoad(screen, width, height, windowsChars[winId], autoLineBreakAtWinEnd)
 
 	return screen
 }
 
 // TESTED
-func WinSourceLoad(windows Windows, winName, contentType, contentSrc string) Windows {
-	windows[winName][KeyWinContentType] = contentType // options: "simpleText"
-	windows[winName][KeyWinContentSrc] = contentSrc
-	return windows
+func WinSourceLoad(windowsChars WindowsChars, winName, contentType, contentSrc string) WindowsChars {
+	// possible types: simpleText, html
+	// or in a different fun later: CharObjects can be loaded directly without text-> CharObj conversion
+	if contentType == "simpleText" {
+		for _, char := range contentSrc {
+			charObj := CharObj{CharVal: char, ColorBg: Color{Name: "black"}, ColorFg: Color{Name: "white"}}
+			chars := windowsChars[winName] // before the update
+			chars = append(chars, charObj)
+			windowsChars[winName] = chars
+		}
+	}
+	return windowsChars
 }
 
 // TESTED
@@ -201,20 +210,19 @@ var KeyYtopCalculated = "yTopCalculated"
 var KeyYbottomCalculated = "yBottomCalculated"
 var KeyDebugWindowFillerChar = "debugWindowFillerChar"
 var KeyWinId = "winId"
-var KeyWinContentSrc = "winContentSrc"
-var KeyWinContentType = "winContentType"
 
 // TESTED in Test_new_window
-func WindowsNewState(terminalWidth, terminalHeight int) Windows {
+func WindowsNewState(terminalWidth, terminalHeight int) (Windows, WindowsChars) {
 	Win := Windows{}
 	// prgState contains all general data
 	Win2 := WinNew(Win, "prgState", "-1", "-1", "0", "0", "S")
 	Win2["prgState"]["winActiveId"] = ""
+
 	return WinNew(Win2, "Terminal", "0", "0",
 		strconv.Itoa(terminalWidth-1),
 		strconv.Itoa(terminalHeight-1),
 		"T",
-	)
+	), WindowsChars{}
 }
 
 // if the next operator is "": there is no more operator
@@ -378,8 +386,6 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			KeyWidthCalculated:       Itoa(Atoi(keyXright) - Atoi(keyXleft) + 1),
 			KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
 			KeyDebugWindowFillerChar: debugWindowFiller,
-			KeyWinContentSrc:         "",
-			KeyWinContentType:        "",
 		}
 	}
 	return windows

@@ -12,7 +12,7 @@ import (
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
-func UserInterfaceStart(windows Windows) {
+func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 
 	///////////////////////////////////////////////////
 	// keypress detection is based on this example:
@@ -46,7 +46,7 @@ func UserInterfaceStart(windows Windows) {
 
 	for {
 		windows = WinCoordsCalculate(windows)
-		screenComposed := ScreensCompose(windows, []string{"Terminal", "Child"}, " ")
+		screenComposed := ScreensCompose(windows, windowsChars, []string{"Terminal", "Child"}, " ")
 		screenComposedStr := screenComposed.toString()
 		if screenComposedStr != screenComposedStr_prev {
 			fmt.Print(screen_cursor_pos_home())

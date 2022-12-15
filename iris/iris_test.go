@@ -78,7 +78,7 @@ func Test_OperatorPrecedence(t *testing.T) {
 	compare_str_pair("operatorPrecedence3s", operatorNext, "/", t)
 }
 func Test_CoordExpressionEval(t *testing.T) {
-	windows := WindowsNewState(4, 2)
+	windows, _ := WindowsNewState(4, 2)
 
 	expression := "1"
 	result := CoordExpressionEval(expression, windows)
@@ -98,7 +98,7 @@ func Test_CoordExpressionEval(t *testing.T) {
 }
 
 func Test_CalculateAllWindowCoords(t *testing.T) {
-	windows := WindowsNewState(4, 2)
+	windows, _ := WindowsNewState(4, 2)
 	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")
 	// we have 2 windows here: "Terminal" (default) and "Child"
 
@@ -145,10 +145,10 @@ func Test_IsNumber(t *testing.T) {
 }
 
 func Test_RenderToScreenOfWin(t *testing.T) {
-	windows := WindowsNewState(5, 5)
+	windows, windowsChars := WindowsNewState(5, 5)
 	windows = WinNew(windows, "Child", "1", "1", "3", "3", "C")
-	windows = WinSourceLoad(windows, "Child", "simpleText", "abcdefghijklmnopq") // the input test is long but the displayed
-	childRenderedScreen := windows["Child"].RenderToScreenOfWin("debug")         // area is only 3x3 char
+	windowsChars = WinSourceLoad(windowsChars, "Child", "simpleText", "abcdefghijklmnopq") // the input test is long but the displayed
+	childRenderedScreen := windows["Child"].RenderToScreenOfWin(windowsChars, "debug")     // area is only 3x3 char
 	wantedChildRendered := "" +
 		"abc" + NewLine() +
 		"def" + NewLine() +
@@ -157,7 +157,7 @@ func Test_RenderToScreenOfWin(t *testing.T) {
 }
 
 func Test_new_window(t *testing.T) {
-	windows := WindowsNewState(4, 2)
+	windows, windowsChars := WindowsNewState(4, 2)
 	// this windows fills the parent terminal,
 	// so the right/bottom coords are equal with width/height
 	winTerminalWidth := windows["Terminal"][KeyXright]
@@ -165,7 +165,7 @@ func Test_new_window(t *testing.T) {
 	compare_str_pair("new win 1", winTerminalWidth, "3", t)
 	compare_str_pair("new win 2", winTerminalHeight, "1", t)
 
-	winRenderedScreen := windows["Terminal"].RenderToScreenOfWin("debug")
+	winRenderedScreen := windows["Terminal"].RenderToScreenOfWin(windowsChars, "debug")
 	wantedRendered := "" +
 		"TTTT" + NewLine() +
 		"TTTT"
@@ -173,11 +173,11 @@ func Test_new_window(t *testing.T) {
 
 	////////////////////////// children ////////////////////////////////
 	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")
-	childRenderedScreen := windows["Child"].RenderToScreenOfWin("debug")
+	childRenderedScreen := windows["Child"].RenderToScreenOfWin(windowsChars, "debug")
 	wantedChildRendered := "CC"
 	compare_str_pair("new win 4", childRenderedScreen.toString(), wantedChildRendered, t)
 
-	screenComposed := ScreensCompose(windows, []string{"Terminal", "Child"}, "debug")
+	screenComposed := ScreensCompose(windows, windowsChars, []string{"Terminal", "Child"}, "debug")
 	wantedComposedRendered := "" +
 		"CCTT" + NewLine() +
 		"TTTT"
