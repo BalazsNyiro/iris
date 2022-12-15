@@ -2,4 +2,4 @@ module demos
 
 go 1.18
 
-require github.com/BalazsNyiro/iris v0.0.0-20221212040350-56832a2d2689
+require github.com/BalazsNyiro/iris v0.0.0-20221215191109-d18475154ca0

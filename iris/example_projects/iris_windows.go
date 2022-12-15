@@ -8,12 +8,12 @@ func main() {
 	widthSys, heightSys := iris.TerminalDimensionsWithSyscall()
 	fmt.Println("syscall:", widthSys, heightSys)
 
-	windows := iris.WindowsNewState(widthSys, heightSys)
+	windows, windowsChars := iris.WindowsNewState(widthSys, heightSys)
 	windows = iris.WinNew(windows, "Child", "0", "0", "8", "4", "C")
 	windows = iris.WinSourceLoad(windows, "Child", "simpleText", "apple orange banana")
 	windows["prgState"]["winActiveId"] = "Child"
 
-	iris.UserInterfaceStart(windows)
+	iris.UserInterfaceStart(windows, windowsChars)
 }
 
 /*
