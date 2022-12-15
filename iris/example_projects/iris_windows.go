@@ -11,7 +11,7 @@ func main() {
 
 	windows, windowsChars := iris.WindowsNewState(widthSys, heightSys)
 	windows = iris.WinNew(windows, "Child", "0", "0", "8", "4", "C")
-	windowsChars = iris.WinSourceLoad(windowsChars, "Child", "simpleText", "apple orange banana")
+	windowsChars = iris.WinSourceUpdate(windowsChars, "Child", "simpleText", "apple orange banana")
 	windows["prgState"]["winActiveId"] = "Child"
 
 	iris.UserInterfaceStart(windows, windowsChars)

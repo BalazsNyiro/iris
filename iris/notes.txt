@@ -2,7 +2,8 @@ Tasks:
 
   - collect functions and build up a program plan
 
-  ok: test - RenderToScreenOfWin/ScreenSrcLoad
+  documentation: what is a screen? what is ScreenSrcLoad?
+  TODO:
 
 
 ---------------------------------

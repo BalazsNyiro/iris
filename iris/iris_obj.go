@@ -11,19 +11,7 @@ func NewLine() string { return "\n" }
 // Attr     map[string]string
 type Coord [2]int
 
-// a rendered char can have ANSI settings so a single displayed char
-// with foreground and background settings can be a long string
-type CharRenderedWithFgBgSettings struct {
-	colorFgRGB string
-	colorBgRGB string
-	character  string
-}
-
-func (c CharRenderedWithFgBgSettings) toString() string {
-	return c.character
-}
-
-type MatrixCharsRenderedWithFgBgSettings map[Coord]CharRenderedWithFgBgSettings
+type MatrixCharsRenderedWithFgBgSettings map[Coord]CharObj
 
 type RenderedScreen struct {
 	name                string
@@ -40,7 +28,7 @@ func (screen RenderedScreen) toString() string {
 		}
 		for x := 0; x < screen.width; x++ {
 			coordinate := Coord{x, y}
-			out = append(out, screen.matrixCharsRendered[coordinate].toString())
+			out = append(out, screen.matrixCharsRendered[coordinate].render())
 		}
 	}
 	return strings.Join(out, "")
@@ -48,12 +36,12 @@ func (screen RenderedScreen) toString() string {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedScreen {
+func ScreenEmpty(width, height int, defaultScreenFiller rune, name string) RenderedScreen {
 	screen := RenderedScreen{width: width, height: height, name: name, matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			coordinate := Coord{x, y}
-			screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: defaultScreenFiller}
+			screen.matrixCharsRendered[coordinate] = CharObjNew(defaultScreenFiller)
 		}
 	}
 	return screen
@@ -74,7 +62,7 @@ func ScreenSrcLoad(screen RenderedScreen, width, height int, windowChars WindowC
 		}
 		if y < height && x < width {
 			coordinate := Coord{x, y}
-			screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: string(runeNow)}
+			screen.matrixCharsRendered[coordinate] = CharObjNew(runeNow)
 			x = x + 1
 		}
 	}
@@ -143,9 +131,13 @@ type WindowChars []CharObj
 type WindowsChars map[string]WindowChars
 
 // TESTED in Test_new_window
-func (win Window) RenderToScreenOfWin(windowsChars WindowsChars, screenFillerChar string) RenderedScreen {
-	if screenFillerChar == "debug" {
-		screenFillerChar = win[KeyDebugWindowFillerChar]
+func (win Window) RenderToScreenOfWin(windowsChars WindowsChars, screenFiller string) RenderedScreen {
+
+	screenFillerChar := rune(' ')
+	if screenFiller == "debug" {
+		screenFillerChar = rune(win[KeyDebugWindowFillerChar][0])
+	} else {
+		screenFillerChar = rune(screenFiller[0])
 	}
 	width := Atoi(win[KeyXrightCalculated]) - Atoi(win[KeyXleftCalculated]) + 1
 	height := Atoi(win[KeyYbottomCalculated]) - Atoi(win[KeyYtopCalculated]) + 1
@@ -159,12 +151,12 @@ func (win Window) RenderToScreenOfWin(windowsChars WindowsChars, screenFillerCha
 }
 
 // TESTED
-func WinSourceLoad(windowsChars WindowsChars, winName, contentType, contentSrc string) WindowsChars {
+func WinSourceUpdate(windowsChars WindowsChars, winName, contentType, contentSrc string) WindowsChars {
 	// possible types: simpleText, html
 	// or in a different fun later: CharObjects can be loaded directly without text-> CharObj conversion
 	if contentType == "simpleText" {
 		for _, char := range contentSrc {
-			charObj := CharObj{CharVal: char, ColorBg: Color{Name: "black"}, ColorFg: Color{Name: "white"}}
+			charObj := CharObjNew(char)
 			chars := windowsChars[winName] // before the update
 			chars = append(chars, charObj)
 			windowsChars[winName] = chars

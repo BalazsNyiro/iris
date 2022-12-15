@@ -147,8 +147,8 @@ func Test_IsNumber(t *testing.T) {
 func Test_RenderToScreenOfWin(t *testing.T) {
 	windows, windowsChars := WindowsNewState(5, 5)
 	windows = WinNew(windows, "Child", "1", "1", "3", "3", "C")
-	windowsChars = WinSourceLoad(windowsChars, "Child", "simpleText", "abcdefghijklmnopq") // the input test is long but the displayed
-	childRenderedScreen := windows["Child"].RenderToScreenOfWin(windowsChars, "debug")     // area is only 3x3 char
+	windowsChars = WinSourceUpdate(windowsChars, "Child", "simpleText", "abcdefghijklmnopq") // the input test is long but the displayed
+	childRenderedScreen := windows["Child"].RenderToScreenOfWin(windowsChars, "debug")       // area is only 3x3 char
 	wantedChildRendered := "" +
 		"abc" + NewLine() +
 		"def" + NewLine() +
@@ -185,9 +185,9 @@ func Test_new_window(t *testing.T) {
 }
 
 func Test_ScreenNew(t *testing.T) {
-	screen := ScreenEmpty(3, 2, "S", "Test_ScreenNew")
+	screen := ScreenEmpty(3, 2, 'S', "Test_ScreenNew")
 	compare_int_pair("ScreenNew 1", len(screen.matrixCharsRendered), 6, t) // 6 elems are in the screen
-	compare_str_pair("ScreenNew 1", screen.matrixCharsRendered[Coord{0, 0}].character, "S", t)
+	compare_rune_pair("ScreenNew 1", screen.matrixCharsRendered[Coord{0, 0}].CharVal, 'S', t)
 
 	wantedRendered := "" +
 		"SSS" + NewLine() +
@@ -210,6 +210,13 @@ func compare_int_pair(source string, received, wanted int, t *testing.T) {
 func compare_str_pair(source, received, wanted string, t *testing.T) {
 	if received != wanted {
 		t.Fatalf("\nERROR STR (%v) - received: %v\n  wanted: %v",
+			source, received, wanted)
+	}
+}
+
+func compare_rune_pair(source string, received, wanted rune, t *testing.T) {
+	if received != wanted {
+		t.Fatalf("\nERROR RUNE (%v) - received: %v\n  wanted: %v",
 			source, received, wanted)
 	}
 }
