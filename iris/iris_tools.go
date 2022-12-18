@@ -99,7 +99,7 @@ func OsDetect() string {
 	// return "unknown"
 }
 
-// TESTED
+// TESTED - mainly used in test functions
 func IsNumber(txt string) bool {
 	plusMinusDetected := false
 	normalCharDetected := false

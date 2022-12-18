@@ -4,6 +4,7 @@ Tasks:
 
   documentation: what is a screen? what is ScreenSrcLoad?
   TODO:
+    render the chars with colors: iris_char_obj.go, render()
 
 
 ---------------------------------
