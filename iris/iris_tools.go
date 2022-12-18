@@ -125,37 +125,51 @@ func IsNumber(txt string) bool {
 	return true
 }
 
+func IntMin(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func IntMax(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 // wrapper, not tested
-func Itoa(i int) string {
+func Int2Str(i int) string {
 	return strconv.Itoa(i)
 }
 
 // wrapper, not tested
-func Atoi(txt string) int {
+func Str2Int(txt string) int {
 	num, error := strconv.Atoi(txt)
 	if error == nil {
 		return num
 	}
-	fmt.Println("Atoi error: ", error)
+	fmt.Println("Str2Int error: ", error)
 	return 0
 }
 
 // TESTED
 func StrMath(a, operator, b string) string {
-	a_int := Atoi(a)
-	b_int := Atoi(b)
+	a_int := Str2Int(a)
+	b_int := Str2Int(b)
 	if operator == "-" {
-		return Itoa(a_int - b_int)
+		return Int2Str(a_int - b_int)
 	}
 	if operator == "+" {
-		return Itoa(a_int + b_int)
+		return Int2Str(a_int + b_int)
 	}
 	if operator == "*" {
-		return Itoa(a_int * b_int)
+		return Int2Str(a_int * b_int)
 	}
 	if operator == "/" {
 		if b_int != 0 {
-			return Itoa(a_int / b_int)
+			return Int2Str(a_int / b_int)
 		} else {
 			fmt.Println("zero division", a_int, operator, b_int)
 		}

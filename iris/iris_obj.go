@@ -79,37 +79,26 @@ func ScreensCompose(windows Windows, windowsChars WindowsChars, winNamesToCompos
 	// keep the original order because the later rendered win overlaps the previous ones
 	winNamesToComposite = win_names_keep_publics(winNamesToComposite, false)
 
-	if true { // This part is to find the max width/height only. //////////////
-		screensOfWindows := []RenderedScreen{}
-		for _, winName := range winNamesToComposite { // default filler: we want to detect the width/height only
-			screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin(windowsChars, "default"))
-		}
-		for _, screen := range screensOfWindows {
-			if screen.width > widthMax {
-				widthMax = screen.width
-			}
-			if screen.height > heightMax {
-				heightMax = screen.height
-			}
-		}
-	} // This part is to find the max width/height only. //////////////
-
 	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
 
 	for _, winName := range winNamesToComposite {
-		screen := windows[winName].RenderToScreenOfWin(windowsChars, screenFiller)
+		screenActualWin := windows[winName].RenderToScreenOfWin(windowsChars, screenFiller)
 
-		// read the values only once, avoid to be changed in the for loop
-		winLocalXLeftCalculated := Atoi(windows[winName][KeyXleftCalculated])
-		winLocalYTopCalculated := Atoi(windows[winName][KeyYtopCalculated])
+		winLocalXLeftCalculated := Str2Int(windows[winName][KeyXleftCalculated]) // read the values only once,
+		winLocalYTopCalculated := Str2Int(windows[winName][KeyYtopCalculated])   // avoid to be changed in the for loop
 
-		for yInWin := 0; yInWin < screen.height; yInWin++ {
-			for xInWin := 0; xInWin < screen.width; xInWin++ {
+		for yInWin := 0; yInWin < screenActualWin.height; yInWin++ {
+			for xInWin := 0; xInWin < screenActualWin.width; xInWin++ {
 				coordInWinLocal := Coord{xInWin, yInWin}
 				coordInRootTerminal := Coord{winLocalXLeftCalculated + xInWin, winLocalYTopCalculated + yInWin}
-				composed.matrixCharsRendered[coordInRootTerminal] = screen.matrixCharsRendered[coordInWinLocal]
+				composed.matrixCharsRendered[coordInRootTerminal] = screenActualWin.matrixCharsRendered[coordInWinLocal]
 			}
 		}
+		// +1: because the coords are 0 based numbers, which means `if x == 9` then width = 10
+		// -1: because the screen's left char is similar with the Calculated's latest char,
+		// so one character is double calculated
+		composed.width = IntMax(composed.width, +1+winLocalXLeftCalculated+screenActualWin.width-1)
+		composed.height = IntMax(composed.height, +1+winLocalYTopCalculated+screenActualWin.height-1)
 	}
 	return composed
 }
@@ -139,8 +128,8 @@ func (win Window) RenderToScreenOfWin(windowsChars WindowsChars, screenFiller st
 	} else {
 		screenFillerChar = rune(screenFiller[0])
 	}
-	width := Atoi(win[KeyXrightCalculated]) - Atoi(win[KeyXleftCalculated]) + 1
-	height := Atoi(win[KeyYbottomCalculated]) - Atoi(win[KeyYtopCalculated]) + 1
+	width := Str2Int(win[KeyXrightCalculated]) - Str2Int(win[KeyXleftCalculated]) + 1
+	height := Str2Int(win[KeyYbottomCalculated]) - Str2Int(win[KeyYtopCalculated]) + 1
 	autoLineBreakAtWinEnd := true
 
 	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
@@ -267,18 +256,18 @@ func ParametersCollect(tokens []string, tokenId int) (string, string, int, int, 
 
 	idValueLeft, idValueRight := tokenId-1, tokenId+1
 	if idValueLeft < 0 {
-		errMsg = errMsg + "express param left id < 0:" + Itoa(idValueLeft) + ";"
+		errMsg = errMsg + "express param left id < 0:" + Int2Str(idValueLeft) + ";"
 	}
 	if idValueRight < 0 {
-		errMsg = errMsg + "express param right id < 0:" + Itoa(idValueRight) + ";"
+		errMsg = errMsg + "express param right id < 0:" + Int2Str(idValueRight) + ";"
 	}
 	idMax := len(tokens) - 1
-	idMaxStr := Itoa(idMax)
+	idMaxStr := Int2Str(idMax)
 	if idValueLeft > idMax {
-		errMsg = errMsg + "express param left id > len(tokens)-1:" + Itoa(idValueLeft) + " len tokens: " + idMaxStr + ";"
+		errMsg = errMsg + "express param left id > len(tokens)-1:" + Int2Str(idValueLeft) + " len tokens: " + idMaxStr + ";"
 	}
 	if idValueRight > idMax {
-		errMsg = errMsg + "express param right id > len(tokens)-1:" + Itoa(idValueRight) + " len tokens: " + idMaxStr + ";"
+		errMsg = errMsg + "express param right id > len(tokens)-1:" + Int2Str(idValueRight) + " len tokens: " + idMaxStr + ";"
 	}
 	if errMsg == "" {
 		valueLeft = tokens[idValueLeft]
@@ -375,8 +364,8 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			KeyXrightCalculated:      keyXright, // use these values
 			KeyYtopCalculated:        keyYtop,
 			KeyYbottomCalculated:     keyYbottom,
-			KeyWidthCalculated:       Itoa(Atoi(keyXright) - Atoi(keyXleft) + 1),
-			KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
+			KeyWidthCalculated:       Int2Str(Str2Int(keyXright) - Str2Int(keyXleft) + 1),
+			KeyHeightCalculated:      Int2Str(Str2Int(keyYbottom) - Str2Int(keyYtop) + 1),
 			KeyDebugWindowFillerChar: debugWindowFiller,
 		}
 	}

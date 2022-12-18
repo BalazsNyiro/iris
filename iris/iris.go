@@ -45,6 +45,8 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 	screenComposedStr_prev := ""
 
 	for {
+
+		// the windows content can be updated from an outsider source without direct user input
 		windows = WinCoordsCalculate(windows)
 		screenComposed := ScreensCompose(windows, windowsChars, []string{"Terminal", "Child"}, " ")
 		screenComposedStr := screenComposed.toString()
