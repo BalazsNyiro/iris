@@ -1,8 +1,7 @@
 Tasks:
-
-  - collect functions and build up a program plan
-
   documentation: what is a screen? what is ScreenSrcLoad?
+  TEST writing: ScreenSrcLoad
+
   TODO:
     render the chars with colors: iris_char_obj.go, render()
 

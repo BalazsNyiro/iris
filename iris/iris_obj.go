@@ -49,21 +49,45 @@ func ScreenEmpty(width, height int, defaultScreenFiller rune, name string) Rende
 
 // //////////////////////////////////////////////////////////////////////////////////////
 func ScreenSrcLoad(screen RenderedScreen, width, height int, windowChars WindowChars, lineBreakIfTxtTooLong bool) RenderedScreen {
-	// based on srcType and src the screen is modified here
+	x, y := 0, 0 // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
+	idNext := 0  // create the variable only once
+	newLine := NewLine()
+	newLineLen := len(newLine)
+	newLineRune := rune(newLine[0])
 
-	y := 0
-	x := 0 // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
+	for id := 0; id < len(windowChars); id++ { // counting. so if x == width then you have to move into the next line.
+		idNext = id + 1
+		charObj := windowChars[id]
 
-	for _, charObj := range windowChars { // counting. so if x == width then you have to move into the next line.
-		runeNow := charObj.CharVal
+		if true { // ##################################### NEWLINE HANDLING ###############
+			isNewLine := false
+
+			if charObj.CharVal == '\r' && newLine == "\r\n" && idNext < len(windowChars) {
+				if windowChars[idNext].CharVal == '\n' {
+					isNewLine = true
+					id++ // skip the next \r
+				}
+			}
+
+			if newLineLen == 1 && charObj.CharVal == newLineRune {
+				isNewLine = true // work with \r, \n newlines too
+			}
+
+			if isNewLine { // and the newline char objects are not added into the screen, because
+				x = 0 //      they are represented with the increased y value.
+				y += 1
+				continue
+			}
+		} // ###################################### NEWLINE HANDLING #############################
+
 		if lineBreakIfTxtTooLong && (x == width) && (y < height-1) {
 			x = 0
-			y = y + 1
+			y += 1
 		}
-		if y < height && x < width {
+		if y < height && x < width { // with 'x <', 'y <' it copies the visible part only
 			coordinate := Coord{x, y}
-			screen.matrixCharsRendered[coordinate] = CharObjNew(runeNow)
-			x = x + 1
+			screen.matrixCharsRendered[coordinate] = charObj
+			x += 1
 		}
 	}
 	return screen
@@ -95,7 +119,7 @@ func ScreensCompose(windows Windows, windowsChars WindowsChars, winNamesToCompos
 			}
 		}
 		// +1: because the coords are 0 based numbers, which means `if x == 9` then width = 10
-		// -1: because the screen's left char is similar with the Calculated's latest char,
+		// -1: because the screen's first position is similar with the Calculated's last position
 		// so one character is double calculated
 		composed.width = IntMax(composed.width, +1+winLocalXLeftCalculated+screenActualWin.width-1)
 		composed.height = IntMax(composed.height, +1+winLocalYTopCalculated+screenActualWin.height-1)
@@ -122,11 +146,11 @@ type WindowsChars map[string]WindowChars
 // TESTED in Test_new_window
 func (win Window) RenderToScreenOfWin(windowsChars WindowsChars, screenFiller string) RenderedScreen {
 
-	screenFillerChar := rune(' ')
+	// in screenFiller we can pass one char (in the string) or more chars too (debug)
+	// and the need of debug selection is the reason why screenFiller is a string and not a rune
+	screenFillerChar := rune(screenFiller[0])
 	if screenFiller == "debug" {
 		screenFillerChar = rune(win[KeyDebugWindowFillerChar][0])
-	} else {
-		screenFillerChar = rune(screenFiller[0])
 	}
 	width := Str2Int(win[KeyXrightCalculated]) - Str2Int(win[KeyXleftCalculated]) + 1
 	height := Str2Int(win[KeyYbottomCalculated]) - Str2Int(win[KeyYtopCalculated]) + 1
