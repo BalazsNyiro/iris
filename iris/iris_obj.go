@@ -13,22 +13,22 @@ type Coord [2]int
 
 type MatrixCharsRenderedWithFgBgSettings map[Coord]CharObj
 
-type RenderedScreen struct {
-	name                string
-	width               int
-	height              int
-	matrixCharsRendered MatrixCharsRenderedWithFgBgSettings
+type MatrixChars struct {
+	name     string
+	width    int
+	height   int
+	Rendered MatrixCharsRenderedWithFgBgSettings
 }
 
-func (screen RenderedScreen) toString() string {
+func (matrixChars MatrixChars) toString() string {
 	out := []string{}
-	for y := 0; y < screen.height; y++ {
+	for y := 0; y < matrixChars.height; y++ {
 		if len(out) > 0 {
 			out = append(out, NewLine())
 		}
-		for x := 0; x < screen.width; x++ {
+		for x := 0; x < matrixChars.width; x++ {
 			coordinate := Coord{x, y}
-			out = append(out, screen.matrixCharsRendered[coordinate].render())
+			out = append(out, matrixChars.Rendered[coordinate].render())
 		}
 	}
 	return strings.Join(out, "")
@@ -36,19 +36,19 @@ func (screen RenderedScreen) toString() string {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-func ScreenEmpty(width, height int, defaultScreenFiller rune, name string) RenderedScreen {
-	screen := RenderedScreen{width: width, height: height, name: name, matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
+func MatrixCharsEmpty(width, height int, matrixFiller rune, name string) MatrixChars {
+	matrixChars := MatrixChars{width: width, height: height, name: name, Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			coordinate := Coord{x, y}
-			screen.matrixCharsRendered[coordinate] = CharObjNew(defaultScreenFiller)
+			matrixChars.Rendered[coordinate] = CharObjNew(matrixFiller)
 		}
 	}
-	return screen
+	return matrixChars
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////
-func ScreenSrcLoad(screen RenderedScreen, width, height int, windowChars WindowChars, lineBreakIfTxtTooLong bool) RenderedScreen {
+func MatrixCharsLoadTxt(matrixChars MatrixChars, width, height int, windowChars WindowChars, lineBreakIfTxtTooLong bool) MatrixChars {
 	x, y := 0, 0 // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
 	idNext := 0  // create the variable only once
 	newLine := NewLine()
@@ -73,7 +73,7 @@ func ScreenSrcLoad(screen RenderedScreen, width, height int, windowChars WindowC
 				isNewLine = true // work with \r, \n newlines too
 			}
 
-			if isNewLine { // and the newline char objects are not added into the screen, because
+			if isNewLine { // and the newline char objects are not added into the matrixChars, because
 				x = 0 //      they are represented with the increased y value.
 				y += 1
 				continue
@@ -86,14 +86,14 @@ func ScreenSrcLoad(screen RenderedScreen, width, height int, windowChars WindowC
 		}
 		if y < height && x < width { // with 'x <', 'y <' it copies the visible part only
 			coordinate := Coord{x, y}
-			screen.matrixCharsRendered[coordinate] = charObj
+			matrixChars.Rendered[coordinate] = charObj
 			x += 1
 		}
 	}
-	return screen
+	return matrixChars
 } ////////////////////////////////////////////////////////////////////////////////////////
 
-func ScreensCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, screenFiller string) RenderedScreen {
+func MatrixCharsCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, matrixFiller string) MatrixChars {
 	widthMax, heightMax := 0, 0
 
 	// FIXME: windows rendering is based on Name list order.
@@ -103,26 +103,26 @@ func ScreensCompose(windows Windows, windowsChars WindowsChars, winNamesToCompos
 	// keep the original order because the later rendered win overlaps the previous ones
 	winNamesToComposite = win_names_keep_publics(winNamesToComposite, false)
 
-	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
+	composed := MatrixChars{width: widthMax, height: heightMax, name: "composed", Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 
 	for _, winName := range winNamesToComposite {
-		screenActualWin := windows[winName].RenderToScreenOfWin(windowsChars, screenFiller)
+		matrixActualWin := windows[winName].RenderToMatrixCharsOfWin(windowsChars, matrixFiller)
 
 		winLocalXLeftCalculated := Str2Int(windows[winName][KeyXleftCalculated]) // read the values only once,
 		winLocalYTopCalculated := Str2Int(windows[winName][KeyYtopCalculated])   // avoid to be changed in the for loop
 
-		for yInWin := 0; yInWin < screenActualWin.height; yInWin++ {
-			for xInWin := 0; xInWin < screenActualWin.width; xInWin++ {
+		for yInWin := 0; yInWin < matrixActualWin.height; yInWin++ {
+			for xInWin := 0; xInWin < matrixActualWin.width; xInWin++ {
 				coordInWinLocal := Coord{xInWin, yInWin}
 				coordInRootTerminal := Coord{winLocalXLeftCalculated + xInWin, winLocalYTopCalculated + yInWin}
-				composed.matrixCharsRendered[coordInRootTerminal] = screenActualWin.matrixCharsRendered[coordInWinLocal]
+				composed.Rendered[coordInRootTerminal] = matrixActualWin.Rendered[coordInWinLocal]
 			}
 		}
 		// +1: because the coords are 0 based numbers, which means `if x == 9` then width = 10
-		// -1: because the screen's first position is similar with the Calculated's last position
+		// -1: because the matrix's first position is similar with the Calculated's last position
 		// so one character is double calculated
-		composed.width = IntMax(composed.width, +1+winLocalXLeftCalculated+screenActualWin.width-1)
-		composed.height = IntMax(composed.height, +1+winLocalYTopCalculated+screenActualWin.height-1)
+		composed.width = IntMax(composed.width, +1+winLocalXLeftCalculated+matrixActualWin.width-1)
+		composed.height = IntMax(composed.height, +1+winLocalYTopCalculated+matrixActualWin.height-1)
 	}
 	return composed
 }
@@ -144,23 +144,23 @@ type WindowChars []CharObj
 type WindowsChars map[string]WindowChars
 
 // TESTED in Test_new_window
-func (win Window) RenderToScreenOfWin(windowsChars WindowsChars, screenFiller string) RenderedScreen {
+func (win Window) RenderToMatrixCharsOfWin(windowsChars WindowsChars, matrixFiller string) MatrixChars {
 
-	// in screenFiller we can pass one char (in the string) or more chars too (debug)
-	// and the need of debug selection is the reason why screenFiller is a string and not a rune
-	screenFillerChar := rune(screenFiller[0])
-	if screenFiller == "debug" {
-		screenFillerChar = rune(win[KeyDebugWindowFillerChar][0])
+	// in matrixFiller we can pass one char (in the string) or more chars too (debug)
+	// and the need of debug selection is the reason why matrixFiller is a string and not a rune
+	matrixFillerChar := rune(matrixFiller[0])
+	if matrixFiller == "debug" {
+		matrixFillerChar = rune(win[KeyDebugWindowFillerChar][0])
 	}
 	width := Str2Int(win[KeyXrightCalculated]) - Str2Int(win[KeyXleftCalculated]) + 1
 	height := Str2Int(win[KeyYbottomCalculated]) - Str2Int(win[KeyYtopCalculated]) + 1
 	autoLineBreakAtWinEnd := true
 
-	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
+	matrixChars := MatrixCharsEmpty(width, height, matrixFillerChar, KeyWinId+":"+win[KeyWinId])
 	winId := win[KeyWinId] // read the id out from the window
-	screen = ScreenSrcLoad(screen, width, height, windowsChars[winId], autoLineBreakAtWinEnd)
+	matrixChars = MatrixCharsLoadTxt(matrixChars, width, height, windowsChars[winId], autoLineBreakAtWinEnd)
 
-	return screen
+	return matrixChars
 }
 
 // TESTED

@@ -144,16 +144,16 @@ func Test_IsNumber(t *testing.T) {
 	compare_bool_pair("IsNumber 12", IsNumber("2a"), false, t)
 }
 
-func Test_RenderToScreenOfWin(t *testing.T) {
+func Test_RenderToMatrixOfWin(t *testing.T) {
 	windows, windowsChars := WindowsNewState(5, 5)
 	windows = WinNew(windows, "Child", "1", "1", "3", "3", "C")
-	windowsChars = WinSourceUpdate(windowsChars, "Child", "simpleText", "abcdefghijklmnopq") // the input test is long but the displayed
-	childRenderedScreen := windows["Child"].RenderToScreenOfWin(windowsChars, "debug")       // area is only 3x3 char
+	windowsChars = WinSourceUpdate(windowsChars, "Child", "simpleText", "abcdefghijklmnopq")     // the input test is long but the displayed
+	childRenderedMatrixChars := windows["Child"].RenderToMatrixCharsOfWin(windowsChars, "debug") // area is only 3x3 char
 	wantedChildRendered := "" +
 		"abc" + NewLine() +
 		"def" + NewLine() +
 		"ghi"
-	compare_str_pair("RenderToScreenOfWin", childRenderedScreen.toString(), wantedChildRendered, t)
+	compare_str_pair("RenderToMatrixCharsOfWin", childRenderedMatrixChars.toString(), wantedChildRendered, t)
 }
 
 func Test_new_window(t *testing.T) {
@@ -165,34 +165,34 @@ func Test_new_window(t *testing.T) {
 	compare_str_pair("new win 1", winTerminalWidth, "3", t)
 	compare_str_pair("new win 2", winTerminalHeight, "1", t)
 
-	winRenderedScreen := windows["Terminal"].RenderToScreenOfWin(windowsChars, "debug")
+	winRenderedMatrixChars := windows["Terminal"].RenderToMatrixCharsOfWin(windowsChars, "debug")
 	wantedRendered := "" +
 		"TTTT" + NewLine() +
 		"TTTT"
-	compare_str_pair("new win 3", winRenderedScreen.toString(), wantedRendered, t)
+	compare_str_pair("new win 3", winRenderedMatrixChars.toString(), wantedRendered, t)
 
 	////////////////////////// children ////////////////////////////////
 	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")
-	childRenderedScreen := windows["Child"].RenderToScreenOfWin(windowsChars, "debug")
+	childRenderedMatrixChars := windows["Child"].RenderToMatrixCharsOfWin(windowsChars, "debug")
 	wantedChildRendered := "CC"
-	compare_str_pair("new win 4", childRenderedScreen.toString(), wantedChildRendered, t)
+	compare_str_pair("new win 4", childRenderedMatrixChars.toString(), wantedChildRendered, t)
 
-	screenComposed := ScreensCompose(windows, windowsChars, []string{"Terminal", "Child"}, "debug")
+	matrixCharsComposed := MatrixCharsCompose(windows, windowsChars, []string{"Terminal", "Child"}, "debug")
 	wantedComposedRendered := "" +
 		"CCTT" + NewLine() +
 		"TTTT"
-	compare_str_pair("new win 5", screenComposed.toString(), wantedComposedRendered, t)
+	compare_str_pair("new win 5", matrixCharsComposed.toString(), wantedComposedRendered, t)
 }
 
-func Test_ScreenNew(t *testing.T) {
-	screen := ScreenEmpty(3, 2, 'S', "Test_ScreenNew")
-	compare_int_pair("ScreenNew 1", len(screen.matrixCharsRendered), 6, t) // 6 elems are in the screen
-	compare_rune_pair("ScreenNew 1", screen.matrixCharsRendered[Coord{0, 0}].CharVal, 'S', t)
+func Test_MatrixNew(t *testing.T) {
+	matrixChars := MatrixCharsEmpty(3, 2, 'S', "Test_MatrixNew")
+	compare_int_pair("MatrixNew 1", len(matrixChars.Rendered), 6, t) // 6 elems are in the matrixChars
+	compare_rune_pair("MatrixNew 1", matrixChars.Rendered[Coord{0, 0}].CharVal, 'S', t)
 
 	wantedRendered := "" +
 		"SSS" + NewLine() +
 		"SSS"
-	compare_str_pair("ScreenNew 2", screen.toString(), wantedRendered, t)
+	compare_str_pair("MatrixNew 2", matrixChars.toString(), wantedRendered, t)
 
 }
 func Test_Empty(t *testing.T) {
