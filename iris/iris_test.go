@@ -20,7 +20,7 @@ import (
 }
 */
 
-func Test_MatrixCharsInsertContent(t *testing.T) {
+func Test_MatrixCharsInsertContentIntoOneWindow(t *testing.T) {
 	terminalWidth := 8
 	terminalHeight := 4
 
@@ -199,15 +199,15 @@ func Test_new_window(t *testing.T) {
 	compare_str_pair("new win 3", winRenderedMatrixChars.toString(), wantedRendered, t)
 
 	////////////////////////// children ////////////////////////////////
-	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")
+	windows = WinNew(windows, "Child", "2", "1", "3", "1", "C")
 	childRenderedMatrixChars := windows["Child"].RenderToMatrixCharsOfWin(windowsChars, "debug")
 	wantedChildRendered := "CC"
 	compare_str_pair("new win 4", childRenderedMatrixChars.toString(), wantedChildRendered, t)
 
 	matrixCharsComposed := MatrixCharsCompose(windows, windowsChars, []string{"Terminal", "Child"}, "debug")
 	wantedComposedRendered := "" +
-		"CCTT" + NewLine() +
-		"TTTT"
+		"TTTT" + NewLine() +
+		"TTCC" // Child has a shifted position (2,1) so Compose has to handle the shifting, too
 	compare_str_pair("new win 5", matrixCharsComposed.toString(), wantedComposedRendered, t)
 }
 
