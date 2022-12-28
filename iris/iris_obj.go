@@ -36,8 +36,8 @@ func (matrixChars MatrixChars) toString() string {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-func MatrixCharsEmpty(width, height int, matrixFiller rune, name string) MatrixChars {
-	matrixChars := MatrixChars{width: width, height: height, name: name, Rendered: MatrixCharsRenderedWithFgBgSettings{}}
+func MatrixCharsEmpty(width, height int, matrixFiller rune, winName string) MatrixChars {
+	matrixChars := MatrixChars{width: width, height: height, name: winName, Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			coordinate := Coord{x, y}
@@ -156,9 +156,9 @@ func (win Window) RenderToMatrixCharsOfWin(windowsChars WindowsChars, matrixFill
 	height := Str2Int(win[KeyYbottomCalculated]) - Str2Int(win[KeyYtopCalculated]) + 1
 	autoLineBreakAtWinEnd := true
 
-	matrixChars := MatrixCharsEmpty(width, height, matrixFillerChar, KeyWinId+":"+win[KeyWinId])
-	winId := win[KeyWinId] // read the id out from the window
-	matrixChars = MatrixCharsLoadTxt(matrixChars, width, height, windowsChars[winId], autoLineBreakAtWinEnd)
+	matrixChars := MatrixCharsEmpty(width, height, matrixFillerChar, KeyWinName+":"+win[KeyWinName])
+	winName := win[KeyWinName] // read the id out from the window
+	matrixChars = MatrixCharsLoadTxt(matrixChars, width, height, windowsChars[winName], autoLineBreakAtWinEnd)
 
 	return matrixChars
 }
@@ -179,7 +179,7 @@ func WinSourceUpdate(windowsChars WindowsChars, winName, contentType, contentSrc
 }
 
 // TESTED
-func WinCoordsCalculate(windows Windows) Windows {
+func WinCoordsCalculateUpdate(windows Windows) Windows {
 	for winName, _ := range windows_keep_publics(windows) {
 		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
@@ -214,7 +214,7 @@ var KeyXrightCalculated = "xRightCalculated"
 var KeyYtopCalculated = "yTopCalculated"
 var KeyYbottomCalculated = "yBottomCalculated"
 var KeyDebugWindowFillerChar = "debugWindowFillerChar"
-var KeyWinId = "winId"
+var KeyWinName = "winName"
 
 // TESTED in Test_new_window
 func WindowsNewState(terminalWidth, terminalHeight int) (Windows, WindowsChars) {
@@ -373,7 +373,7 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			// TODO: fun:function_name(params) - user can call functions to calculate
 			// the position. example: move coordinates based on current seconds.
 
-			KeyWinId: id,
+			KeyWinName: id,
 
 			KeyXleft:   keyXleft,
 			KeyXright:  keyXright,

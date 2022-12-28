@@ -19,6 +19,11 @@ import (
 
 }
 */
+
+func Test_MatrixCharsLoadTxt(t *testing.T) {
+
+}
+
 func Test_parameterCollect(t *testing.T) {
 	tokens := []string{"1", "*", "2"}
 	valueLeft, valueRight, idValueLeft, idValueRight, idError := ParametersCollect(tokens, 1)
@@ -40,6 +45,7 @@ func Test_parameterCollect(t *testing.T) {
 	compare_str_pair("paramCollect2", valueRight, "", t)
 	compare_bool_pair("paramCollect2", len(idError) > 0, true, t)
 }
+
 func Test_ExprOperatorIsValid(t *testing.T) {
 	compare_bool_pair("expr operator is valid 1a", ExprOperatorIsValid(""), false, t)
 	compare_bool_pair("expr operator is valid 1a", ExprOperatorIsValid("?"), false, t)
@@ -104,7 +110,7 @@ func Test_CalculateAllWindowCoords(t *testing.T) {
 
 	compare_str_pair("CalcAll 1", windows["Child"][KeyXleftCalculated], "0", t)
 	windows["Child"][KeyXshift] = StrMath(windows["Child"][KeyXshift], "+", "1")
-	windows = WinCoordsCalculate(windows)
+	windows = WinCoordsCalculateUpdate(windows)
 	compare_str_pair("CalcAll 1", windows["Child"][KeyXleftCalculated], "1", t)
 	/*
 		windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "+", "1")
