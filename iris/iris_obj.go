@@ -34,9 +34,9 @@ func (matrixChars MatrixChars) toString() string {
 	return strings.Join(out, "")
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-
-func MatrixCharsEmpty(width, height int, matrixFiller rune, winName string) MatrixChars {
+// //////////////////////////////////////////////////////////////////////////////////
+// internal function, it uses integer width, height values because of calculations (avoid conversion)
+func MatrixCharsEmptyOfWindows(width, height int, matrixFiller rune, winName string) MatrixChars {
 	matrixChars := MatrixChars{width: width, height: height, name: winName, Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
@@ -48,14 +48,15 @@ func MatrixCharsEmpty(width, height int, matrixFiller rune, winName string) Matr
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////
-func MatrixCharsLoadTxt(matrixChars MatrixChars, width, height int, windowChars WindowChars, lineBreakIfTxtTooLong bool) MatrixChars {
-	x, y := 0, 0 // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
+// internal function, it uses integer width, height values because of calculations (avoid conversion)
+func MatrixCharsInsertContentOfWindows(matrixChars MatrixChars, winWidth, winHeight int, windowChars WindowChars, lineBreakIfTxtTooLong bool) MatrixChars {
+	x, y := 0, 0 // x starts with 0. If x == winWidth it means that x is not inside the windows area because of the 0 based
 	idNext := 0  // create the variable only once
 	newLine := NewLine()
 	newLineLen := len(newLine)
 	newLineRune := rune(newLine[0])
 
-	for id := 0; id < len(windowChars); id++ { // counting. so if x == width then you have to move into the next line.
+	for id := 0; id < len(windowChars); id++ { // counting. so if x == winWidth then you have to move into the next line.
 		idNext = id + 1
 		charObj := windowChars[id]
 
@@ -80,11 +81,11 @@ func MatrixCharsLoadTxt(matrixChars MatrixChars, width, height int, windowChars 
 			}
 		} // ###################################### NEWLINE HANDLING #############################
 
-		if lineBreakIfTxtTooLong && (x == width) && (y < height-1) {
+		if lineBreakIfTxtTooLong && (x == winWidth) && (y < winHeight-1) {
 			x = 0
 			y += 1
 		}
-		if y < height && x < width { // with 'x <', 'y <' it copies the visible part only
+		if y < winHeight && x < winWidth { // with 'x <', 'y <' it copies the visible part only
 			coordinate := Coord{x, y}
 			matrixChars.Rendered[coordinate] = charObj
 			x += 1
@@ -152,13 +153,13 @@ func (win Window) RenderToMatrixCharsOfWin(windowsChars WindowsChars, matrixFill
 	if matrixFiller == "debug" {
 		matrixFillerChar = rune(win[KeyDebugWindowFillerChar][0])
 	}
-	width := Str2Int(win[KeyXrightCalculated]) - Str2Int(win[KeyXleftCalculated]) + 1
-	height := Str2Int(win[KeyYbottomCalculated]) - Str2Int(win[KeyYtopCalculated]) + 1
+	winWidth := Str2Int(win[KeyXrightCalculated]) - Str2Int(win[KeyXleftCalculated]) + 1
+	winHeight := Str2Int(win[KeyYbottomCalculated]) - Str2Int(win[KeyYtopCalculated]) + 1
 	autoLineBreakAtWinEnd := true
 
-	matrixChars := MatrixCharsEmpty(width, height, matrixFillerChar, KeyWinName+":"+win[KeyWinName])
 	winName := win[KeyWinName] // read the id out from the window
-	matrixChars = MatrixCharsLoadTxt(matrixChars, width, height, windowsChars[winName], autoLineBreakAtWinEnd)
+	matrixChars := MatrixCharsEmptyOfWindows(winWidth, winHeight, matrixFillerChar, KeyWinName+":"+winName)
+	matrixChars = MatrixCharsInsertContentOfWindows(matrixChars, winWidth, winHeight, windowsChars[winName], autoLineBreakAtWinEnd)
 
 	return matrixChars
 }

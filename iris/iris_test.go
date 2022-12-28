@@ -20,8 +20,29 @@ import (
 }
 */
 
-func Test_MatrixCharsLoadTxt(t *testing.T) {
+func Test_MatrixCharsInsertContent(t *testing.T) {
+	terminalWidth := 8
+	terminalHeight := 4
 
+	winName := "TestWindows"
+	winTestWidth := 5
+	winTestHeight := 2
+
+	windows, windowsChars := WindowsNewState(terminalWidth, terminalHeight)
+	windows = WinNew(windows, winName, "1", "2", Int2Str(winTestWidth), Int2Str(winTestHeight), "T")
+	windowsChars = WinSourceUpdate(windowsChars, winName, "simpleText", "Dogs are BARKING...")
+	windows["prgState"]["winActiveId"] = winName
+
+	matrixChars := MatrixCharsEmptyOfWindows(winTestWidth, winTestHeight, 'M', "winName:"+winName)
+	matrixChars = MatrixCharsInsertContentOfWindows(matrixChars, winTestWidth, winTestHeight, windowsChars[winName], true)
+	compare_rune_pair("MatrixCharsInsertContentA", matrixChars.Rendered[Coord{0, 0}].CharVal, 'D', t)
+	compare_rune_pair("MatrixCharsInsertContentB", matrixChars.Rendered[Coord{1, 0}].CharVal, 'o', t)
+	compare_rune_pair("MatrixCharsInsertContentC", matrixChars.Rendered[Coord{2, 0}].CharVal, 'g', t)
+	compare_rune_pair("MatrixCharsInsertContentD", matrixChars.Rendered[Coord{3, 0}].CharVal, 's', t)
+	compare_rune_pair("MatrixCharsInsertContentE", matrixChars.Rendered[Coord{4, 0}].CharVal, ' ', t)
+	compare_rune_pair("MatrixCharsInsertContentF", matrixChars.Rendered[Coord{0, 1}].CharVal, 'a', t)
+	compare_rune_pair("MatrixCharsInsertContentG", matrixChars.Rendered[Coord{1, 1}].CharVal, 'r', t)
+	compare_rune_pair("MatrixCharsInsertContentH", matrixChars.Rendered[Coord{2, 1}].CharVal, 'e', t)
 }
 
 func Test_parameterCollect(t *testing.T) {
@@ -191,7 +212,7 @@ func Test_new_window(t *testing.T) {
 }
 
 func Test_MatrixNew(t *testing.T) {
-	matrixChars := MatrixCharsEmpty(3, 2, 'S', "Test_MatrixNew")
+	matrixChars := MatrixCharsEmptyOfWindows(3, 2, 'S', "Test_MatrixNew")
 	compare_int_pair("MatrixNew 1", len(matrixChars.Rendered), 6, t) // 6 elems are in the matrixChars
 	compare_rune_pair("MatrixNew 1", matrixChars.Rendered[Coord{0, 0}].CharVal, 'S', t)
 
