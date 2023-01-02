@@ -36,6 +36,7 @@ func (matrixChars MatrixChars) toString() string {
 
 // //////////////////////////////////////////////////////////////////////////////////
 // internal function, it uses integer width, height values because of calculations (avoid conversion)
+// TESTED
 func MatrixCharsEmptyOfWindows(width, height int, matrixFiller rune, winName string) MatrixChars {
 	matrixChars := MatrixChars{width: width, height: height, name: winName, Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 	for y := 0; y < height; y++ {
@@ -49,6 +50,7 @@ func MatrixCharsEmptyOfWindows(width, height int, matrixFiller rune, winName str
 
 // //////////////////////////////////////////////////////////////////////////////////////
 // internal function, it uses integer width, height values because of calculations (avoid conversion)
+// TESTED
 func MatrixCharsInsertContentOfWindows(matrixChars MatrixChars, winWidth, winHeight int, windowChars WindowChars, lineBreakIfTxtTooLong bool) MatrixChars {
 	x, y := 0, 0 // x starts with 0. If x == winWidth it means that x is not inside the windows area because of the 0 based
 	idNext := 0  // create the variable only once
@@ -94,19 +96,18 @@ func MatrixCharsInsertContentOfWindows(matrixChars MatrixChars, winWidth, winHei
 	return matrixChars
 } ////////////////////////////////////////////////////////////////////////////////////////
 
+func sortWinNamesByLayers(windows Windows, winNamesToComposite []string) []string {
+	return winNamesToComposite
+}
+
 func MatrixCharsCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, matrixFiller string) MatrixChars {
 	widthMax, heightMax := 0, 0
 
-	// FIXME: windows rendering is based on Name list order.
-	// it means if you change the order, a win can overlap another one.
-	// maybe it would be better to give a LayerNum into the windows and render them based on that value??
-
-	// keep the original order because the later rendered win overlaps the previous ones
 	winNamesToComposite = win_names_keep_publics(winNamesToComposite, false)
 
 	composed := MatrixChars{width: widthMax, height: heightMax, name: "composed", Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 
-	for _, winName := range winNamesToComposite {
+	for _, winName := range sortWinNamesByLayers(windows, winNamesToComposite) {
 		matrixActualWin := windows[winName].RenderToMatrixCharsOfWin(windowsChars, matrixFiller)
 
 		winLocalXLeftCalculated := Str2Int(windows[winName][KeyXleftCalculated]) // read the values only once,
@@ -216,6 +217,8 @@ var KeyYtopCalculated = "yTopCalculated"
 var KeyYbottomCalculated = "yBottomCalculated"
 var KeyDebugWindowFillerChar = "debugWindowFillerChar"
 var KeyWinName = "winName"
+var KeyVisible = "visible"
+var KeyRenderLayerNum = "renderLayerNum" // smaller is rendered first
 
 // TESTED in Test_new_window
 func WindowsNewState(terminalWidth, terminalHeight int) (Windows, WindowsChars) {
@@ -350,7 +353,9 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 	if id == "prgState" {
 		// program state is not a real window,
 		// it stores the current settings
-		windows[id] = Window{}
+		windows[id] = Window{
+			KeyRenderLayerNum: Int2Str(len(windows)),
+		}
 	} else {
 		windows[id] = Window{
 
@@ -392,6 +397,11 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			KeyWidthCalculated:       Int2Str(Str2Int(keyXright) - Str2Int(keyXleft) + 1),
 			KeyHeightCalculated:      Int2Str(Str2Int(keyYbottom) - Str2Int(keyYtop) + 1),
 			KeyDebugWindowFillerChar: debugWindowFiller,
+
+			KeyVisible: "true",
+
+			// the default render layer num is follow the natural windows creation
+			KeyRenderLayerNum: Int2Str(len(windows)),
 		}
 	}
 	return windows
