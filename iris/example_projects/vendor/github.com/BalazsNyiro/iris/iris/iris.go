@@ -22,7 +22,7 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 	go func(ch chan string) {
 		// disable input buffering
 		exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-		// do not display entered characters on the screen
+		// do not display entered characters in the console
 		exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
 		var b []byte = make([]byte, 1)
 		for {
@@ -40,17 +40,21 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 		}
 	}(ch_terminal_size_change_detect)
 
-	screen_clear()
+	terminal_console_clear()
 
-	screenComposedStr_prev := ""
+	matrixCharsComposedStr_prev := ""
 
 	for {
-		windows = WinCoordsCalculate(windows)
-		screenComposed := ScreensCompose(windows, windowsChars, []string{"Terminal", "Child"}, " ")
-		screenComposedStr := screenComposed.toString()
-		if screenComposedStr != screenComposedStr_prev {
-			fmt.Print(screen_cursor_pos_home())
-			fmt.Print(screenComposedStr)
+
+		// the windows content can be updated from an outsider source without direct user input
+		windows = WinCoordsCalculateUpdate(windows)
+
+		matrixCharsComposed := MatrixCharsCompose(windows, windowsChars, []string{"Terminal", "Child"}, " ")
+
+		matrixCharsComposedStr := matrixCharsComposed.toString()
+		if matrixCharsComposedStr != matrixCharsComposedStr_prev {
+			fmt.Print(terminal_console_cursor_pos_home())
+			fmt.Print(matrixCharsComposedStr)
 		}
 
 		action := ""
@@ -63,7 +67,7 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 			// vim navigation keys
 			if strings.Contains("lhjk", stdin) {
 				winActiveId := windows["prgState"]["winActiveId"]
-				debug_info_save(windows)
+				DebugInfoSave(windows)
 				if stdin == "l" {
 					windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "+", "1")
 				}
@@ -87,6 +91,6 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 		}
 		time.Sleep(time.Millisecond * time.Duration(TimeIntervalUserInterfaceRefreshTimeMillisec))
 
-		screenComposedStr_prev = screenComposedStr
+		matrixCharsComposedStr_prev = matrixCharsComposedStr
 	}
 }

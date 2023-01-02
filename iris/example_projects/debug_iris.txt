@@ -1,4 +1,5 @@
 ===============
+LayerRenderNum: 0
 winActiveId: Child
-win public: Child (44, 4)
+win public: Child (38, 6)
 win public: Terminal (0, 0)

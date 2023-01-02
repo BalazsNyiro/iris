@@ -11,117 +11,117 @@ func NewLine() string { return "\n" }
 // Attr     map[string]string
 type Coord [2]int
 
-// a rendered char can have ANSI settings so a single displayed char
-// with foreground and background settings can be a long string
-type CharRenderedWithFgBgSettings struct {
-	colorFgRGB string
-	colorBgRGB string
-	character  string
+type MatrixCharsRenderedWithFgBgSettings map[Coord]CharObj
+
+type MatrixChars struct {
+	name     string
+	width    int
+	height   int
+	Rendered MatrixCharsRenderedWithFgBgSettings
 }
 
-func (c CharRenderedWithFgBgSettings) toString() string {
-	return c.character
-}
-
-type MatrixCharsRenderedWithFgBgSettings map[Coord]CharRenderedWithFgBgSettings
-
-type RenderedScreen struct {
-	name                string
-	width               int
-	height              int
-	matrixCharsRendered MatrixCharsRenderedWithFgBgSettings
-}
-
-func (screen RenderedScreen) toString() string {
+func (matrixChars MatrixChars) toString() string {
 	out := []string{}
-	for y := 0; y < screen.height; y++ {
+	for y := 0; y < matrixChars.height; y++ {
 		if len(out) > 0 {
 			out = append(out, NewLine())
 		}
-		for x := 0; x < screen.width; x++ {
+		for x := 0; x < matrixChars.width; x++ {
 			coordinate := Coord{x, y}
-			out = append(out, screen.matrixCharsRendered[coordinate].toString())
+			out = append(out, matrixChars.Rendered[coordinate].render())
 		}
 	}
 	return strings.Join(out, "")
 }
 
-////////////////////////////////////////////////////////////////////////////////////
-
-func ScreenEmpty(width, height int, defaultScreenFiller, name string) RenderedScreen {
-	screen := RenderedScreen{width: width, height: height, name: name, matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
+// //////////////////////////////////////////////////////////////////////////////////
+// internal function, it uses integer width, height values because of calculations (avoid conversion)
+// TESTED
+func MatrixCharsEmptyOfWindows(width, height int, matrixFiller rune, winName string) MatrixChars {
+	matrixChars := MatrixChars{width: width, height: height, name: winName, Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			coordinate := Coord{x, y}
-			screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: defaultScreenFiller}
+			matrixChars.Rendered[coordinate] = CharObjNew(matrixFiller)
 		}
 	}
-	return screen
+	return matrixChars
 }
 
 // //////////////////////////////////////////////////////////////////////////////////////
-func ScreenSrcLoad(screen RenderedScreen, width, height int, windowChars WindowChars, lineBreakIfTxtTooLong bool) RenderedScreen {
-	// based on srcType and src the screen is modified here
+// internal function, it uses integer width, height values because of calculations (avoid conversion)
+// TESTED
+func MatrixCharsInsertContentOfWindows(matrixChars MatrixChars, winWidth, winHeight int, windowChars WindowChars, lineBreakIfTxtTooLong bool) MatrixChars {
+	x, y := 0, 0 // x starts with 0. If x == winWidth it means that x is not inside the windows area because of the 0 based
+	idNext := 0  // create the variable only once
+	newLine := NewLine()
+	newLineLen := len(newLine)
+	newLineRune := rune(newLine[0])
 
-	y := 0
-	x := 0 // x starts with 0. If x == width it means that x is not inside the windows area because of the 0 based
+	for id := 0; id < len(windowChars); id++ { // counting. so if x == winWidth then you have to move into the next line.
+		idNext = id + 1
+		charObj := windowChars[id]
 
-	for _, charObj := range windowChars { // counting. so if x == width then you have to move into the next line.
-		runeNow := charObj.CharVal
-		if lineBreakIfTxtTooLong && (x == width) && (y < height-1) {
+		if true { // ##################################### NEWLINE HANDLING ###############
+			isNewLine := false
+
+			if charObj.CharVal == '\r' && newLine == "\r\n" && idNext < len(windowChars) {
+				if windowChars[idNext].CharVal == '\n' {
+					isNewLine = true
+					id++ // skip the next \r
+				}
+			}
+
+			if newLineLen == 1 && charObj.CharVal == newLineRune {
+				isNewLine = true // work with \r, \n newlines too
+			}
+
+			if isNewLine { // and the newline char objects are not added into the matrixChars, because
+				x = 0 //      they are represented with the increased y value.
+				y += 1
+				continue
+			}
+		} // ###################################### NEWLINE HANDLING #############################
+
+		if lineBreakIfTxtTooLong && (x == winWidth) && (y < winHeight-1) {
 			x = 0
-			y = y + 1
+			y += 1
 		}
-		if y < height && x < width {
+		if y < winHeight && x < winWidth { // with 'x <', 'y <' it copies the visible part only
 			coordinate := Coord{x, y}
-			screen.matrixCharsRendered[coordinate] = CharRenderedWithFgBgSettings{character: string(runeNow)}
-			x = x + 1
+			matrixChars.Rendered[coordinate] = charObj
+			x += 1
 		}
 	}
-	return screen
+	return matrixChars
 } ////////////////////////////////////////////////////////////////////////////////////////
 
-func ScreensCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, screenFiller string) RenderedScreen {
+func MatrixCharsCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, matrixFiller string) MatrixChars {
 	widthMax, heightMax := 0, 0
 
-	// FIXME: windows rendering is based on Name list order.
-	// it means if you change the order, a win can overlap another one.
-	// maybe it would be better to give a LayerNum into the windows and render them based on that value??
+	winNamesToComposite = WinNamesKeepPublic(winNamesToComposite, false)
 
-	// keep the original order because the later rendered win overlaps the previous ones
-	winNamesToComposite = win_names_keep_publics(winNamesToComposite, false)
+	composed := MatrixChars{width: widthMax, height: heightMax, name: "composed", Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 
-	if true { // This part is to find the max width/height only. //////////////
-		screensOfWindows := []RenderedScreen{}
-		for _, winName := range winNamesToComposite { // default filler: we want to detect the width/height only
-			screensOfWindows = append(screensOfWindows, windows[winName].RenderToScreenOfWin(windowsChars, "default"))
-		}
-		for _, screen := range screensOfWindows {
-			if screen.width > widthMax {
-				widthMax = screen.width
-			}
-			if screen.height > heightMax {
-				heightMax = screen.height
-			}
-		}
-	} // This part is to find the max width/height only. //////////////
+	// lower Layer number is rendered earlier
+	for _, winName := range WinNamesSort(windows, winNamesToComposite, KeyLayerNum, "number") {
+		matrixActualWin := windows[winName].RenderToMatrixCharsOfWin(windowsChars, matrixFiller)
 
-	composed := RenderedScreen{width: widthMax, height: heightMax, name: "composed", matrixCharsRendered: MatrixCharsRenderedWithFgBgSettings{}}
+		winLocalXLeftCalculated := Str2Int(windows[winName][KeyXleftCalculated]) // read the values only once,
+		winLocalYTopCalculated := Str2Int(windows[winName][KeyYtopCalculated])   // avoid to be changed in the for loop
 
-	for _, winName := range winNamesToComposite {
-		screen := windows[winName].RenderToScreenOfWin(windowsChars, screenFiller)
-
-		// read the values only once, avoid to be changed in the for loop
-		winLocalXLeftCalculated := Atoi(windows[winName][KeyXleftCalculated])
-		winLocalYTopCalculated := Atoi(windows[winName][KeyYtopCalculated])
-
-		for yInWin := 0; yInWin < screen.height; yInWin++ {
-			for xInWin := 0; xInWin < screen.width; xInWin++ {
+		for yInWin := 0; yInWin < matrixActualWin.height; yInWin++ {
+			for xInWin := 0; xInWin < matrixActualWin.width; xInWin++ {
 				coordInWinLocal := Coord{xInWin, yInWin}
 				coordInRootTerminal := Coord{winLocalXLeftCalculated + xInWin, winLocalYTopCalculated + yInWin}
-				composed.matrixCharsRendered[coordInRootTerminal] = screen.matrixCharsRendered[coordInWinLocal]
+				composed.Rendered[coordInRootTerminal] = matrixActualWin.Rendered[coordInWinLocal]
 			}
 		}
+		// +1: because the coords are 0 based numbers, which means `if x == 9` then width = 10
+		// -1: because the matrix's first position is similar with the Calculated's last position
+		// so one character is double calculated
+		composed.width = IntMax(composed.width, +1+winLocalXLeftCalculated+matrixActualWin.width-1)
+		composed.height = IntMax(composed.height, +1+winLocalYTopCalculated+matrixActualWin.height-1)
 	}
 	return composed
 }
@@ -143,28 +143,32 @@ type WindowChars []CharObj
 type WindowsChars map[string]WindowChars
 
 // TESTED in Test_new_window
-func (win Window) RenderToScreenOfWin(windowsChars WindowsChars, screenFillerChar string) RenderedScreen {
-	if screenFillerChar == "debug" {
-		screenFillerChar = win[KeyDebugWindowFillerChar]
+func (win Window) RenderToMatrixCharsOfWin(windowsChars WindowsChars, matrixFiller string) MatrixChars {
+
+	// in matrixFiller we can pass one char (in the string) or more chars too (debug)
+	// and the need of debug selection is the reason why matrixFiller is a string and not a rune
+	matrixFillerChar := rune(matrixFiller[0])
+	if matrixFiller == "debug" {
+		matrixFillerChar = rune(win[KeyDebugWindowFillerChar][0])
 	}
-	width := Atoi(win[KeyXrightCalculated]) - Atoi(win[KeyXleftCalculated]) + 1
-	height := Atoi(win[KeyYbottomCalculated]) - Atoi(win[KeyYtopCalculated]) + 1
+	winWidth := Str2Int(win[KeyXrightCalculated]) - Str2Int(win[KeyXleftCalculated]) + 1
+	winHeight := Str2Int(win[KeyYbottomCalculated]) - Str2Int(win[KeyYtopCalculated]) + 1
 	autoLineBreakAtWinEnd := true
 
-	screen := ScreenEmpty(width, height, screenFillerChar, KeyWinId+":"+win[KeyWinId])
-	winId := win[KeyWinId] // read the id out from the window
-	screen = ScreenSrcLoad(screen, width, height, windowsChars[winId], autoLineBreakAtWinEnd)
+	winName := win[KeyWinName] // read the id out from the window
+	matrixChars := MatrixCharsEmptyOfWindows(winWidth, winHeight, matrixFillerChar, KeyWinName+":"+winName)
+	matrixChars = MatrixCharsInsertContentOfWindows(matrixChars, winWidth, winHeight, windowsChars[winName], autoLineBreakAtWinEnd)
 
-	return screen
+	return matrixChars
 }
 
 // TESTED
-func WinSourceLoad(windowsChars WindowsChars, winName, contentType, contentSrc string) WindowsChars {
+func WinSourceUpdate(windowsChars WindowsChars, winName, contentType, contentSrc string) WindowsChars {
 	// possible types: simpleText, html
 	// or in a different fun later: CharObjects can be loaded directly without text-> CharObj conversion
 	if contentType == "simpleText" {
 		for _, char := range contentSrc {
-			charObj := CharObj{CharVal: char, ColorBg: Color{Name: "black"}, ColorFg: Color{Name: "white"}}
+			charObj := CharObjNew(char)
 			chars := windowsChars[winName] // before the update
 			chars = append(chars, charObj)
 			windowsChars[winName] = chars
@@ -174,8 +178,8 @@ func WinSourceLoad(windowsChars WindowsChars, winName, contentType, contentSrc s
 }
 
 // TESTED
-func WinCoordsCalculate(windows Windows) Windows {
-	for winName, _ := range windows_keep_publics(windows) {
+func WinCoordsCalculateUpdate(windows Windows) Windows {
+	for winName, _ := range WindowsKeepPublic(windows) {
 		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
 		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright], windows), "+", windows[winName][KeyXshift])
@@ -209,7 +213,9 @@ var KeyXrightCalculated = "xRightCalculated"
 var KeyYtopCalculated = "yTopCalculated"
 var KeyYbottomCalculated = "yBottomCalculated"
 var KeyDebugWindowFillerChar = "debugWindowFillerChar"
-var KeyWinId = "winId"
+var KeyWinName = "winName"
+var KeyVisible = "visible"
+var KeyLayerNum = "LayerRenderNum" // smaller is rendered first
 
 // TESTED in Test_new_window
 func WindowsNewState(terminalWidth, terminalHeight int) (Windows, WindowsChars) {
@@ -275,18 +281,18 @@ func ParametersCollect(tokens []string, tokenId int) (string, string, int, int, 
 
 	idValueLeft, idValueRight := tokenId-1, tokenId+1
 	if idValueLeft < 0 {
-		errMsg = errMsg + "express param left id < 0:" + Itoa(idValueLeft) + ";"
+		errMsg = errMsg + "express param left id < 0:" + Int2Str(idValueLeft) + ";"
 	}
 	if idValueRight < 0 {
-		errMsg = errMsg + "express param right id < 0:" + Itoa(idValueRight) + ";"
+		errMsg = errMsg + "express param right id < 0:" + Int2Str(idValueRight) + ";"
 	}
 	idMax := len(tokens) - 1
-	idMaxStr := Itoa(idMax)
+	idMaxStr := Int2Str(idMax)
 	if idValueLeft > idMax {
-		errMsg = errMsg + "express param left id > len(tokens)-1:" + Itoa(idValueLeft) + " len tokens: " + idMaxStr + ";"
+		errMsg = errMsg + "express param left id > len(tokens)-1:" + Int2Str(idValueLeft) + " len tokens: " + idMaxStr + ";"
 	}
 	if idValueRight > idMax {
-		errMsg = errMsg + "express param right id > len(tokens)-1:" + Itoa(idValueRight) + " len tokens: " + idMaxStr + ";"
+		errMsg = errMsg + "express param right id > len(tokens)-1:" + Int2Str(idValueRight) + " len tokens: " + idMaxStr + ";"
 	}
 	if errMsg == "" {
 		valueLeft = tokens[idValueLeft]
@@ -344,7 +350,9 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 	if id == "prgState" {
 		// program state is not a real window,
 		// it stores the current settings
-		windows[id] = Window{}
+		windows[id] = Window{
+			KeyLayerNum: Int2Str(len(windows)),
+		}
 	} else {
 		windows[id] = Window{
 
@@ -368,7 +376,7 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			// TODO: fun:function_name(params) - user can call functions to calculate
 			// the position. example: move coordinates based on current seconds.
 
-			KeyWinId: id,
+			KeyWinName: id,
 
 			KeyXleft:   keyXleft,
 			KeyXright:  keyXright,
@@ -383,9 +391,14 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			KeyXrightCalculated:      keyXright, // use these values
 			KeyYtopCalculated:        keyYtop,
 			KeyYbottomCalculated:     keyYbottom,
-			KeyWidthCalculated:       Itoa(Atoi(keyXright) - Atoi(keyXleft) + 1),
-			KeyHeightCalculated:      Itoa(Atoi(keyYbottom) - Atoi(keyYtop) + 1),
+			KeyWidthCalculated:       Int2Str(Str2Int(keyXright) - Str2Int(keyXleft) + 1),
+			KeyHeightCalculated:      Int2Str(Str2Int(keyYbottom) - Str2Int(keyYtop) + 1),
 			KeyDebugWindowFillerChar: debugWindowFiller,
+
+			KeyVisible: "true",
+
+			// the default render layer num is follow the natural windows creation
+			KeyLayerNum: Int2Str(len(windows)),
 		}
 	}
 	return windows

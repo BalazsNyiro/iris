@@ -1,4 +1,12 @@
 Tasks:
+
+ Questions:
+  - where is the cursor?
+  - what if you see a menu, how do you know where are you exactly?
+  - how do you receive user input text?
+
+
+  ----------------------------------
   TEST writing:  MatrixCharsCompose
 
   TODO:

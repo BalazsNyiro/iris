@@ -1,9 +1,10 @@
 Tasks:
+  TEST writing:  MatrixCharsCompose
 
-  - collect functions and build up a program plan
+  TODO:
+    render the chars with colors: iris_char_obj.go, render()
 
-  ok: test - RenderToScreenOfWin/ScreenSrcLoad
-
+  TODO: Test sortWinNames
 
 ---------------------------------
 https://stackoverflow.com/questions/2050391/how-to-check-if-a-map-contains-a-key-in-go
