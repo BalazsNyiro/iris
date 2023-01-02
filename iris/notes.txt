@@ -8,6 +8,7 @@ Tasks:
   TODO:
     render the chars with colors: iris_char_obj.go, render()
 
+  TODO: Test sortWinNames
 
 ---------------------------------
 https://stackoverflow.com/questions/2050391/how-to-check-if-a-map-contains-a-key-in-go

@@ -96,18 +96,14 @@ func MatrixCharsInsertContentOfWindows(matrixChars MatrixChars, winWidth, winHei
 	return matrixChars
 } ////////////////////////////////////////////////////////////////////////////////////////
 
-func sortWinNamesByLayers(windows Windows, winNamesToComposite []string) []string {
-	return winNamesToComposite
-}
-
 func MatrixCharsCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, matrixFiller string) MatrixChars {
 	widthMax, heightMax := 0, 0
 
-	winNamesToComposite = win_names_keep_publics(winNamesToComposite, false)
+	winNamesToComposite = WinNamesKeepPublic(winNamesToComposite, false)
 
 	composed := MatrixChars{width: widthMax, height: heightMax, name: "composed", Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 
-	for _, winName := range sortWinNamesByLayers(windows, winNamesToComposite) {
+	for _, winName := range WinNamesSort(windows, winNamesToComposite, KeyLayerNum, "number") {
 		matrixActualWin := windows[winName].RenderToMatrixCharsOfWin(windowsChars, matrixFiller)
 
 		winLocalXLeftCalculated := Str2Int(windows[winName][KeyXleftCalculated]) // read the values only once,
@@ -182,7 +178,7 @@ func WinSourceUpdate(windowsChars WindowsChars, winName, contentType, contentSrc
 
 // TESTED
 func WinCoordsCalculateUpdate(windows Windows) Windows {
-	for winName, _ := range windows_keep_publics(windows) {
+	for winName, _ := range WindowsKeepPublic(windows) {
 		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
 		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright], windows), "+", windows[winName][KeyXshift])
@@ -218,7 +214,7 @@ var KeyYbottomCalculated = "yBottomCalculated"
 var KeyDebugWindowFillerChar = "debugWindowFillerChar"
 var KeyWinName = "winName"
 var KeyVisible = "visible"
-var KeyRenderLayerNum = "renderLayerNum" // smaller is rendered first
+var KeyLayerNum = "LayerRenderNum" // smaller is rendered first
 
 // TESTED in Test_new_window
 func WindowsNewState(terminalWidth, terminalHeight int) (Windows, WindowsChars) {
@@ -354,7 +350,7 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 		// program state is not a real window,
 		// it stores the current settings
 		windows[id] = Window{
-			KeyRenderLayerNum: Int2Str(len(windows)),
+			KeyLayerNum: Int2Str(len(windows)),
 		}
 	} else {
 		windows[id] = Window{
@@ -401,7 +397,7 @@ func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debug
 			KeyVisible: "true",
 
 			// the default render layer num is follow the natural windows creation
-			KeyRenderLayerNum: Int2Str(len(windows)),
+			KeyLayerNum: Int2Str(len(windows)),
 		}
 	}
 	return windows

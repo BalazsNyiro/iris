@@ -210,7 +210,7 @@ func ExprOperatorIsValid(operatorChecked string) bool {
 	return false
 }
 
-func debug_info_save(windows Windows) {
+func DebugInfoSave(windows Windows) {
 
 	f, _ := os.Create("debug_iris.txt")
 	defer f.Close()
@@ -221,7 +221,7 @@ func debug_info_save(windows Windows) {
 		data := []byte(message)
 		f.Write(data)
 	}
-	for _, winName := range windows_get_win_names_publics_sorted(windows) {
+	for _, winName := range WindowsGetWinNamesPublicsSorted(windows) {
 		winInfo := windows[winName]
 		data := []byte(fmt.Sprintf("win public: %s (%s, %s)\n",
 			winName,
@@ -232,10 +232,10 @@ func debug_info_save(windows Windows) {
 }
 
 // collect win names, I want to sort it!
-func windows_get_win_names_publics_sorted(windows Windows) []string {
+func WindowsGetWinNamesPublicsSorted(windows Windows) []string {
 	winNames := []string{}
 	for winName, _ := range windows {
-		if win_name_is_publics(winName) {
+		if WinNameIsPublic(winName) {
 			winNames = append(winNames, winName)
 		}
 	}
@@ -245,10 +245,10 @@ func windows_get_win_names_publics_sorted(windows Windows) []string {
 
 // from windows -> windows public list
 // map keys are always unsorted!
-func windows_keep_publics(windows Windows) Windows {
+func WindowsKeepPublic(windows Windows) Windows {
 	windows_publics := Windows{}
 	for winName, value := range windows {
-		if win_name_is_publics(winName) {
+		if WinNameIsPublic(winName) {
 			windows_publics[winName] = value
 		}
 	}
@@ -256,10 +256,10 @@ func windows_keep_publics(windows Windows) Windows {
 }
 
 // windows Names -> windows Names: remove internal/non-public window names
-func win_names_keep_publics(winNames []string, sort_the_names bool) []string {
+func WinNamesKeepPublic(winNames []string, sort_the_names bool) []string {
 	publicNames := []string{}
 	for _, name := range winNames {
-		if win_name_is_publics(name) {
+		if WinNameIsPublic(name) {
 			publicNames = append(publicNames, name)
 		}
 	}
@@ -270,10 +270,43 @@ func win_names_keep_publics(winNames []string, sort_the_names bool) []string {
 }
 
 // window name is public?
-func win_name_is_publics(winName string) bool {
+func WinNameIsPublic(winName string) bool {
 	public := true
 	if winName == "prgState" { // prgState is an internal key-value storage
 		public = false
 	}
 	return public
+}
+
+// FIXME: test this
+func WinNamesSort(windows Windows, winNames []string, attribName, sortingMode string) []string {
+	winNamesSorted := []string{}
+	valueStrWinnamePairs := map[string]string{}
+	valueIntWinnamePairs := map[int]string{}
+
+	keysStr := []string{}
+	keysInt := []int{}
+
+	for _, winName := range winNames {
+		val := windows[winName][attribName]
+
+		if sortingMode == "number" { // the values are always strings
+			valInt := Str2Int(val)
+			valueIntWinnamePairs[valInt] = winName
+			keysInt = append(keysInt, valInt)
+		}
+		if sortingMode == "string" {
+			valueStrWinnamePairs[val] = winName
+			keysStr = append(keysStr, val)
+		}
+	}
+	sort.Strings(keysStr) // we have values only in keysStr or in keysInt,
+	sort.Ints(keysInt)    // depend on the stortingMode value
+	for _, keyS := range keysStr {
+		winNamesSorted = append(winNamesSorted, valueStrWinnamePairs[keyS])
+	}
+	for _, keyI := range keysInt {
+		winNamesSorted = append(winNamesSorted, valueIntWinnamePairs[keyI])
+	}
+	return winNamesSorted
 }
