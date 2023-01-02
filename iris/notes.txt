@@ -1,10 +1,6 @@
 Tasks:
   TEST writing:  MatrixCharsCompose
 
-   FIXME: iris_obj.go, COMPOSE LAYERS (Line 53)
-   here are pre-defined window names. collect the public window names,
-   and Compose only the Visible ones, ordered by renderLayerNum
-
   TODO:
     render the chars with colors: iris_char_obj.go, render()
 

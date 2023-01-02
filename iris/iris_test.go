@@ -209,6 +209,15 @@ func Test_new_window(t *testing.T) {
 		"TTTT" + NewLine() +
 		"TTCC" // Child has a shifted position (2,1) so Compose has to handle the shifting, too
 	compare_str_pair("new win 5", matrixCharsComposed.toString(), wantedComposedRendered, t)
+
+	// replace the layer orders
+	windows["Terminal"][KeyLayerNum] = "10" // Child Layer Num is around 1 or 2, not 10
+	matrixCharsComposed = MatrixCharsCompose(windows, windowsChars, []string{"Terminal", "Child"}, "debug")
+	wantedComposedRendered = "" +
+		"TTTT" + NewLine() +
+		"TTTT"
+	compare_str_pair("new win 6 - layers re-ordered", matrixCharsComposed.toString(), wantedComposedRendered, t)
+
 }
 
 func Test_MatrixNew(t *testing.T) {

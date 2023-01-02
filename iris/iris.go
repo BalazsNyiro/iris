@@ -49,7 +49,6 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 		// the windows content can be updated from an outsider source without direct user input
 		windows = WinCoordsCalculateUpdate(windows)
 
-		// FIXME: COMPOSE LAYERS
 		matrixCharsComposed := MatrixCharsCompose(windows, windowsChars, []string{"Terminal", "Child"}, " ")
 
 		matrixCharsComposedStr := matrixCharsComposed.toString()
