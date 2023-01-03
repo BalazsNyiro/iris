@@ -7,9 +7,9 @@ type Color struct {
 	// GRAY24: use a gray color code
 	// NAMED16: first 16 color code, named values
 
-	Red   int    // 0-5 step
-	Green int    // 0-5 step
-	Blue  int    // 0-5 step
-	Gray  int    // 0-23 steps (color code range: 232 - 255)
+	Red   int // RGB: 0-5 step in RGB6 mode
+	Green int
+	Blue  int
+	Gray  int    // 0-23 steps (color code range: 232 - 255 in RGB6 mode)
 	Name  string // named color value?
 }

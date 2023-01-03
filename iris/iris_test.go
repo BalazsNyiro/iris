@@ -35,19 +35,19 @@ func Test_MatrixCharsInsertContentIntoOneWindow(t *testing.T) {
 
 	matrixChars := MatrixCharsEmptyOfWindows(winTestWidth, winTestHeight, 'M', "winName:"+winName)
 	matrixChars = MatrixCharsInsertContentOfWindows(matrixChars, winTestWidth, winTestHeight, windowsChars[winName], true)
-	compare_rune_pair("MatrixCharsInsertContentA", matrixChars.Rendered[Coord{0, 0}].CharVal, 'D', t)
-	compare_rune_pair("MatrixCharsInsertContentB", matrixChars.Rendered[Coord{1, 0}].CharVal, 'o', t)
-	compare_rune_pair("MatrixCharsInsertContentC", matrixChars.Rendered[Coord{2, 0}].CharVal, 'g', t)
-	compare_rune_pair("MatrixCharsInsertContentD", matrixChars.Rendered[Coord{3, 0}].CharVal, 's', t)
-	compare_rune_pair("MatrixCharsInsertContentE", matrixChars.Rendered[Coord{4, 0}].CharVal, ' ', t)
-	compare_rune_pair("MatrixCharsInsertContentF", matrixChars.Rendered[Coord{0, 1}].CharVal, 'a', t)
-	compare_rune_pair("MatrixCharsInsertContentG", matrixChars.Rendered[Coord{1, 1}].CharVal, 'r', t)
-	compare_rune_pair("MatrixCharsInsertContentH", matrixChars.Rendered[Coord{2, 1}].CharVal, 'e', t)
+	compare_rune_pair("MatrixCharsInsertContentA", matrixChars.Rendered[MatrixCoord{0, 0}].CharVal, 'D', t)
+	compare_rune_pair("MatrixCharsInsertContentB", matrixChars.Rendered[MatrixCoord{1, 0}].CharVal, 'o', t)
+	compare_rune_pair("MatrixCharsInsertContentC", matrixChars.Rendered[MatrixCoord{2, 0}].CharVal, 'g', t)
+	compare_rune_pair("MatrixCharsInsertContentD", matrixChars.Rendered[MatrixCoord{3, 0}].CharVal, 's', t)
+	compare_rune_pair("MatrixCharsInsertContentE", matrixChars.Rendered[MatrixCoord{4, 0}].CharVal, ' ', t)
+	compare_rune_pair("MatrixCharsInsertContentF", matrixChars.Rendered[MatrixCoord{0, 1}].CharVal, 'a', t)
+	compare_rune_pair("MatrixCharsInsertContentG", matrixChars.Rendered[MatrixCoord{1, 1}].CharVal, 'r', t)
+	compare_rune_pair("MatrixCharsInsertContentH", matrixChars.Rendered[MatrixCoord{2, 1}].CharVal, 'e', t)
 }
 
 func Test_parameterCollect(t *testing.T) {
 	tokens := []string{"1", "*", "2"}
-	valueLeft, valueRight, idValueLeft, idValueRight, idError := ParametersCollect(tokens, 1)
+	valueLeft, valueRight, idValueLeft, idValueRight, idError := TokenParametersCollect(tokens, 1)
 	compare_str_pair("paramCollect1", valueLeft, "1", t)
 	compare_str_pair("paramCollect1", valueRight, "2", t)
 	compare_int_pair("paramCollect1", idValueLeft, 0, t)
@@ -55,13 +55,13 @@ func Test_parameterCollect(t *testing.T) {
 	compare_str_pair("paramCollect1", idError, "", t)
 
 	tokens = []string{"1", "*"} // missing right param
-	valueLeft, valueRight, idValueLeft, idValueRight, idError = ParametersCollect(tokens, 1)
+	valueLeft, valueRight, idValueLeft, idValueRight, idError = TokenParametersCollect(tokens, 1)
 	compare_str_pair("paramCollect2", valueLeft, "", t)
 	compare_str_pair("paramCollect2", valueRight, "", t)
 	compare_bool_pair("paramCollect2", len(idError) > 0, true, t)
 
 	tokens = []string{"*", "2"} // missing left param
-	valueLeft, valueRight, idValueLeft, idValueRight, idError = ParametersCollect(tokens, 0)
+	valueLeft, valueRight, idValueLeft, idValueRight, idError = TokenParametersCollect(tokens, 0)
 	compare_str_pair("paramCollect2", valueLeft, "", t)
 	compare_str_pair("paramCollect2", valueRight, "", t)
 	compare_bool_pair("paramCollect2", len(idError) > 0, true, t)
@@ -223,7 +223,7 @@ func Test_new_window(t *testing.T) {
 func Test_MatrixNew(t *testing.T) {
 	matrixChars := MatrixCharsEmptyOfWindows(3, 2, 'S', "Test_MatrixNew")
 	compare_int_pair("MatrixNew 1", len(matrixChars.Rendered), 6, t) // 6 elems are in the matrixChars
-	compare_rune_pair("MatrixNew 1", matrixChars.Rendered[Coord{0, 0}].CharVal, 'S', t)
+	compare_rune_pair("MatrixNew 1", matrixChars.Rendered[MatrixCoord{0, 0}].CharVal, 'S', t)
 
 	wantedRendered := "" +
 		"SSS" + NewLine() +

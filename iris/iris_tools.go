@@ -315,3 +315,5 @@ func WinNamesSort(windows Windows, winNames []string, attribName, sortingMode st
 func TimeSleep(interval_millisec int) {
 	time.Sleep(time.Millisecond * time.Duration(interval_millisec))
 }
+
+func NewLine() string { return "\n" }
