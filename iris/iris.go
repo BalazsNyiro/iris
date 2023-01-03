@@ -4,9 +4,7 @@ package iris
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
-	"time"
 )
 
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
@@ -20,10 +18,8 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 	// thank you.
 	ch_user_input := make(chan string)
 	go func(ch chan string) {
-		// disable input buffering
-		exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
-		// do not display entered characters in the console
-		exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
+		terminal_console_disable_input_buffering()
+		terminal_console_character_hide()
 		var b []byte = make([]byte, 1)
 		for {
 			os.Stdin.Read(b)
@@ -36,7 +32,7 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 	go func(ch chan string) {
 		for {
 			// TODO: detect terminal size change here
-			time.Sleep(time.Millisecond * time.Duration(TimeIntervalTerminalSizeDetectMillisec))
+			TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
 		}
 	}(ch_terminal_size_change_detect)
 
@@ -89,7 +85,7 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 		if action == "quit" {
 			break
 		}
-		time.Sleep(time.Millisecond * time.Duration(TimeIntervalUserInterfaceRefreshTimeMillisec))
+		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
 
 		matrixCharsComposedStr_prev = matrixCharsComposedStr
 	}

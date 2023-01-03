@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 	"unsafe"
 )
 
@@ -309,4 +310,8 @@ func WinNamesSort(windows Windows, winNames []string, attribName, sortingMode st
 		winNamesSorted = append(winNamesSorted, valueIntWinnamePairs[keyI])
 	}
 	return winNamesSorted
+}
+
+func TimeSleep(interval_millisec int) {
+	time.Sleep(time.Millisecond * time.Duration(interval_millisec))
 }

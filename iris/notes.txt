@@ -14,6 +14,8 @@ Tasks:
 
   TODO: Test sortWinNames
 
+  TODO: iris.go, Line 35: detect terminal size change
+
 ---------------------------------
 https://stackoverflow.com/questions/2050391/how-to-check-if-a-map-contains-a-key-in-go
 
