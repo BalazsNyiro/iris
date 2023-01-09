@@ -97,7 +97,7 @@ func MatrixCharsCompose(windows Windows, windowsChars WindowsChars, winNamesToCo
 	composed := MatrixChars{width: widthMax, height: heightMax, name: "composed", Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 
 	// lower Layer number is rendered earlier
-	for _, winName := range WinNamesSort(windows, winNamesToComposite, KeyLayerNum, "number") {
+	for _, winName := range WinNamesSortByAttribute(windows, winNamesToComposite, KeyLayerNum, "number") {
 		matrixActualWin := windows[winName].RenderToMatrixCharsOfWin(windowsChars, matrixFiller)
 
 		winLocalXLeftCalculated := Str2Int(windows[winName][KeyXleftCalculated]) // read the values only once,

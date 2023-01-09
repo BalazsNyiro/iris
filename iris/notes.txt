@@ -12,9 +12,6 @@ Tasks:
 
   TODO:
     render the chars with colors: iris_char_obj.go, render()
-
-  TODO: Test sortWinNames
-
   TODO: iris.go, Line 35: detect terminal size change
 
 ---------------------------------

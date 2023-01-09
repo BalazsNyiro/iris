@@ -279,8 +279,8 @@ func WinNameIsPublic(winName string) bool {
 	return public
 }
 
-// FIXME: test this
-func WinNamesSort(windows Windows, winNames []string, attribName, sortingMode string) []string {
+// Tested
+func WinNamesSortByAttribute(windows Windows, winNames []string, attribName, sortingMode string) []string {
 	winNamesSorted := []string{}
 	valueStrWinnamePairs := map[string]string{}
 	valueIntWinnamePairs := map[int]string{}

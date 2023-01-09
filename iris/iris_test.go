@@ -20,6 +20,40 @@ import (
 }
 */
 
+func Test_WinNamesSortByAttribute(t *testing.T) {
+	terminalWidth := 8
+	terminalHeight := 4
+	windows, _ := WindowsNewState(terminalWidth, terminalHeight)
+
+	windows = WinNew(windows, "nameC", "1", "6", Int2Str(1), Int2Str(1), "A")
+	windows = WinNew(windows, "nameD", "2", "5", Int2Str(2), Int2Str(2), "D")
+	windows = WinNew(windows, "nameB", "3", "4", Int2Str(5), Int2Str(2), "C")
+	windows = WinNew(windows, "nameA", "4", "3", Int2Str(3), Int2Str(2), "B")
+
+	sortedByNames := WinNamesSortByAttribute(windows,
+		[]string{"nameC", "nameD", "nameB", "nameA"},
+		KeyWinName, "string")
+	compare_str_lists("sortByNames", sortedByNames, []string{"nameA", "nameB", "nameC", "nameD"}, t)
+
+	sortedByNames = WinNamesSortByAttribute(windows,
+		[]string{"nameC", "nameD", "nameB", "nameA"},
+		KeyDebugWindowFillerChar, "string")
+	compare_str_lists("sortByFillChar", sortedByNames,
+		[]string{"nameC", "nameA", "nameB", "nameD"}, t)
+
+	sortedByNames = WinNamesSortByAttribute(windows, // 1, 2, 3, 4
+		[]string{"nameC", "nameD", "nameB", "nameA"},
+		KeyXleft, "number")
+	compare_str_lists("sortByFillChar", sortedByNames,
+		[]string{"nameC", "nameD", "nameB", "nameA"}, t)
+
+	sortedByNames = WinNamesSortByAttribute(windows, // 3, 4, 5, 6
+		[]string{"nameC", "nameD", "nameB", "nameA"},
+		KeyYtop, "number")
+	compare_str_lists("sortByFillChar", sortedByNames,
+		[]string{"nameA", "nameB", "nameD", "nameC"}, t)
+}
+
 func Test_MatrixCharsInsertContentIntoOneWindow(t *testing.T) {
 	terminalWidth := 8
 	terminalHeight := 4
