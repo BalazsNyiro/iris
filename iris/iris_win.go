@@ -43,7 +43,7 @@ func (win Window) RenderToMatrixCharsOfWin(windowsChars WindowsChars, matrixFill
 }
 
 // TESTED
-func WinSourceUpdate(windowsChars WindowsChars, winName, contentType, contentSrc string) WindowsChars {
+func WinTextUpdate(windowsChars WindowsChars, winName, contentType, contentSrc string) WindowsChars {
 	// possible types: simpleText, html
 	// or in a different fun later: CharObjects can be loaded directly without text-> CharObj conversion
 	if contentType == "simpleText" {

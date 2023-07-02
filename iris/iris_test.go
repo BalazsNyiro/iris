@@ -64,7 +64,7 @@ func Test_MatrixCharsInsertContentIntoOneWindow(t *testing.T) {
 
 	windows, windowsChars := WindowsNewState(terminalWidth, terminalHeight)
 	windows = WinCreateIntoWindows(windows, winName, "1", "2", Int2Str(winTestWidth), Int2Str(winTestHeight), "T")
-	windowsChars = WinSourceUpdate(windowsChars, winName, "simpleText", "Dogs are BARKING...")
+	windowsChars = WinTextUpdate(windowsChars, winName, "simpleText", "Dogs are BARKING...")
 	windows["prgState"]["winActiveId"] = winName
 
 	matrixChars := MatrixCharsEmptyOfWindows(winTestWidth, winTestHeight, 'M', "winName:"+winName)
@@ -208,7 +208,7 @@ func Test_IsNumber(t *testing.T) {
 func Test_RenderToMatrixOfWin(t *testing.T) {
 	windows, windowsChars := WindowsNewState(5, 5)
 	windows = WinCreateIntoWindows(windows, "Child", "1", "1", "3", "3", "C")
-	windowsChars = WinSourceUpdate(windowsChars, "Child", "simpleText", "abcdefghijklmnopq")     // the input test is long but the displayed
+	windowsChars = WinTextUpdate(windowsChars, "Child", "simpleText", "abcdefghijklmnopq")       // the input test is long but the displayed
 	childRenderedMatrixChars := windows["Child"].RenderToMatrixCharsOfWin(windowsChars, "debug") // area is only 3x3 char
 	wantedChildRendered := "" +
 		"abc" + NewLine() +
