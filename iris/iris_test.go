@@ -25,10 +25,10 @@ func Test_WinNamesSortByAttribute(t *testing.T) {
 	terminalHeight := 4
 	windows, _ := WindowsNewState(terminalWidth, terminalHeight)
 
-	windows = WinNew(windows, "nameC", "1", "6", Int2Str(1), Int2Str(1), "A")
-	windows = WinNew(windows, "nameD", "2", "5", Int2Str(2), Int2Str(2), "D")
-	windows = WinNew(windows, "nameB", "3", "4", Int2Str(5), Int2Str(2), "C")
-	windows = WinNew(windows, "nameA", "4", "3", Int2Str(3), Int2Str(2), "B")
+	windows = WinCreateIntoWindows(windows, "nameC", "1", "6", Int2Str(1), Int2Str(1), "A")
+	windows = WinCreateIntoWindows(windows, "nameD", "2", "5", Int2Str(2), Int2Str(2), "D")
+	windows = WinCreateIntoWindows(windows, "nameB", "3", "4", Int2Str(5), Int2Str(2), "C")
+	windows = WinCreateIntoWindows(windows, "nameA", "4", "3", Int2Str(3), Int2Str(2), "B")
 
 	sortedByNames := WinNamesSortByAttribute(windows,
 		[]string{"nameC", "nameD", "nameB", "nameA"},
@@ -63,7 +63,7 @@ func Test_MatrixCharsInsertContentIntoOneWindow(t *testing.T) {
 	winTestHeight := 2
 
 	windows, windowsChars := WindowsNewState(terminalWidth, terminalHeight)
-	windows = WinNew(windows, winName, "1", "2", Int2Str(winTestWidth), Int2Str(winTestHeight), "T")
+	windows = WinCreateIntoWindows(windows, winName, "1", "2", Int2Str(winTestWidth), Int2Str(winTestHeight), "T")
 	windowsChars = WinSourceUpdate(windowsChars, winName, "simpleText", "Dogs are BARKING...")
 	windows["prgState"]["winActiveId"] = winName
 
@@ -160,7 +160,7 @@ func Test_CoordExpressionEval(t *testing.T) {
 
 func Test_CalculateAllWindowCoords(t *testing.T) {
 	windows, _ := WindowsNewState(4, 2)
-	windows = WinNew(windows, "Child", "0", "0", "1", "0", "C")
+	windows = WinCreateIntoWindows(windows, "Child", "0", "0", "1", "0", "C")
 	// we have 2 windows here: "Terminal" (default) and "Child"
 
 	compare_str_pair("CalcAll 1", windows["Child"][KeyXleftCalculated], "0", t)
@@ -207,7 +207,7 @@ func Test_IsNumber(t *testing.T) {
 
 func Test_RenderToMatrixOfWin(t *testing.T) {
 	windows, windowsChars := WindowsNewState(5, 5)
-	windows = WinNew(windows, "Child", "1", "1", "3", "3", "C")
+	windows = WinCreateIntoWindows(windows, "Child", "1", "1", "3", "3", "C")
 	windowsChars = WinSourceUpdate(windowsChars, "Child", "simpleText", "abcdefghijklmnopq")     // the input test is long but the displayed
 	childRenderedMatrixChars := windows["Child"].RenderToMatrixCharsOfWin(windowsChars, "debug") // area is only 3x3 char
 	wantedChildRendered := "" +
@@ -233,7 +233,7 @@ func Test_new_window(t *testing.T) {
 	compare_str_pair("new win 3", winRenderedMatrixChars.toString(), wantedRendered, t)
 
 	////////////////////////// children ////////////////////////////////
-	windows = WinNew(windows, "Child", "2", "1", "3", "1", "C")
+	windows = WinCreateIntoWindows(windows, "Child", "2", "1", "3", "1", "C")
 	childRenderedMatrixChars := windows["Child"].RenderToMatrixCharsOfWin(windowsChars, "debug")
 	wantedChildRendered := "CC"
 	compare_str_pair("new win 4", childRenderedMatrixChars.toString(), wantedChildRendered, t)

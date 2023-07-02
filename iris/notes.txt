@@ -1,6 +1,16 @@
 Tasks:
 
  Questions:
+  - the BIG question: how can the user interface communicate with the main program?
+    - the main program can wait for:
+      - button pressings
+      - text input receiving
+      - selected menu items from a list:
+         > <ul><li id="elemA" selectable="true">1</li><li id="elemB">2</li></ul>
+         > which one is selected?
+         > if a text input is active, the user can type there
+     UI is running in a different thread
+
   - where is the cursor?
   - what if you see a menu, how do you know where are you exactly?
   - how do you receive user input text?

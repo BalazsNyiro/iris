@@ -99,16 +99,18 @@ var KeyLayerNum = "LayerRenderNum" // smaller is rendered first
 
 // TESTED in Test_new_window
 func WindowsNewState(terminalWidth, terminalHeight int) (Windows, WindowsChars) {
-	Win := Windows{}
+	windows := Windows{}
 	// prgState contains all general data
-	Win2 := WinNew(Win, "prgState", "-1", "-1", "0", "0", "S")
-	Win2["prgState"]["winActiveId"] = ""
+	windows = WinCreateIntoWindows(windows, "prgState", "-1", "-1", "0", "0", "S")
+	windows["prgState"]["winActiveId"] = ""
 
-	return WinNew(Win2, "Terminal", "0", "0",
+	windows = WinCreateIntoWindows(windows, "Terminal", "0", "0",
 		strconv.Itoa(terminalWidth-1),
 		strconv.Itoa(terminalHeight-1),
 		"T",
-	), WindowsChars{}
+	)
+
+	return windows, WindowsChars{}
 }
 
 // TESTED
@@ -155,7 +157,7 @@ func CoordExpressionEval(exp string, windows Windows) string {
 }
 
 // TESTED
-func WinNew(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
+func WinCreateIntoWindows(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
 	if id == "prgState" {
 		// program state is not a real window,
 		// it stores the current settings

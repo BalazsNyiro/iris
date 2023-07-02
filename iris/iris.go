@@ -83,6 +83,7 @@ func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 			_ = ""
 		}
 		if action == "quit" {
+			terminal_console_character_show()
 			break
 		}
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)

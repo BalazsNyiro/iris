@@ -16,8 +16,14 @@ func terminal_console_clear() string {
 	return "\033[2J"
 }
 
+// unbuffered input manager in go:
+// https://stackoverflow.com/questions/48831750/unbuffered-input-manager-in-go
 func terminal_console_disable_input_buffering() {
 	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
+}
+
+func terminal_console_character_show() {
+	exec.Command("stty", "-f", "/dev/tty", "echo").Run()
 }
 
 // do not display entered characters in the console
