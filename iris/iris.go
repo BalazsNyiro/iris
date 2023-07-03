@@ -3,6 +3,7 @@ package iris
 
 import (
 	"fmt"
+	iris "github.com/BalazsNyiro/iris/iris/TRASH_OLD_VERSION"
 	"os"
 )
 
@@ -14,7 +15,7 @@ func UserInterfaceStart() {
 	ch_user_input := make(chan string)
 	go channel_read_user_input(ch_user_input)
 
-	ch_terminal_size_change_detect := make(chan string)
+	ch_terminal_size_change_detect := make(chan [2]int)
 	go channel_read_terminal_size_change_detect(ch_terminal_size_change_detect)
 	terminal_console_clear()
 
@@ -80,9 +81,10 @@ func channel_read_user_input(ch chan string) {
 	}
 } ///////////////////////////////////////////////////
 
-func channel_read_terminal_size_change_detect(ch chan string) {
+func channel_read_terminal_size_change_detect(ch chan [2]int) {
 	for {
-		// TODO: detect terminal size change here
+		widthSys, heightSys := iris.TerminalDimensionsWithSyscall()
+		ch <- [2]int{widthSys, heightSys}
 		TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
 	}
 }
