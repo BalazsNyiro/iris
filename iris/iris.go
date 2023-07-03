@@ -11,29 +11,12 @@ var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
 func UserInterfaceStart() {
-	init_set()
-	///////////////////////////////////////////////////
-	// keypress detection is based on this example:
-	// https://stackoverflow.com/questions/54422309/how-to-catch-keypress-without-enter-in-golang-loop
-	// thank you.
+	ui_init()
 	ch_user_input := make(chan string)
-	go func(ch chan string) {
-		var b []byte = make([]byte, 1)
-		for {
-			os.Stdin.Read(b)
-			ch <- string(b)
-		}
-	}(ch_user_input)
-	///////////////////////////////////////////////////
+	go channel_read_user_input(ch_user_input)
 
 	ch_terminal_size_change_detect := make(chan string)
-	go func(ch chan string) {
-		for {
-			// TODO: detect terminal size change here
-			TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
-		}
-	}(ch_terminal_size_change_detect)
-
+	go channel_read_terminal_size_change_detect(ch_terminal_size_change_detect)
 	terminal_console_clear()
 
 	for {
@@ -61,19 +44,38 @@ func UserInterfaceStart() {
 			_ = ""
 		}
 		if action == "quit" {
-			exit_cleaning()
+			ui_exit()
 			break
 		}
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
 	}
 }
 
-func init_set() {
+func ui_init() {
 	terminal_console_input_buffering_disable()
 	terminal_console_character_hide()
 }
 
-func exit_cleaning() {
+func ui_exit() {
 	terminal_console_character_show()
 	terminal_console_input_buffering_enable()
+}
+
+// /////////////////////////////////////////////////
+// keypress detection is based on this example:
+// https://stackoverflow.com/questions/54422309/how-to-catch-keypress-without-enter-in-golang-loop
+// thank you.
+func channel_read_user_input(ch chan string) {
+	var b []byte = make([]byte, 1)
+	for {
+		os.Stdin.Read(b)
+		ch <- string(b)
+	}
+} ///////////////////////////////////////////////////
+
+func channel_read_terminal_size_change_detect(ch chan string) {
+	for {
+		// TODO: detect terminal size change here
+		TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
+	}
 }
