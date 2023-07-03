@@ -82,9 +82,14 @@ func channel_read_user_input(ch chan string) {
 } ///////////////////////////////////////////////////
 
 func channel_read_terminal_size_change_detect(ch chan [2]int) {
+	widthSys, heightSys := 0, 0
 	for {
-		widthSys, heightSys := iris.TerminalDimensionsWithSyscall()
-		ch <- [2]int{widthSys, heightSys}
+		widthSysNow, heightSysNow := iris.TerminalDimensionsWithSyscall()
+		if widthSysNow != widthSys || heightSysNow != heightSys {
+			widthSys = widthSysNow
+			heightSys = heightSysNow
+			ch <- [2]int{widthSys, heightSys}
+		}
 		TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
 	}
 }
