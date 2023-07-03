@@ -11,15 +11,13 @@ var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
 func UserInterfaceStart() {
-
+	init()
 	///////////////////////////////////////////////////
 	// keypress detection is based on this example:
 	// https://stackoverflow.com/questions/54422309/how-to-catch-keypress-without-enter-in-golang-loop
 	// thank you.
 	ch_user_input := make(chan string)
 	go func(ch chan string) {
-		terminal_console_input_buffering_disable()
-		terminal_console_character_hide()
 		var b []byte = make([]byte, 1)
 		for {
 			os.Stdin.Read(b)
@@ -63,10 +61,19 @@ func UserInterfaceStart() {
 			_ = ""
 		}
 		if action == "quit" {
-			terminal_console_character_show()
-			terminal_console_input_buffering_enable()
+			exit_cleaning()
 			break
 		}
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
 	}
+}
+
+func init() {
+	terminal_console_input_buffering_disable()
+	terminal_console_character_hide()
+}
+
+func exit_cleaning() {
+	terminal_console_character_show()
+	terminal_console_input_buffering_enable()
 }
