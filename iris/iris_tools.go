@@ -76,8 +76,8 @@ func shell(commandAndParams string) (string, error) { // basic fun
 func shellCore(commandAndParams, stdInput string) (string, error) { // basic fun
 	args := strings.Fields(commandAndParams)
 	cmd := exec.Command(args[0], args[1:]...)
-	if len(input) > 0 {
-		cmd.Stdin = strings.NewReader(input)
+	if len(stdInput) > 0 {
+		cmd.Stdin = strings.NewReader(stdInput)
 	} else {
 		cmd.Stdin = os.Stdin
 	}
