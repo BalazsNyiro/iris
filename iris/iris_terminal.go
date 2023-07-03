@@ -18,15 +18,19 @@ func terminal_console_clear() string { // basic fun
 
 // unbuffered input manager in go:
 // https://stackoverflow.com/questions/48831750/unbuffered-input-manager-in-go
-func terminal_console_disable_input_buffering() { // basic fun
-	exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run()
+func terminal_console_input_buffering_disable() { // basic fun
+	exec.Command("stty", "--file=/dev/tty", "cbreak", "min", "1").Run()
+}
+
+func terminal_console_input_buffering_enable() { // basic fun
+	exec.Command("stty", "--file=/dev/tty", "-cbreak", "min", "1").Run()
 }
 
 func terminal_console_character_show() { // basic fun
-	exec.Command("stty", "-f", "/dev/tty", "echo").Run()
+	exec.Command("stty", "--file=/dev/tty", "echo").Run()
 }
 
 // do not display entered characters in the console
 func terminal_console_character_hide() { // basic fun
-	exec.Command("stty", "-F", "/dev/tty", "-echo").Run()
+	exec.Command("stty", "--file=/dev/tty", "-echo").Run()
 }
