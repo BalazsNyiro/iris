@@ -4,7 +4,6 @@ package iris
 import (
 	"fmt"
 	"os"
-	"strings"
 )
 
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
@@ -24,31 +23,39 @@ func UserInterfaceStart() {
 		select { //                https://gobyexample.com/select
 		case stdin, _ := <-ch_user_input: //  the message is coming...
 			fmt.Println("Keys pressed:", stdin)
-			if stdin == "q" {
-				action = "quit"
-			}
+			action = action_of_user_input(stdin)
 
-			if strings.Contains("lhjk", stdin) {
-				if stdin == "l" {
-				}
-				if stdin == "h" {
-				}
-				if stdin == "j" {
-				}
-				if stdin == "k" {
-				}
-			}
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)
+
 		default: //               or not coming
 			_ = ""
 		}
+
 		if action == "quit" {
 			ui_exit()
 			break
 		}
+
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
 	}
+}
+
+func action_of_user_input(stdin string) string {
+	action := ""
+	if stdin == "q" {
+		action = "quit"
+	}
+
+	if stdin == "l" {
+	}
+	if stdin == "h" {
+	}
+	if stdin == "j" {
+	}
+	if stdin == "k" {
+	}
+	return action
 }
 
 func ui_init() {
