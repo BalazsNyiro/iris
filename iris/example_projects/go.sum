@@ -82,3 +82,17 @@ github.com/BalazsNyiro/iris v0.0.0-20230703201636-06eb1b210e5d h1:XBiHW/vCDiqE+L
 github.com/BalazsNyiro/iris v0.0.0-20230703201636-06eb1b210e5d/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
 github.com/BalazsNyiro/iris v0.0.0-20230703201801-a25cde730632 h1:dfDCMJTEpuTfddDtNiTQVfzc7BQUbfjyQQ51PO3onoE=
 github.com/BalazsNyiro/iris v0.0.0-20230703201801-a25cde730632/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703202745-0c8a6a6adde6 h1:gg4SU1X7OM285yigce1AYp0RzR4BCweD8X+GFJvMlFA=
+github.com/BalazsNyiro/iris v0.0.0-20230703202745-0c8a6a6adde6/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703203217-1a5aa3af8b9c h1:0qcpvHYlbjCPSDWxz5rhTfg2PpkjLhTkRV7lfPnYicw=
+github.com/BalazsNyiro/iris v0.0.0-20230703203217-1a5aa3af8b9c/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703203311-d2337c8fb3ca h1:S/FEisRr+lL4YWKp+p/Nwc88bCU0F6AKQTX0QbBxjPA=
+github.com/BalazsNyiro/iris v0.0.0-20230703203311-d2337c8fb3ca/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703203747-0df09f3d5f6e h1:eiUZi06XubymqQ0kGuYha5bJ0Kj+VoQBrkvY6lBkWms=
+github.com/BalazsNyiro/iris v0.0.0-20230703203747-0df09f3d5f6e/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703204436-d37f4288d524 h1:GTnEy5kyq91qwNFN3UKdkZmuDidhtQsiy6UyhhkGqHI=
+github.com/BalazsNyiro/iris v0.0.0-20230703204436-d37f4288d524/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703211612-1e7c7fea71b4 h1:mI2JTGJecCT7+tAHgo0Oot5GwhMfByDhk3sDUPiTMlg=
+github.com/BalazsNyiro/iris v0.0.0-20230703211612-1e7c7fea71b4/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703212015-61dc2e6764bb h1:21NaDsKVVIynrucxobi2qVP1UEMCJ2mYEtRBtEPO2tc=
+github.com/BalazsNyiro/iris v0.0.0-20230703212015-61dc2e6764bb/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
