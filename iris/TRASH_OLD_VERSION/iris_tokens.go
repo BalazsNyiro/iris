@@ -4,7 +4,7 @@ import "strings"
 
 // if the next operator is "": there is no more operator
 // TESTED
-func TokenOperatorNext(tokens []string) (int, string) {
+func TokenOperatorNext(tokens []string) (int, string) { // DIA
 	operatorNext := "unknown"
 	tokens = StrListRemoveEmptyElems(tokens, true)
 	// math operator precedence: * / are the first
@@ -25,7 +25,7 @@ func TokenOperatorNext(tokens []string) (int, string) {
 	return -1, operatorNext
 }
 
-func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string {
+func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string { // DIA
 	tokens = StrListRemoveEmptyElems(tokens, true)
 	for id, token := range tokens {
 		if len(token) > 4 && token[0:4] == "win:" { // win:Terminal:xRightCalculated
@@ -45,7 +45,7 @@ func TokenReplaceWinPlaceholders(windows Windows, tokens []string) []string {
 }
 
 // TESTED
-func TokenParametersCollect(tokens []string, tokenId int) (string, string, int, int, string) {
+func TokenParametersCollect(tokens []string, tokenId int) (string, string, int, int, string) { // DIA
 	errMsg := ""
 	valueLeft := ""
 	valueRight := ""

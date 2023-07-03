@@ -89,10 +89,10 @@ func MatrixCharsInsertContentOfWindows(matrixChars MatrixChars, winWidth, winHei
 	return matrixChars
 } ////////////////////////////////////////////////////////////////////////////////////////
 
-func MatrixCharsCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, matrixFiller string) MatrixChars {
+func MatrixCharsCompose(windows Windows, windowsChars WindowsChars, winNamesToComposite []string, matrixFiller string) MatrixChars { // DIA , kicsit ertem???
 	widthMax, heightMax := 0, 0
 
-	winNamesToComposite = WinNamesKeepPublic(winNamesToComposite, false)
+	winNamesToComposite = WinNamesKeepPublicOnly(winNamesToComposite, false)
 
 	composed := MatrixChars{width: widthMax, height: heightMax, name: "composed", Rendered: MatrixCharsRenderedWithFgBgSettings{}}
 

@@ -59,7 +59,7 @@ func WinTextUpdate(windowsChars WindowsChars, winName, contentType, contentSrc s
 
 // TESTED
 func WinCoordsCalculateUpdate(windows Windows) Windows {
-	for winName, _ := range WindowsKeepPublic(windows) {
+	for winName, _ := range WindowsKeepPublicOnly(windows) {
 		// fmt.Println("Calc winName", winName)
 		windows[winName][KeyXleftCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXleft], windows), "+", windows[winName][KeyXshift])
 		windows[winName][KeyXrightCalculated] = StrMath(CoordExpressionEval(windows[winName][KeyXright], windows), "+", windows[winName][KeyXshift])
@@ -98,7 +98,7 @@ var KeyVisible = "visible"
 var KeyLayerNum = "LayerRenderNum" // smaller is rendered first
 
 // TESTED in Test_new_window
-func WindowsNewState(terminalWidth, terminalHeight int) (Windows, WindowsChars) {
+func WinNewStateIntoWindows(terminalWidth, terminalHeight int) (Windows, WindowsChars) { // DIA
 	windows := Windows{}
 	// prgState contains all general data
 	windows = WinCreateIntoWindows(windows, "prgState", "-1", "-1", "0", "0", "S")
@@ -156,8 +156,8 @@ func CoordExpressionEval(exp string, windows Windows) string {
 	return tokens[0]
 }
 
-// TESTED
-func WinCreateIntoWindows(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows {
+// TESTED, new window object creation into windows
+func WinCreateIntoWindows(windows Windows, id, keyXleft, keyYtop, keyXright, keyYbottom, debugWindowFiller string) Windows { // DIA
 	if id == "prgState" {
 		// program state is not a real window,
 		// it stores the current settings

@@ -10,7 +10,7 @@ import (
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
-func UserInterfaceStart() {
+func UserInterfaceStart(windows Windows, windowsChars WindowsChars) {
 
 	///////////////////////////////////////////////////
 	// keypress detection is based on this example:
@@ -38,23 +38,43 @@ func UserInterfaceStart() {
 
 	terminal_console_clear()
 
+	matrixCharsComposedStr_prev := ""
+
 	for {
+
+		// the windows content can be updated from an outsider source without direct user input
+		windows = WinCoordsCalculateUpdate(windows)
+
+		matrixCharsComposed := MatrixCharsCompose(windows, windowsChars, []string{"Terminal", "Child"}, " ")
+
+		matrixCharsComposedStr := matrixCharsComposed.toString()
+		if matrixCharsComposedStr != matrixCharsComposedStr_prev {
+			fmt.Print(terminal_console_cursor_pos_home())
+			fmt.Print(matrixCharsComposedStr)
+		}
+
 		action := ""
 		select { //                https://gobyexample.com/select
 		case stdin, _ := <-ch_user_input: //  the message is coming...
-			fmt.Println("Keys pressed:", stdin)
+			// fmt.Println("Keys pressed:", stdin)
 			if stdin == "q" {
 				action = "quit"
 			}
-
+			// vim navigation keys
 			if strings.Contains("lhjk", stdin) {
+				winActiveId := windows["prgState"]["winActiveId"]
+				DebugInfoSave(windows)
 				if stdin == "l" {
+					windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "+", "1")
 				}
 				if stdin == "h" {
+					windows[winActiveId][KeyXshift] = StrMath(windows[winActiveId][KeyXshift], "-", "1")
 				}
 				if stdin == "j" {
+					windows[winActiveId][KeyYshift] = StrMath(windows[winActiveId][KeyYshift], "+", "1")
 				}
 				if stdin == "k" {
+					windows[winActiveId][KeyYshift] = StrMath(windows[winActiveId][KeyYshift], "-", "1")
 				}
 			}
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
@@ -67,5 +87,7 @@ func UserInterfaceStart() {
 			break
 		}
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
+
+		matrixCharsComposedStr_prev = matrixCharsComposedStr
 	}
 }
