@@ -76,3 +76,9 @@ github.com/BalazsNyiro/iris v0.0.0-20221215191628-f2e7b14d445f h1:v9XjnULeISYbjy
 github.com/BalazsNyiro/iris v0.0.0-20221215191628-f2e7b14d445f/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
 github.com/BalazsNyiro/iris v0.0.0-20230102150728-20f53bf4d42a h1:ABcNt3yPbJ7YOWtJ4VSWkfRVjadFsgyWOMZL+36trOs=
 github.com/BalazsNyiro/iris v0.0.0-20230102150728-20f53bf4d42a/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230702124917-4936d901daff h1:niSkO+h22NsZWCvilHwDiRY8u99wDTRrdOUlUQuvuHk=
+github.com/BalazsNyiro/iris v0.0.0-20230702124917-4936d901daff/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703201636-06eb1b210e5d h1:XBiHW/vCDiqE+Lg7oArJOy6viiv8g/iPGjg+WikL00c=
+github.com/BalazsNyiro/iris v0.0.0-20230703201636-06eb1b210e5d/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
+github.com/BalazsNyiro/iris v0.0.0-20230703201801-a25cde730632 h1:dfDCMJTEpuTfddDtNiTQVfzc7BQUbfjyQQ51PO3onoE=
+github.com/BalazsNyiro/iris v0.0.0-20230703201801-a25cde730632/go.mod h1:gOOpqgInAXvDwO/dbfrht1NuO34jy3WcMVq5hvRcqsE=
