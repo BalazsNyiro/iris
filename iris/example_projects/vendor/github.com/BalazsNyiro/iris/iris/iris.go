@@ -10,14 +10,15 @@ import (
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
-func UserInterfaceStart() {
+func UserInterfaceStart(ch_data_input chan string) {
 	ui_init()
 	ch_user_input := make(chan string)
 	go channel_read_user_input(ch_user_input)
 
 	ch_terminal_size_change_detect := make(chan [2]int)
 	go channel_read_terminal_size_change_detect(ch_terminal_size_change_detect)
-	terminal_console_clear()
+
+	go data_input_interpret(ch_data_input)
 
 	for {
 		action := ""
@@ -28,6 +29,7 @@ func UserInterfaceStart() {
 
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)
+			// TODO: where do you store the new terminal size?
 
 		default: //               or not coming
 			_ = ""
@@ -39,6 +41,17 @@ func UserInterfaceStart() {
 		}
 
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
+	}
+}
+
+func data_input_interpret(ch_data_input chan string) {
+	for {
+		select {
+		case dataInput, _ := <-ch_data_input:
+			fmt.Println("data input:", dataInput)
+		default:
+			_ = ""
+		}
 	}
 }
 
@@ -60,6 +73,7 @@ func action_of_user_input(stdin string) string {
 }
 
 func ui_init() {
+	terminal_console_clear()
 	terminal_console_input_buffering_disable()
 	terminal_console_character_hide()
 }
