@@ -18,6 +18,8 @@ func UserInterfaceStart(ch_data_input chan string) {
 	ch_terminal_size_change_detect := make(chan [2]int)
 	go channel_read_terminal_size_change_detect(ch_terminal_size_change_detect)
 
+	go data_input_interpret(ch_data_input)
+
 	for {
 		action := ""
 		select { //                https://gobyexample.com/select
@@ -28,9 +30,6 @@ func UserInterfaceStart(ch_data_input chan string) {
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
 			fmt.Println("terminal size change:", terminal_size_change)
 			// TODO: where do you store the new terminal size?
-
-		case dataInput, _ := <-ch_data_input:
-			data_input_interpret(dataInput)
 
 		default: //               or not coming
 			_ = ""
@@ -45,8 +44,15 @@ func UserInterfaceStart(ch_data_input chan string) {
 	}
 }
 
-func data_input_interpret(dataInput string) {
-	fmt.Println("data input:", dataInput)
+func data_input_interpret(ch_data_input chan string) {
+	for {
+		select {
+		case dataInput, _ := <-ch_data_input:
+			fmt.Println("data input:", dataInput)
+		default:
+			_ = ""
+		}
+	}
 }
 
 func action_of_user_input(stdin string) string {
