@@ -36,7 +36,7 @@ func UserInterfaceStart(ch_data_input chan string) {
 		}
 
 		if action == "quit" {
-			ui_exit()
+			Ui_exit()
 			break
 		}
 
@@ -78,7 +78,7 @@ func ui_init() {
 	terminal_console_character_hide()
 }
 
-func ui_exit() {
+func Ui_exit() {
 	terminal_console_character_show()
 	terminal_console_input_buffering_enable()
 }

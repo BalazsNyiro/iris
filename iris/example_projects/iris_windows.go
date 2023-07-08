@@ -12,20 +12,17 @@ func main() {
 	ch_data_input := make(chan string)
 	go iris.UserInterfaceStart(ch_data_input)
 
-	ch_data_input <- `	obj:win_1
-						top:5
-						bottom:22
-						left:4
-						right:33`
+	ch_data_input <- `	select:win:logs-left
+						set:top:5
+						set:bottom:22
+						set:left:4
+						set:right:33`
 
 	for i := 1; i < 5; i++ {
-		ch_data_input <- ` obj:win_1
-						addSimpleText:AddEverythingAfter\tfirstColon
-This is the second line`
+		// everything after the 'addSimpleText:' is the part of the text
+		ch_data_input <- `select:win:logs-left
+						add:simpleText:AddEverythingAfterColon` + fmt.Sprintf("%d", i)
 		iris.TimeSleep(2000)
 	}
 
-	ch_data_input <- ` 	obj:win_manager
-						cmd:exit
-`
 }
