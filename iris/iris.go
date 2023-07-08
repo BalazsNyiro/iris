@@ -5,10 +5,23 @@ import (
 	"fmt"
 	iris "github.com/BalazsNyiro/iris/iris/TRASH_OLD_VERSION"
 	"os"
+	"strings"
 )
 
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
+
+type Windows []Window
+type Window struct {
+	id string
+
+	// top-left coord: 0, 0 in the root terminal
+	top    int
+	bottom int
+	left   int
+	right  int
+	lines  []string
+}
 
 func UserInterfaceStart(ch_data_input chan string) {
 	ui_init()
@@ -18,7 +31,9 @@ func UserInterfaceStart(ch_data_input chan string) {
 	ch_terminal_size_change_detect := make(chan [2]int)
 	go channel_read_terminal_size_change_detect(ch_terminal_size_change_detect)
 
-	go data_input_interpret(ch_data_input)
+	// windows is a read-only variable everywhere,
+	windows := Windows{} // modified/updated ONLY here:
+	go data_input_interpret(ch_data_input, &windows)
 
 	for {
 		action := ""
@@ -36,7 +51,7 @@ func UserInterfaceStart(ch_data_input chan string) {
 		}
 
 		if action == "quit" {
-			Ui_exit()
+			UserInterfaceExit()
 			break
 		}
 
@@ -44,11 +59,16 @@ func UserInterfaceStart(ch_data_input chan string) {
 	}
 }
 
-func data_input_interpret(ch_data_input chan string) {
+func data_input_interpret(ch_data_input chan string, windows *Windows) {
+
 	for {
 		select {
 		case dataInput, _ := <-ch_data_input:
-			fmt.Println("data input:", dataInput)
+			// fmt.Println("data input:", dataInput)
+			for _, lineOrig := range strings.Split(dataInput, "\n") {
+				line := strings.TrimSpace(lineOrig)
+				fmt.Println("data input, line:", line)
+			}
 		default:
 			_ = ""
 		}
@@ -78,7 +98,7 @@ func ui_init() {
 	terminal_console_character_hide()
 }
 
-func Ui_exit() {
+func UserInterfaceExit() {
 	terminal_console_character_show()
 	terminal_console_input_buffering_enable()
 }
