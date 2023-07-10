@@ -108,7 +108,7 @@ func select_win(dataInput string, windows *Windows) string {
 			addSimpleTextDetectedLine = lineNum
 			win := (*windows)[winId]
 			fmt.Println("DEBUG:", lineOrig)
-			win.lines = append(win.lines, strings.SplitN(lineOrig, "add:simpleText:", 1)[1])
+			win.lines = append(win.lines, strings.SplitN(lineOrig, "add:simpleText:", -1)[1])
 			(*windows)[winId] = win
 			break
 		}
