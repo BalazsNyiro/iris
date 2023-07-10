@@ -65,13 +65,20 @@ func data_input_interpret(ch_data_input chan string, windows *Windows) {
 		select {
 		case dataInput, _ := <-ch_data_input:
 			// fmt.Println("data input:", dataInput)
-			for _, lineOrig := range strings.Split(dataInput, "\n") {
-				line := strings.TrimSpace(lineOrig)
-				fmt.Println("data input, line:", line)
+			if strings.HasPrefix(dataInput, "select:win") {
+				select_win(dataInput, windows)
 			}
 		default:
 			_ = ""
 		}
+	}
+}
+
+func select_win(dataInput string, windows *Windows) {
+
+	for _, lineOrig := range strings.Split(dataInput, "\n") {
+		line := strings.TrimSpace(lineOrig)
+		fmt.Println("select_win, line:", line)
 	}
 }
 
