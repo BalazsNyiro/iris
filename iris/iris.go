@@ -11,7 +11,7 @@ import (
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
-type Windows []Window
+type Windows map[string]Window
 type Window struct {
 	id string
 
@@ -66,7 +66,11 @@ func data_input_interpret(ch_data_input chan string, windows *Windows) {
 		case dataInput, _ := <-ch_data_input:
 			// fmt.Println("data input:", dataInput)
 			if strings.HasPrefix(dataInput, "select:win") {
-				select_win(dataInput, windows)
+				winId := select_win(dataInput, windows)
+				if winId != "" {
+					fmt.Println("after select:win, addSimpleText", (*windows)[winId].lines)
+
+				}
 			}
 		default:
 			_ = ""
@@ -74,12 +78,50 @@ func data_input_interpret(ch_data_input chan string, windows *Windows) {
 	}
 }
 
-func select_win(dataInput string, windows *Windows) {
+/*
+'add:simpleText:' is always the last added elem, everything after it is added automatically
+into the lines
+*/
+func select_win(dataInput string, windows *Windows) string {
+	winId := ""
+	addSimpleTextDetectedLine := -1
 
-	for _, lineOrig := range strings.Split(dataInput, "\n") {
+	for lineNum, lineOrig := range strings.Split(dataInput, "\n") {
 		line := strings.TrimSpace(lineOrig)
 		fmt.Println("select_win, line:", line)
+		elems := strings.Split(line, ":")
+
+		// select:win:nameOfWin
+		if elems[0] == "select" && elems[1] == "win" {
+			if len(elems) == 3 {
+				winId = strings.TrimSpace(elems[2])
+				if _, exist := (*windows)[winId]; !exist {
+					(*windows)[winId] = Window{}
+				}
+			}
+		}
+
+		if winId == "" {
+			continue
+		}
+		if elems[0] == "add" && elems[1] == "simpleText" {
+			addSimpleTextDetectedLine = lineNum
+			fmt.Println((*windows)[winId].lines)
+			win := (*windows)[winId]
+			win.lines = append(win.lines, strings.SplitN(lineOrig, "add:simpleText:", 1)[1])
+			break
+		}
+
 	}
+	if addSimpleTextDetectedLine > -1 {
+		for lineNum, lineOrig := range strings.Split(dataInput, "\n") {
+			if lineNum > addSimpleTextDetectedLine {
+				win := (*windows)[winId]
+				win.lines = append(win.lines, lineOrig)
+			}
+		}
+	}
+	return winId
 }
 
 func action_of_user_input(stdin string) string {
