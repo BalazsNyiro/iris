@@ -23,7 +23,8 @@ type Window struct {
 	lines  []string
 }
 
-func UserInterfaceStart(ch_data_input chan string) {
+// newLineSeparator: \n, \r\n - that you can find at the end of the lines - a line separator
+func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 	ui_init()
 	ch_user_input := make(chan string)
 	go channel_read_user_input(ch_user_input)
@@ -33,7 +34,7 @@ func UserInterfaceStart(ch_data_input chan string) {
 
 	// windows is a read-only variable everywhere,
 	windows := Windows{} // modified/updated ONLY here:
-	go data_input_interpret(ch_data_input, &windows)
+	go data_input_interpret(ch_data_input, &windows, newlineSeparator)
 
 	for {
 		action := ""
@@ -59,14 +60,14 @@ func UserInterfaceStart(ch_data_input chan string) {
 	}
 }
 
-func data_input_interpret(ch_data_input chan string, windows *Windows) {
+func data_input_interpret(ch_data_input chan string, windows *Windows, newlineSeparator string) {
 
 	for {
 		select {
 		case dataInput, _ := <-ch_data_input:
 			// fmt.Println("data input:", dataInput)
 			if strings.HasPrefix(dataInput, "select:win") {
-				winId := select_win(dataInput, windows)
+				winId := select_win(dataInput, windows, newlineSeparator)
 				if winId != "" {
 					fmt.Println("after select:win, addSimpleText", (*windows)[winId].lines)
 
@@ -82,11 +83,11 @@ func data_input_interpret(ch_data_input chan string, windows *Windows) {
 'add:simpleText:' is always the last added elem, everything after it is added automatically
 into the lines
 */
-func select_win(dataInput string, windows *Windows) string {
+func select_win(dataInput string, windows *Windows, newlineSeparator string) string {
 	winId := ""
 	addSimpleTextDetectedLine := -1
 
-	for lineNum, lineOrig := range strings.Split(dataInput, "\n") {
+	for lineNum, lineOrig := range strings.Split(dataInput, newlineSeparator) {
 		line := strings.TrimSpace(lineOrig)
 		fmt.Println("select_win, line:", line)
 		elems := strings.Split(line, ":")
@@ -107,7 +108,6 @@ func select_win(dataInput string, windows *Windows) string {
 		if elems[0] == "add" && elems[1] == "simpleText" {
 			addSimpleTextDetectedLine = lineNum
 			win := (*windows)[winId]
-			fmt.Println("DEBUG:", lineOrig)
 			win.lines = append(win.lines, strings.SplitN(lineOrig, "add:simpleText:", -1)[1])
 			(*windows)[winId] = win
 			break
@@ -115,7 +115,7 @@ func select_win(dataInput string, windows *Windows) string {
 
 	}
 	if addSimpleTextDetectedLine > -1 {
-		for lineNum, lineOrig := range strings.Split(dataInput, "\n") {
+		for lineNum, lineOrig := range strings.Split(dataInput, newlineSeparator) {
 			if lineNum > addSimpleTextDetectedLine {
 				win := (*windows)[winId]
 				win.lines = append(win.lines, lineOrig)
