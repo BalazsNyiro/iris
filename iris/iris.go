@@ -2,9 +2,13 @@
 package iris
 
 import (
+	"bytes"
 	"fmt"
 	iris "github.com/BalazsNyiro/iris/iris/TRASH_OLD_VERSION"
+	"log"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -23,6 +27,17 @@ type Window struct {
 	lines  []string
 }
 
+type ScreenLayers []ScreenLayer
+type ScreenLayer struct {
+	leftX  int
+	topY   int
+	matrix []ScreenColumn
+}
+type ScreenColumn []ScreenChar
+type ScreenChar struct {
+	txtValue string
+}
+
 // newLineSeparator: \n, \r\n - that you can find at the end of the lines - a line separator
 func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 	ui_init()
@@ -36,6 +51,7 @@ func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 	windows := Windows{} // modified/updated ONLY here:
 	go data_input_interpret(ch_data_input, &windows, newlineSeparator)
 
+	var terminalSizeActual [2]int
 	for {
 		action := ""
 		select { //                https://gobyexample.com/select
@@ -44,9 +60,7 @@ func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 			action = action_of_user_input(stdin)
 
 		case terminal_size_change, _ := <-ch_terminal_size_change_detect: //  the message is coming...
-			fmt.Println("terminal size change:", terminal_size_change)
-			// TODO: where do you store the new terminal size?
-
+			terminalSizeActual = terminal_size_change
 		default: //               or not coming
 			_ = ""
 		}
@@ -55,22 +69,67 @@ func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 			UserInterfaceExit()
 			break
 		}
-
+		layers := RenderAllWindowsIntoLayers(windows, terminalSizeActual)
+		DisplayAllLayers(layers, newlineSeparator)
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
 	}
 }
 
-func data_input_interpret(ch_data_input chan string, windows *Windows, newlineSeparator string) {
+////////////////////////////////////////////////////////////////////////////////////////////////
 
+func DisplayAllLayers(layers ScreenLayers, newlineSeparator string) {
+	// naive, TODO: display layers in order?
+	shell("clear")
+	for _, layerStruct := range layers {
+		matrix := layerStruct.matrix
+		height := len(matrix[0]) // len of first column
+		for y := 0; y < height; y++ {
+			width := len(matrix)
+			for x := 0; x < width; x++ {
+				fmt.Print(matrix[x][y])
+			}
+			fmt.Print()
+		}
+	}
+}
+
+func ScreenLayerCreate(leftX, topY, width, height int, txtLayerDefault string) ScreenLayer {
+	// fmt.Println("screen layer create:", width, height)
+	screenLayer := ScreenLayer{leftX: leftX, topY: topY}
+	for x := 0; x < width; x++ {
+		column := ScreenColumn{}
+		for y := 0; y < height; y++ {
+			column = append(column, ScreenChar{txtValue: txtLayerDefault})
+		}
+		screenLayer.matrix = append(screenLayer.matrix, column)
+	}
+}
+
+func RenderAllWindowsIntoLayers(windowsRO Windows, terminalSize [2]int) ScreenLayers {
+	screenBackground := ScreenLayerCreate(
+		0, 0,
+		terminalSize[0],
+		terminalSize[1], ".")
+
+	layers := ScreenLayers{screenBackground}
+
+	/*
+		for _, winId := range windowsRO {
+			fmt.Println("render: winId", winId)
+		}
+	*/
+	return layers
+}
+
+func data_input_interpret(ch_data_input chan string, windows *Windows, newlineSeparator string) {
 	for {
 		select {
 		case dataInput, _ := <-ch_data_input:
 			// fmt.Println("data input:", dataInput)
 			if strings.HasPrefix(dataInput, "select:win") {
-				winId := select_win(dataInput, windows, newlineSeparator)
-				if winId != "" {
-					fmt.Println("after select:win, addSimpleText", (*windows)[winId].lines)
-
+				winUpdated := select_win(dataInput, windows, newlineSeparator)
+				if winUpdated != "" {
+					// fmt.Println("after select:win, addSimpleText", (*windows)[winUpdated].lines)
 				}
 			}
 		default:
@@ -105,6 +164,8 @@ func select_win(dataInput string, windows *Windows, newlineSeparator string) str
 		if winId == "" {
 			continue
 		}
+
+		// process only the first line here, then later add all other lines, too
 		if elems[0] == "add" && elems[1] == "simpleText" {
 			addSimpleTextDetectedLine = lineNum
 			win := (*windows)[winId]
@@ -177,4 +238,37 @@ func channel_read_terminal_size_change_detect(ch chan [2]int) {
 		}
 		TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
 	}
+}
+
+// https://zetcode.com/golang/exec-command/
+// TESTED manually
+func shell(commandAndParams string) (string, error) { // basic fun
+	return shellCore(commandAndParams, "")
+}
+
+// TESTED manually
+func shellCore(commandAndParams, input string) (string, error) { // basic fun
+	args := strings.Fields(commandAndParams)
+	cmd := exec.Command(args[0], args[1:]...)
+	if len(input) > 0 {
+		cmd.Stdin = strings.NewReader(input)
+	} else {
+		cmd.Stdin = os.Stdin
+	}
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		log.Println(err)
+	}
+	return out.String(), err
+}
+
+func OsDetect() string { // basic fun
+	os := runtime.GOOS
+	if strings.Contains("windows|darwin|linux", os) {
+		return os
+	}
+	return "linux" // if we have an exotic os, we will handle it as linux
+	// return "unknown"
 }
