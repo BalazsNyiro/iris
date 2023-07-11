@@ -90,14 +90,15 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string) {
 
 func ScreenLayerCreate(leftX, topY, width, height int, txtLayerDefault string) ScreenLayer {
 	// fmt.Println("screen layer create:", width, height)
-	screenLayer := ScreenLayer{leftX: leftX, topY: topY}
+	screenLayerNew := ScreenLayer{leftX: leftX, topY: topY}
 	for x := 0; x < width; x++ {
 		column := ScreenColumn{}
 		for y := 0; y < height; y++ {
 			column = append(column, ScreenChar{txtValue: txtLayerDefault})
 		}
-		screenLayer.matrix = append(screenLayer.matrix, column)
+		screenLayerNew.matrix = append(screenLayerNew.matrix, column)
 	}
+	return screenLayerNew
 }
 
 func RenderAllWindowsIntoLayers(windowsRO Windows, terminalSize [2]int) ScreenLayers {
