@@ -2,13 +2,8 @@
 package iris
 
 import (
-	"bytes"
 	"fmt"
-	iris "github.com/BalazsNyiro/iris/iris/TRASH_OLD_VERSION"
-	"log"
 	"os"
-	"os/exec"
-	"runtime"
 	"strings"
 )
 
@@ -230,7 +225,7 @@ func channel_read_user_input(ch chan string) {
 func channel_read_terminal_size_change_detect(ch chan [2]int) {
 	widthSys, heightSys := 0, 0
 	for {
-		widthSysNow, heightSysNow := iris.TerminalDimensionsWithSyscall()
+		widthSysNow, heightSysNow := TerminalDimensionsWithSyscall()
 		if widthSysNow != widthSys || heightSysNow != heightSys {
 			widthSys = widthSysNow
 			heightSys = heightSysNow
@@ -238,37 +233,4 @@ func channel_read_terminal_size_change_detect(ch chan [2]int) {
 		}
 		TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
 	}
-}
-
-// https://zetcode.com/golang/exec-command/
-// TESTED manually
-func shell(commandAndParams string) (string, error) { // basic fun
-	return shellCore(commandAndParams, "")
-}
-
-// TESTED manually
-func shellCore(commandAndParams, input string) (string, error) { // basic fun
-	args := strings.Fields(commandAndParams)
-	cmd := exec.Command(args[0], args[1:]...)
-	if len(input) > 0 {
-		cmd.Stdin = strings.NewReader(input)
-	} else {
-		cmd.Stdin = os.Stdin
-	}
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	err := cmd.Run()
-	if err != nil {
-		log.Println(err)
-	}
-	return out.String(), err
-}
-
-func OsDetect() string { // basic fun
-	os := runtime.GOOS
-	if strings.Contains("windows|darwin|linux", os) {
-		return os
-	}
-	return "linux" // if we have an exotic os, we will handle it as linux
-	// return "unknown"
 }
