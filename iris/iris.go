@@ -15,18 +15,18 @@ type Window struct {
 	id string
 
 	// top-left coord: 0, 0 in the root terminal
-	top               int
-	bottom            int
-	left              int
-	right             int
+	yTop              int
+	yBottom           int
+	xLeft             int
+	xRight            int
 	lines             []string
 	backgroundDefault string
 }
 
 type ScreenLayers []ScreenLayer
 type ScreenLayer struct {
-	leftX  int
-	topY   int
+	xLeft  int
+	yTop   int
 	matrix []ScreenColumn
 }
 type ScreenColumn []ScreenChar
@@ -90,8 +90,8 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 	widthMax, heightMax := 0, 0
 	for _, layerStruct := range layers {
 		matrix := layerStruct.matrix
-		height := len(matrix[0]) + layerStruct.topY // len of first column
-		width := len(matrix) + layerStruct.leftX
+		height := len(matrix[0]) + layerStruct.yTop // len of first column
+		width := len(matrix) + layerStruct.xLeft
 		heightMax = IntMax(heightMax, height)
 		widthMax = IntMax(widthMax, width)
 	}
@@ -106,8 +106,8 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 		width := len(matrix)
 		for y := 0; y < height; y++ {
 			for x := 0; x < width; x++ {
-				xCalculated := layerStruct.leftX + x
-				yCalculated := layerStruct.topY + y
+				xCalculated := layerStruct.xLeft + x
+				yCalculated := layerStruct.yTop + y
 				screenMerged.matrix[xCalculated][yCalculated].txtValue = layerStruct.matrix[x][y].txtValue
 			}
 		}
@@ -122,9 +122,9 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 	}
 }
 
-func ScreenLayerCreate(leftX, topY, width, height int, txtLayerDefault string) ScreenLayer {
-	// fmt.Println("screen layer create:", leftX, topY, width, height)
-	screenLayerNew := ScreenLayer{leftX: leftX, topY: topY}
+func ScreenLayerCreate(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer {
+	// fmt.Println("screen layer create:", xLeft, yTop, width, height)
+	screenLayerNew := ScreenLayer{xLeft: xLeft, yTop: yTop}
 	for x := 0; x < width; x++ {
 		column := ScreenColumn{}
 		for y := 0; y < height; y++ {
@@ -186,22 +186,34 @@ func select_win(dataInput string, windows *Windows, newlineSeparator string) str
 		// fmt.Println("select_win, line:", line)
 		elems := strings.Split(line, ":")
 
-		// select:win:nameOfWin
-		if elems[0] == "select" && elems[1] == "win" {
-			if len(elems) == 3 {
+		if len(elems) == 3 {
+
+			// select:win:nameOfWin
+			if elems[0] == "select" && elems[1] == "win" {
 				winId = strings.TrimSpace(elems[2])
 				if _, exist := (*windows)[winId]; !exist {
 					(*windows)[winId] = Window{}
 				}
 			}
-		}
 
-		if elems[0] == "set" && elems[1] == "backgroundDefault" {
-			if len(elems) == 3 {
-				win := (*windows)[winId]
+			win := (*windows)[winId]
+			if elems[0] == "set" && elems[1] == "backgroundDefault" {
 				win.backgroundDefault = elems[2]
-				(*windows)[winId] = win
 			}
+			if elems[0] == "set" && elems[1] == "xLeft" {
+				win.xLeft = Str2Int(elems[2])
+			}
+			if elems[0] == "set" && elems[1] == "xRight" {
+				win.xRight = Str2Int(elems[2])
+			}
+			if elems[0] == "set" && elems[1] == "yTop" {
+				win.yTop = Str2Int(elems[2])
+			}
+			if elems[0] == "set" && elems[1] == "yBottom" {
+				win.yBottom = Str2Int(elems[2])
+			}
+			(*windows)[winId] = win
+
 		}
 
 		if winId == "" {
