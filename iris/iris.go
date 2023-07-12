@@ -46,8 +46,13 @@ func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 	windows := Windows{} // modified/updated ONLY here:
 	go data_input_interpret(ch_data_input, &windows, newlineSeparator)
 
-	var terminalSizeActual [2]int
+	widthSysNow, heightSysNow := TerminalDimensionsWithSyscall()
+	terminalSizeActual := [2]int{widthSysNow, heightSysNow}
+
+	loopCounter := 0
 	for {
+		loopCounter++
+
 		action := ""
 		select { //                https://gobyexample.com/select
 		case stdin, _ := <-ch_user_input: //  the message is coming...
@@ -65,31 +70,37 @@ func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 			break
 		}
 		layers := RenderAllWindowsIntoLayers(windows, terminalSizeActual)
-		DisplayAllLayers(layers, newlineSeparator)
+		// fmt.Println("layers:", layers)
+		DisplayAllLayers(layers, newlineSeparator, loopCounter)
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-func DisplayAllLayers(layers ScreenLayers, newlineSeparator string) {
+func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter int) {
 	// naive, TODO: display layers in order?
-	shell("clear")
+	// https://stackoverflow.com/questions/5367068/clear-a-terminal-screen-for-real/5367075#5367075
+
+	fmt.Print("\x1b")                        // clear all the screen
+	fmt.Println("clear screen", loopCounter) // clear all the screen
 	for _, layerStruct := range layers {
 		matrix := layerStruct.matrix
 		height := len(matrix[0]) // len of first column
+
+		// fmt.Println(height, "matrix 0 0", matrix[0][0].txtValue)
 		for y := 0; y < height; y++ {
 			width := len(matrix)
 			for x := 0; x < width; x++ {
-				fmt.Print(matrix[x][y])
+				fmt.Print(matrix[x][y].txtValue)
 			}
-			fmt.Print()
+			fmt.Print(newlineSeparator)
 		}
 	}
 }
 
 func ScreenLayerCreate(leftX, topY, width, height int, txtLayerDefault string) ScreenLayer {
-	// fmt.Println("screen layer create:", width, height)
+	// fmt.Println("screen layer create:", leftX, topY, width, height)
 	screenLayerNew := ScreenLayer{leftX: leftX, topY: topY}
 	for x := 0; x < width; x++ {
 		column := ScreenColumn{}
@@ -98,10 +109,12 @@ func ScreenLayerCreate(leftX, topY, width, height int, txtLayerDefault string) S
 		}
 		screenLayerNew.matrix = append(screenLayerNew.matrix, column)
 	}
+	// fmt.Println("new layer:", screenLayerNew)
 	return screenLayerNew
 }
 
 func RenderAllWindowsIntoLayers(windowsRO Windows, terminalSize [2]int) ScreenLayers {
+	// fmt.Println("terminal size:", terminalSize)
 	screenBackground := ScreenLayerCreate(
 		0, 0,
 		terminalSize[0],
@@ -144,7 +157,7 @@ func select_win(dataInput string, windows *Windows, newlineSeparator string) str
 
 	for lineNum, lineOrig := range strings.Split(dataInput, newlineSeparator) {
 		line := strings.TrimSpace(lineOrig)
-		fmt.Println("select_win, line:", line)
+		// fmt.Println("select_win, line:", line)
 		elems := strings.Split(line, ":")
 
 		// select:win:nameOfWin

@@ -32,3 +32,6 @@ https://gobyexample.com/select
 
 https://stackoverflow.com/questions/49150316/how-to-detect-key-press-event
 https://stackoverflow.com/questions/54422309/how-to-catch-keypress-without-enter-in-golang-loop
+
+// terminal printing:
+https://github.com/fatih/color/blob/main/color.go

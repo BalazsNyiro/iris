@@ -10,9 +10,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
 	"time"
-	"unsafe"
 )
 
 var Digits = "0123456789"
@@ -27,16 +25,20 @@ type winsize struct {
 // https://stackoverflow.com/questions/16569433/get-terminal-size-in-go
 // TESTED MANUALLY
 func TerminalDimensionsWithSyscall() (int, int) { // basic fun
-	ws := &winsize{}
-	retCode, _, errno := syscall.Syscall(syscall.SYS_IOCTL,
-		uintptr(syscall.Stdin),
-		uintptr(syscall.TIOCGWINSZ),
-		uintptr(unsafe.Pointer(ws)))
+	return 20, 10
+	/*
+		ws := &winsize{}
+		retCode, _, errno := syscall.Syscall(syscall.SYS_IOCTL,
+			uintptr(syscall.Stdin),
+			uintptr(syscall.TIOCGWINSZ),
+			uintptr(unsafe.Pointer(ws)))
 
-	if int(retCode) == -1 {
-		panic(errno)
-	}
-	return int(ws.Col), int(ws.Row)
+		if int(retCode) == -1 {
+			panic(errno)
+		}
+		return int(ws.Col), int(ws.Row)
+
+	*/
 }
 
 // https://stackoverflow.com/questions/263890/how-do-i-find-the-width-height-of-a-terminal-window
