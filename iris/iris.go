@@ -16,9 +16,9 @@ type Window struct {
 
 	// top-left coord: 0, 0 in the root terminal
 	yTop              int
-	yBottom           int
 	xLeft             int
-	xRight            int
+	width             int
+	height            int
 	lines             []string
 	backgroundDefault string
 }
@@ -34,7 +34,6 @@ type ScreenChar struct {
 	txtValue string
 }
 
-// newLineSeparator: \n, \r\n - that you can find at the end of the lines - a line separator
 func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 	ui_init()
 	ch_user_input := make(chan string)
@@ -70,6 +69,7 @@ func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 			UserInterfaceExit()
 			break
 		}
+		fmt.Println("windows: ", windows)
 		layers := RenderAllWindowsIntoLayers(windows, terminalSizeActual)
 		// fmt.Println("layers:", layers)
 		DisplayAllLayers(layers, newlineSeparator, loopCounter)
@@ -90,8 +90,11 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 	widthMax, heightMax := 0, 0
 	for _, layerStruct := range layers {
 		matrix := layerStruct.matrix
-		height := len(matrix[0]) + layerStruct.yTop // len of first column
+		if len(matrix) < 1 {
+			continue
+		}
 		width := len(matrix) + layerStruct.xLeft
+		height := len(matrix[0]) + layerStruct.yTop // len of first column
 		heightMax = IntMax(heightMax, height)
 		widthMax = IntMax(widthMax, width)
 	}
@@ -102,8 +105,11 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 
 	for _, layerStruct := range layers {
 		matrix := layerStruct.matrix
-		height := len(matrix[0]) // len of first column
 		width := len(matrix)
+		if width < 1 {
+			continue
+		}
+		height := len(matrix[0]) // len of first column
 		for y := 0; y < height; y++ {
 			for x := 0; x < width; x++ {
 				xCalculated := layerStruct.xLeft + x
@@ -145,12 +151,11 @@ func RenderAllWindowsIntoLayers(windowsRO Windows, terminalSize [2]int) ScreenLa
 
 	layers := ScreenLayers{screenBackground}
 
-	for _, windows := range windowsRO {
-		fmt.Println("render: winId", windows)
+	for _, win := range windowsRO {
+		fmt.Println("render: winId", win, "xLeft:", win.xLeft)
 		screenNow := ScreenLayerCreate(
-			3, 2,
-			8,
-			6, "a")
+			win.xLeft, win.yTop,
+			win.width, win.height, "a")
 		layers = append(layers, screenNow)
 	}
 	return layers
@@ -161,7 +166,7 @@ func data_input_interpret(ch_data_input chan string, windows *Windows, newlineSe
 		select {
 		case dataInput, _ := <-ch_data_input:
 			// fmt.Println("data input:", dataInput)
-			if strings.HasPrefix(dataInput, "select:win") {
+			if strings.HasPrefix(strings.TrimSpace(dataInput), "select:win") {
 				winUpdated := select_win(dataInput, windows, newlineSeparator)
 				if winUpdated != "" {
 					// fmt.Println("after select:win, addSimpleText", (*windows)[winUpdated].lines)
@@ -203,14 +208,14 @@ func select_win(dataInput string, windows *Windows, newlineSeparator string) str
 			if elems[0] == "set" && elems[1] == "xLeft" {
 				win.xLeft = Str2Int(elems[2])
 			}
-			if elems[0] == "set" && elems[1] == "xRight" {
-				win.xRight = Str2Int(elems[2])
+			if elems[0] == "set" && elems[1] == "width" {
+				win.width = Str2Int(elems[2])
 			}
 			if elems[0] == "set" && elems[1] == "yTop" {
 				win.yTop = Str2Int(elems[2])
 			}
-			if elems[0] == "set" && elems[1] == "yBottom" {
-				win.yBottom = Str2Int(elems[2])
+			if elems[0] == "set" && elems[1] == "height" {
+				win.height = Str2Int(elems[2])
 			}
 			(*windows)[winId] = win
 

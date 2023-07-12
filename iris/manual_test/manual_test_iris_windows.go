@@ -16,10 +16,10 @@ func main() {
 	// use this id in the reply message
 	ch_data_input <- `	select:win:logs-left
 						useThisIdInReply:1
-						set:xLeft:5
-						set:yTop:5
-						set:width:22
-						set:height:10
+						set:xLeft:2
+						set:yTop:4
+						set:width:10
+						set:height:5
     `
 
 	for i := 1; i < 5; i++ {
