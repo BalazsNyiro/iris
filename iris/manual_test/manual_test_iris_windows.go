@@ -25,7 +25,7 @@ func main() {
 	for i := 1; i < 5; i++ {
 		// everything after the 'add:simpleText:' is the part of the text
 		ch_data_input <- `select:win:logs-left
-						add:simpleText:AddEverythingAfterColon` + fmt.Sprintf("%d", i)
+						add:simpleText:AddEverythingAfterColon` + fmt.Sprintf("%d\n", i)
 		TimeSleep(2000)
 	}
 	UserInterfaceExit()

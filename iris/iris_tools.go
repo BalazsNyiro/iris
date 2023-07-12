@@ -106,6 +106,13 @@ func Int2Str(i int) string {
 	return strconv.Itoa(i)
 }
 
+func IntMax(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 // wrapper, not tested
 func Str2Int(txt string) int {
 	num, error := strconv.Atoi(txt)

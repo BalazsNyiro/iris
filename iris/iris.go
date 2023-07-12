@@ -15,11 +15,12 @@ type Window struct {
 	id string
 
 	// top-left coord: 0, 0 in the root terminal
-	top    int
-	bottom int
-	left   int
-	right  int
-	lines  []string
+	top               int
+	bottom            int
+	left              int
+	right             int
+	lines             []string
+	backgroundDefault string
 }
 
 type ScreenLayers []ScreenLayer
@@ -82,20 +83,42 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 	// naive, TODO: display layers in order?
 	// https://stackoverflow.com/questions/5367068/clear-a-terminal-screen-for-real/5367075#5367075
 
-	fmt.Print("\x1b")                        // clear all the screen
+	// fmt.Print("\x1b")                        // clear all the screen
 	fmt.Println("clear screen", loopCounter) // clear all the screen
+
+	// size of biggest window + x/y positions
+	widthMax, heightMax := 0, 0
+	for _, layerStruct := range layers {
+		matrix := layerStruct.matrix
+		height := len(matrix[0]) + layerStruct.topY // len of first column
+		width := len(matrix) + layerStruct.leftX
+		heightMax = IntMax(heightMax, height)
+		widthMax = IntMax(widthMax, width)
+	}
+
+	screenMerged := ScreenLayerCreate(
+		0, 0,
+		widthMax, heightMax, " ")
+
 	for _, layerStruct := range layers {
 		matrix := layerStruct.matrix
 		height := len(matrix[0]) // len of first column
-
-		// fmt.Println(height, "matrix 0 0", matrix[0][0].txtValue)
+		width := len(matrix)
 		for y := 0; y < height; y++ {
-			width := len(matrix)
 			for x := 0; x < width; x++ {
-				fmt.Print(matrix[x][y].txtValue)
+				xCalculated := layerStruct.leftX + x
+				yCalculated := layerStruct.topY + y
+				screenMerged.matrix[xCalculated][yCalculated].txtValue = layerStruct.matrix[x][y].txtValue
 			}
-			fmt.Print(newlineSeparator)
 		}
+	}
+
+	///////// DISPLAY merged layer //////////////////
+	for y := 0; y < heightMax; y++ {
+		for x := 0; x < widthMax; x++ {
+			fmt.Print(screenMerged.matrix[x][y].txtValue)
+		}
+		fmt.Print(newlineSeparator)
 	}
 }
 
@@ -122,11 +145,14 @@ func RenderAllWindowsIntoLayers(windowsRO Windows, terminalSize [2]int) ScreenLa
 
 	layers := ScreenLayers{screenBackground}
 
-	/*
-		for _, winId := range windowsRO {
-			fmt.Println("render: winId", winId)
-		}
-	*/
+	for _, windows := range windowsRO {
+		fmt.Println("render: winId", windows)
+		screenNow := ScreenLayerCreate(
+			3, 2,
+			8,
+			6, "a")
+		layers = append(layers, screenNow)
+	}
 	return layers
 }
 
@@ -167,6 +193,14 @@ func select_win(dataInput string, windows *Windows, newlineSeparator string) str
 				if _, exist := (*windows)[winId]; !exist {
 					(*windows)[winId] = Window{}
 				}
+			}
+		}
+
+		if elems[0] == "set" && elems[1] == "backgroundDefault" {
+			if len(elems) == 3 {
+				win := (*windows)[winId]
+				win.backgroundDefault = elems[2]
+				(*windows)[winId] = win
 			}
 		}
 
