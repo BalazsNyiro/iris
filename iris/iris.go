@@ -155,7 +155,11 @@ func RenderAllWindowsIntoLayers(windowsRO Windows, terminalSize [2]int) ScreenLa
 		fmt.Println("render: winId", win, "xLeft:", win.xLeft)
 		screenNow := ScreenLayerCreate(
 			win.xLeft, win.yTop,
-			win.width, win.height, "a")
+			win.width, win.height, win.backgroundDefault)
+
+		// TODO: ^^^ this is rendering the backgrounds.
+		// ?? where can we render internal texts?
+
 		layers = append(layers, screenNow)
 	}
 	return layers

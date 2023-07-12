@@ -20,6 +20,7 @@ func main() {
 						set:yTop:4
 						set:width:10
 						set:height:5
+						set:backgroundDefault:B
     `
 
 	for i := 1; i < 5; i++ {
