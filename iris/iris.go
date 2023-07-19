@@ -10,6 +10,29 @@ import (
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
 var TimeIntervalTerminalSizeDetectMillisec = 100
 
+type Char struct {
+	runeVal rune
+}
+
+func (c Char) display() rune {
+	return c.runeVal
+}
+
+type Line []Char
+
+func LineFromStr(txt string) Line {
+	Line := Line{}
+	for _, runeVal := range txt {
+		Line = append(Line, Char{runeVal: runeVal})
+	}
+	return Line
+}
+
+type MessageAndCharacters struct {
+	msg     string
+	addLine Line
+}
+
 type Windows map[string]Window
 type Window struct {
 	id string
@@ -19,7 +42,7 @@ type Window struct {
 	xLeft             int
 	width             int
 	height            int
-	lines             []string
+	lines             []Line
 	backgroundDefault string
 }
 
@@ -29,12 +52,9 @@ type ScreenLayer struct {
 	yTop   int
 	matrix []ScreenColumn
 }
-type ScreenColumn []ScreenChar
-type ScreenChar struct {
-	txtValue string
-}
+type ScreenColumn []Char
 
-func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
+func UserInterfaceStart(ch_data_input chan MessageAndCharacters, newlineSeparator string) {
 	ui_init()
 	ch_user_input := make(chan string)
 	go channel_read_user_input(ch_user_input)
@@ -70,16 +90,78 @@ func UserInterfaceStart(ch_data_input chan string, newlineSeparator string) {
 			break
 		}
 		fmt.Println("windows: ", windows)
-		layers := RenderAllWindowsIntoLayers(windows, terminalSizeActual)
+		layers := Layers_render_from_windows(windows, terminalSizeActual)
 		// fmt.Println("layers:", layers)
-		DisplayAllLayers(layers, newlineSeparator, loopCounter)
+		Layers_display_all(layers, newlineSeparator, loopCounter)
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter int) {
+func Layer_create(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer {
+	// fmt.Println("screen layer create:", xLeft, yTop, width, height)
+	screenLayerNew := ScreenLayer{xLeft: xLeft, yTop: yTop}
+	for x := 0; x < width; x++ {
+		column := ScreenColumn{}
+		for y := 0; y < height; y++ {
+			column = append(column, Char{runeVal: rune(txtLayerDefault[0])})
+		}
+		screenLayerNew.matrix = append(screenLayerNew.matrix, column)
+	}
+	// fmt.Println("new layer:", screenLayerNew)
+	return screenLayerNew
+}
+
+func Layers_render_from_windows(windowsRO Windows, terminalSize [2]int) ScreenLayers {
+	// fmt.Println("terminal size:", terminalSize)
+	screenBackground := Layer_create(
+		0, 0,
+		terminalSize[0],
+		terminalSize[1], ".")
+
+	layers := ScreenLayers{screenBackground}
+
+	for _, win := range windowsRO {
+		fmt.Println("render: winId", win, "xLeft:", win.xLeft)
+		screenNow := Layer_create(
+			win.xLeft, win.yTop,
+			win.width, win.height, win.backgroundDefault)
+
+		// structure the character input into one COLUMN, (a visible structure)
+		columnVisible := []Line{Line{}}
+		lineNumFirstVisible := len(win.lines) - win.height
+		for lineNum, lineReceived := range win.lines {
+			if lineNum >= lineNumFirstVisible {
+				LineVisibleLastId := len(columnVisible) - 1
+				LineActual := columnVisible[LineVisibleLastId]
+				for _, charNow := range lineReceived {
+					// TODO: what if we reached the right margin of the window?
+					LineActual = append(LineActual, charNow)
+				}
+				columnVisible[LineVisibleLastId] = LineActual
+				columnVisible = append(columnVisible, Line{})
+			}
+		}
+
+		// Load the rendered text into the windows' column structure
+		lineNumFirstVisible = len(columnVisible) - win.height
+		for lineNum, lineStructured := range columnVisible {
+			if lineNum >= lineNumFirstVisible {
+				for charPos, charNow := range lineStructured {
+					column := screenNow.matrix[charPos]
+					lineNumInWindows := lineNum - lineNumFirstVisible
+					column[lineNumInWindows] = charNow
+				}
+			}
+
+		}
+		layers = append(layers, screenNow)
+	}
+	return layers
+}
+
+func Layers_display_all(layers ScreenLayers, newlineSeparator string, loopCounter int) {
 	// naive, TODO: display layers in order?
 	// https://stackoverflow.com/questions/5367068/clear-a-terminal-screen-for-real/5367075#5367075
 
@@ -99,7 +181,7 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 		widthMax = IntMax(widthMax, width)
 	}
 
-	screenMerged := ScreenLayerCreate(
+	screenMerged := Layer_create(
 		0, 0,
 		widthMax, heightMax, " ")
 
@@ -114,7 +196,7 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 			for x := 0; x < width; x++ {
 				xCalculated := layerStruct.xLeft + x
 				yCalculated := layerStruct.yTop + y
-				screenMerged.matrix[xCalculated][yCalculated].txtValue = layerStruct.matrix[x][y].txtValue
+				screenMerged.matrix[xCalculated][yCalculated].runeVal = layerStruct.matrix[x][y].runeVal
 			}
 		}
 	}
@@ -122,55 +204,18 @@ func DisplayAllLayers(layers ScreenLayers, newlineSeparator string, loopCounter 
 	///////// DISPLAY merged layer //////////////////
 	for y := 0; y < heightMax; y++ {
 		for x := 0; x < widthMax; x++ {
-			fmt.Print(screenMerged.matrix[x][y].txtValue)
+			fmt.Print(screenMerged.matrix[x][y].display())
 		}
 		fmt.Print(newlineSeparator)
 	}
 }
 
-func ScreenLayerCreate(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer {
-	// fmt.Println("screen layer create:", xLeft, yTop, width, height)
-	screenLayerNew := ScreenLayer{xLeft: xLeft, yTop: yTop}
-	for x := 0; x < width; x++ {
-		column := ScreenColumn{}
-		for y := 0; y < height; y++ {
-			column = append(column, ScreenChar{txtValue: txtLayerDefault})
-		}
-		screenLayerNew.matrix = append(screenLayerNew.matrix, column)
-	}
-	// fmt.Println("new layer:", screenLayerNew)
-	return screenLayerNew
-}
-
-func RenderAllWindowsIntoLayers(windowsRO Windows, terminalSize [2]int) ScreenLayers {
-	// fmt.Println("terminal size:", terminalSize)
-	screenBackground := ScreenLayerCreate(
-		0, 0,
-		terminalSize[0],
-		terminalSize[1], ".")
-
-	layers := ScreenLayers{screenBackground}
-
-	for _, win := range windowsRO {
-		fmt.Println("render: winId", win, "xLeft:", win.xLeft)
-		screenNow := ScreenLayerCreate(
-			win.xLeft, win.yTop,
-			win.width, win.height, win.backgroundDefault)
-
-		// TODO: ^^^ this is rendering the backgrounds.
-		// ?? where can we render internal texts?
-
-		layers = append(layers, screenNow)
-	}
-	return layers
-}
-
-func data_input_interpret(ch_data_input chan string, windows *Windows, newlineSeparator string) {
+func data_input_interpret(ch_data_input chan MessageAndCharacters, windows *Windows, newlineSeparator string) {
 	for {
 		select {
 		case dataInput, _ := <-ch_data_input:
 			// fmt.Println("data input:", dataInput)
-			if strings.HasPrefix(strings.TrimSpace(dataInput), "select:win") {
+			if strings.HasPrefix(strings.TrimSpace(dataInput.msg), "select:win") {
 				winUpdated := select_win(dataInput, windows, newlineSeparator)
 				if winUpdated != "" {
 					// fmt.Println("after select:win, addSimpleText", (*windows)[winUpdated].lines)
@@ -186,11 +231,10 @@ func data_input_interpret(ch_data_input chan string, windows *Windows, newlineSe
 'add:simpleText:' is always the last added elem, everything after it is added automatically
 into the lines
 */
-func select_win(dataInput string, windows *Windows, newlineSeparator string) string {
+func select_win(dataInput MessageAndCharacters, windows *Windows, newlineSeparator string) string {
 	winId := ""
-	addSimpleTextDetectedLine := -1
 
-	for lineNum, lineOrig := range strings.Split(dataInput, newlineSeparator) {
+	for _, lineOrig := range strings.Split(dataInput.msg, newlineSeparator) {
 		line := strings.TrimSpace(lineOrig)
 		// fmt.Println("select_win, line:", line)
 		elems := strings.Split(line, ":")
@@ -203,6 +247,14 @@ func select_win(dataInput string, windows *Windows, newlineSeparator string) str
 				if _, exist := (*windows)[winId]; !exist {
 					(*windows)[winId] = Window{}
 				}
+
+				// process only the first line here, then later add all other lines, too
+				if len(dataInput.addLine) > 0 {
+					win := (*windows)[winId]
+					win.lines = append(win.lines, dataInput.addLine)
+					(*windows)[winId] = win
+				}
+
 			}
 
 			win := (*windows)[winId]
@@ -229,25 +281,8 @@ func select_win(dataInput string, windows *Windows, newlineSeparator string) str
 			continue
 		}
 
-		// process only the first line here, then later add all other lines, too
-		if elems[0] == "add" && elems[1] == "simpleText" {
-			addSimpleTextDetectedLine = lineNum
-			win := (*windows)[winId]
-			win.lines = append(win.lines, strings.SplitN(lineOrig, "add:simpleText:", -1)[1])
-			(*windows)[winId] = win
-			break
-		}
+	}
 
-	}
-	if addSimpleTextDetectedLine > -1 {
-		for lineNum, lineOrig := range strings.Split(dataInput, newlineSeparator) {
-			if lineNum > addSimpleTextDetectedLine {
-				win := (*windows)[winId]
-				win.lines = append(win.lines, lineOrig)
-				(*windows)[winId] = win
-			}
-		}
-	}
 	return winId
 }
 
