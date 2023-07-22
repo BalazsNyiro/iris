@@ -12,11 +12,9 @@ func main() {
 	ch_data_input := make(chan MessageAndCharacters)
 	go UserInterfaceStart(ch_data_input, "\n")
 
-	// useThisIdInReply: if the sender wants to get answer,
-	// use this id in the reply message
 	ch_data_input <- MessageAndCharacters{
 		msg: `	select:win:logs-left
-						useThisIdInReply:1
+						msgId:1
 						set:top:5
 						set:bottom:22
 						set:left:4

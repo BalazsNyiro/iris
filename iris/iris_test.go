@@ -35,6 +35,32 @@ func Test_layer_create(t *testing.T) {
 	compare_str_pair("Test_layer_create 1", layerRendered, "LLLL\nLLLL", t)
 }
 
+func Test_layer_render(t *testing.T) {
+	windows := Windows{} // modified/updated ONLY here:
+
+	data_input := MessageAndCharacters{
+		msg: `select:win:logs-left
+						msgId:1
+						set:top:3
+						set:bottom:6
+						set:left:2
+						set:right:8`,
+		addLine: LineFromStr("testRender1")}
+	dataInputProcessLineByLine(data_input, &windows, "\n")
+
+	data_input2 := MessageAndCharacters{
+		msg: `select:win:second
+						msgId:2
+						set:top:2
+						set:bottom:4
+						set:left:1
+						set:right:4`,
+		addLine: LineFromStr("secondTxt")}
+	dataInputProcessLineByLine(data_input2, &windows, "\n")
+
+	windows.printAll()
+}
+
 func compare_str_pair(callerInfo, received, wanted string, t *testing.T) {
 	if received != wanted {
 		t.Fatalf("\nErr: %s received string ->%s<-, wanted ->%s<-, error", callerInfo, received, wanted)

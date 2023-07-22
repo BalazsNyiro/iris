@@ -20,6 +20,13 @@ func (c Char) display() rune {
 
 type Line []Char
 
+func (line Line) LineToStr() string {
+	out := []rune{}
+	for _, Char := range line {
+		out = append(out, Char.runeVal)
+	}
+	return string(out)
+}
 func LineFromStr(txt string) Line {
 	Line := Line{}
 	for _, runeVal := range txt {
@@ -34,6 +41,16 @@ type MessageAndCharacters struct {
 }
 
 type Windows map[string]Window
+
+func (wins Windows) printAll() {
+	for _, win := range wins {
+		win.print()
+	}
+}
+
+// A window is a logical unit.
+// It has settings, and content, but doesn't now
+// anything how it will be rendered
 type Window struct {
 	id string
 
@@ -47,14 +64,22 @@ type Window struct {
 	winId             string
 }
 
-type ScreenLayers []ScreenLayer
-type ScreenLayer struct {
+func (w Window) print() {
+	fmt.Println("winId:  ", w.winId)
+	for _, line := range w.lines {
+		fmt.Println("winLine:", line.LineToStr())
+	}
+}
+
+type ScreenLayers []ScreenLayer_CharMatrix
+
+type ScreenLayer_CharMatrix struct {
 	xLeft  int
 	yTop   int
 	matrix []ScreenColumn
 }
 
-func (layer ScreenLayer) layerToTxt(lineSep string) string {
+func (layer ScreenLayer_CharMatrix) layerToTxt(lineSep string) string {
 	yMax := len(layer.matrix[0])
 	columns := layer.matrix
 
@@ -119,9 +144,10 @@ func UserInterfaceStart(ch_data_input chan MessageAndCharacters, dataInputLineSe
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer {
+// TESTED
+func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer_CharMatrix {
 	// fmt.Println("screen layer create:", xLeft, yTop, width, height)
-	screenLayerNew := ScreenLayer{xLeft: xLeft, yTop: yTop}
+	screenLayerNew := ScreenLayer_CharMatrix{xLeft: xLeft, yTop: yTop}
 	for x := 0; x < width; x++ {
 		column := ScreenColumn{}
 		for y := 0; y < height; y++ {
