@@ -32,5 +32,6 @@ func main() {
 		}
 		TimeSleep(2000)
 	}
+
 	UserInterfaceExit()
 }

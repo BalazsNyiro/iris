@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-var TimeIntervalUserInterfaceRefreshTimeMillisec = 10
-var TimeIntervalTerminalSizeDetectMillisec = 100
+var TimeIntervalUserInterfaceRefreshTimeMillisec = 1000 // 10 is the prod value
+var TimeIntervalTerminalSizeDetectMillisec = 100        // 100 is the prod value
 
 type Char struct {
 	runeVal rune
@@ -44,6 +44,7 @@ type Window struct {
 	height            int
 	lines             []Line
 	backgroundDefault string
+	winId             string
 }
 
 type ScreenLayers []ScreenLayer
@@ -52,9 +53,28 @@ type ScreenLayer struct {
 	yTop   int
 	matrix []ScreenColumn
 }
+
+func (layer ScreenLayer) layerToTxt(lineSep string) string {
+	yMax := len(layer.matrix[0])
+	columns := layer.matrix
+
+	outputRunes := []rune{}
+	for y := 0; y < yMax; y++ {
+		for _, column := range columns {
+			outputRunes = append(outputRunes, column[y].display())
+		}
+		if y < yMax-1 {
+			for _, r := range []rune(lineSep) { // theoretically the line separator
+				outputRunes = append(outputRunes, r) // can be  \r\n, too, more than one char
+			}
+		}
+	}
+	return string(outputRunes)
+}
+
 type ScreenColumn []Char
 
-func UserInterfaceStart(ch_data_input chan MessageAndCharacters, newlineSeparator string) {
+func UserInterfaceStart(ch_data_input chan MessageAndCharacters, dataInputLineSeparator string) {
 	ui_init()
 	ch_user_input := make(chan string)
 	go channel_read_user_input(ch_user_input)
@@ -64,7 +84,7 @@ func UserInterfaceStart(ch_data_input chan MessageAndCharacters, newlineSeparato
 
 	// windows is a read-only variable everywhere,
 	windows := Windows{} // modified/updated ONLY here:
-	go data_input_interpret(ch_data_input, &windows, newlineSeparator)
+	go dataInputInterpret(ch_data_input, &windows, dataInputLineSeparator)
 
 	widthSysNow, heightSysNow := TerminalDimensionsWithSyscall()
 	terminalSizeActual := [2]int{widthSysNow, heightSysNow}
@@ -90,16 +110,16 @@ func UserInterfaceStart(ch_data_input chan MessageAndCharacters, newlineSeparato
 			break
 		}
 		fmt.Println("windows: ", windows)
-		layers := Layers_render_from_windows(windows, terminalSizeActual)
+		layers := LayersRenderFromWindows(windows, terminalSizeActual)
 		// fmt.Println("layers:", layers)
-		Layers_display_all(layers, newlineSeparator, loopCounter)
+		layersDisplayAll(layers, dataInputLineSeparator, loopCounter)
 		TimeSleep(TimeIntervalUserInterfaceRefreshTimeMillisec)
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-func Layer_create(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer {
+func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer {
 	// fmt.Println("screen layer create:", xLeft, yTop, width, height)
 	screenLayerNew := ScreenLayer{xLeft: xLeft, yTop: yTop}
 	for x := 0; x < width; x++ {
@@ -113,9 +133,9 @@ func Layer_create(xLeft, yTop, width, height int, txtLayerDefault string) Screen
 	return screenLayerNew
 }
 
-func Layers_render_from_windows(windowsRO Windows, terminalSize [2]int) ScreenLayers {
+func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayers {
 	// fmt.Println("terminal size:", terminalSize)
-	screenBackground := Layer_create(
+	screenBackground := LayerCreate(
 		0, 0,
 		terminalSize[0],
 		terminalSize[1], ".")
@@ -123,8 +143,8 @@ func Layers_render_from_windows(windowsRO Windows, terminalSize [2]int) ScreenLa
 	layers := ScreenLayers{screenBackground}
 
 	for _, win := range windowsRO {
-		fmt.Println("render: winId", win, "xLeft:", win.xLeft)
-		screenNow := Layer_create(
+		fmt.Println("render: winId >", win.winId, "< xLeft:", win.xLeft)
+		screenNow := LayerCreate(
 			win.xLeft, win.yTop,
 			win.width, win.height, win.backgroundDefault)
 
@@ -161,7 +181,7 @@ func Layers_render_from_windows(windowsRO Windows, terminalSize [2]int) ScreenLa
 	return layers
 }
 
-func Layers_display_all(layers ScreenLayers, newlineSeparator string, loopCounter int) {
+func layersDisplayAll(layers ScreenLayers, newlineSeparator string, loopCounter int) {
 	// naive, TODO: display layers in order?
 	// https://stackoverflow.com/questions/5367068/clear-a-terminal-screen-for-real/5367075#5367075
 
@@ -181,7 +201,7 @@ func Layers_display_all(layers ScreenLayers, newlineSeparator string, loopCounte
 		widthMax = IntMax(widthMax, width)
 	}
 
-	screenMerged := Layer_create(
+	screenMerged := LayerCreate(
 		0, 0,
 		widthMax, heightMax, " ")
 
@@ -210,16 +230,13 @@ func Layers_display_all(layers ScreenLayers, newlineSeparator string, loopCounte
 	}
 }
 
-func data_input_interpret(ch_data_input chan MessageAndCharacters, windows *Windows, newlineSeparator string) {
+func dataInputInterpret(ch_data_input chan MessageAndCharacters, windows *Windows, dataInputLineSeparator string) {
 	for {
 		select {
 		case dataInput, _ := <-ch_data_input:
-			// fmt.Println("data input:", dataInput)
+			fmt.Println("\ndata input:", dataInput)
 			if strings.HasPrefix(strings.TrimSpace(dataInput.msg), "select:win") {
-				winUpdated := select_win(dataInput, windows, newlineSeparator)
-				if winUpdated != "" {
-					// fmt.Println("after select:win, addSimpleText", (*windows)[winUpdated].lines)
-				}
+				dataInputProcessLineByLine(dataInput, windows, dataInputLineSeparator)
 			}
 		default:
 			_ = ""
@@ -227,16 +244,11 @@ func data_input_interpret(ch_data_input chan MessageAndCharacters, windows *Wind
 	}
 }
 
-/*
-'add:simpleText:' is always the last added elem, everything after it is added automatically
-into the lines
-*/
-func select_win(dataInput MessageAndCharacters, windows *Windows, newlineSeparator string) string {
+func dataInputProcessLineByLine(dataInput MessageAndCharacters, windows *Windows, dataInputLineSeparator string) string {
 	winId := ""
 
-	for _, lineOrig := range strings.Split(dataInput.msg, newlineSeparator) {
+	for _, lineOrig := range strings.Split(dataInput.msg, dataInputLineSeparator) {
 		line := strings.TrimSpace(lineOrig)
-		// fmt.Println("select_win, line:", line)
 		elems := strings.Split(line, ":")
 
 		if len(elems) == 3 {
@@ -245,7 +257,7 @@ func select_win(dataInput MessageAndCharacters, windows *Windows, newlineSeparat
 			if elems[0] == "select" && elems[1] == "win" {
 				winId = strings.TrimSpace(elems[2])
 				if _, exist := (*windows)[winId]; !exist {
-					(*windows)[winId] = Window{}
+					(*windows)[winId] = Window{winId: winId}
 				}
 
 				// process only the first line here, then later add all other lines, too
