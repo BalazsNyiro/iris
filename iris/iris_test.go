@@ -41,24 +41,27 @@ func Test_layer_render(t *testing.T) {
 	data_input := MessageAndCharacters{
 		msg: `select:win:logs-left
 						msgId:1
-						set:top:3
-						set:bottom:6
-						set:left:2
-						set:right:8`,
+						set:xLeft:2
+						set:yTop:3
+						set:width:8
+						set:height:6 `,
 		addLine: LineFromStr("testRender1")}
 	dataInputProcessLineByLine(data_input, &windows, "\n")
 
 	data_input2 := MessageAndCharacters{
 		msg: `select:win:second
 						msgId:2
-						set:top:2
-						set:bottom:4
-						set:left:1
-						set:right:4`,
+						set:xLeft:1
+						set:yTop:2
+						set:width:4
+						set:height:4 `,
 		addLine: LineFromStr("secondTxt")}
 	dataInputProcessLineByLine(data_input2, &windows, "\n")
 
 	windows.printAll()
+	terminalSizeActual := [2]int{9, 6}
+	layers := LayersRenderFromWindows(windows, terminalSizeActual)
+	fmt.Println("layers in test:", layers)
 }
 
 func compare_str_pair(callerInfo, received, wanted string, t *testing.T) {

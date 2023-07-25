@@ -148,10 +148,14 @@ func UserInterfaceStart(ch_data_input chan MessageAndCharacters, dataInputLineSe
 func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer_CharMatrix {
 	// fmt.Println("screen layer create:", xLeft, yTop, width, height)
 	screenLayerNew := ScreenLayer_CharMatrix{xLeft: xLeft, yTop: yTop}
+	defaultRune := 'r'
+	if len(txtLayerDefault) > 0 {
+		defaultRune = rune(txtLayerDefault[0])
+	}
 	for x := 0; x < width; x++ {
 		column := ScreenColumn{}
 		for y := 0; y < height; y++ {
-			column = append(column, Char{runeVal: rune(txtLayerDefault[0])})
+			column = append(column, Char{runeVal: defaultRune})
 		}
 		screenLayerNew.matrix = append(screenLayerNew.matrix, column)
 	}
@@ -160,44 +164,64 @@ func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string) ScreenL
 }
 
 func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayers {
-	// fmt.Println("terminal size:", terminalSize)
-	screenBackground := LayerCreate(
+	fmt.Println("terminal size:", terminalSize)
+	layerBackground := LayerCreate(
 		0, 0,
 		terminalSize[0],
 		terminalSize[1], ".")
 
-	layers := ScreenLayers{screenBackground}
+	layers := ScreenLayers{layerBackground}
 
 	for _, win := range windowsRO {
-		fmt.Println("render: winId >", win.winId, "< xLeft:", win.xLeft)
+		fmt.Println("render: winId >", win.winId, "< xLeft:", win.xLeft, "yTop:", win.yTop, "width:", win.width, "height:", win.height)
 		screenNow := LayerCreate(
 			win.xLeft, win.yTop,
 			win.width, win.height, win.backgroundDefault)
 
 		// structure the character input into one COLUMN, (a visible structure)
-		columnVisible := []Line{Line{}}
+		textBlockVisible := []Line{Line{}}
 		lineNumFirstVisible := len(win.lines) - win.height
-		for lineNum, lineReceived := range win.lines {
-			if lineNum >= lineNumFirstVisible {
-				LineVisibleLastId := len(columnVisible) - 1
-				LineActual := columnVisible[LineVisibleLastId]
+
+		// this solution handles the too long lines, and flow the text into the next line
+		for lineNumInWin, lineReceived := range win.lines {
+			if lineNumInWin >= lineNumFirstVisible {
+				textBlockLastLineId := len(textBlockVisible) - 1
+				LineActual := textBlockVisible[textBlockLastLineId]
+
 				for _, charNow := range lineReceived {
-					// TODO: what if we reached the right margin of the window?
 					LineActual = append(LineActual, charNow)
+					// if we are in the last available column now:
+					if len(LineActual) == len(screenNow.matrix) {
+						textBlockVisible[textBlockLastLineId] = LineActual
+						textBlockVisible = append(textBlockVisible, Line{})
+						textBlockLastLineId = len(textBlockVisible) - 1
+						LineActual = textBlockVisible[textBlockLastLineId]
+					}
+
 				}
-				columnVisible[LineVisibleLastId] = LineActual
-				columnVisible = append(columnVisible, Line{})
+				textBlockVisible[textBlockLastLineId] = LineActual
+				textBlockVisible = append(textBlockVisible, Line{})
 			}
 		}
 
-		// Load the rendered text into the windows' column structure
-		lineNumFirstVisible = len(columnVisible) - win.height
-		for lineNum, lineStructured := range columnVisible {
-			if lineNum >= lineNumFirstVisible {
-				for charPos, charNow := range lineStructured {
+		// Load the theoretically visible text into the windows' column structure
+		len_textBlockVisible := len(textBlockVisible)
+		lineNumFirstVisibleInWindows := 0
+		if len_textBlockVisible > win.height {
+			lineNumFirstVisibleInWindows = len_textBlockVisible - win.height
+		}
+
+		// fmt.Println("len textBlockVisible:", len_textBlockVisible)
+		// fmt.Println("          win.height:", win.height)
+		// fmt.Println(" lineNumFirstVisible:", lineNumFirstVisibleInWindows)
+
+		for lineNum, lineVisible := range textBlockVisible {
+			if lineNum >= lineNumFirstVisibleInWindows {
+				for charPos, charNow := range lineVisible {
 					column := screenNow.matrix[charPos]
-					lineNumInWindows := lineNum - lineNumFirstVisible
+					lineNumInWindows := lineNum - lineNumFirstVisibleInWindows
 					column[lineNumInWindows] = charNow
+					screenNow.matrix[charPos] = column
 				}
 			}
 
