@@ -28,7 +28,7 @@ func Test_layer_create(t *testing.T) {
 	height := 2
 	txtlayerDefault := "L"
 
-	layer := LayerCreate(xLeft, yTop, width, height, txtlayerDefault)
+	layer := LayerCreate(xLeft, yTop, width, height, txtlayerDefault, "testLayerCreate")
 	layerRendered := layer.layerToTxt("\n")
 	fmt.Println(layerRendered)
 
@@ -62,6 +62,10 @@ func Test_layer_render(t *testing.T) {
 	terminalSizeActual := [2]int{9, 6}
 	layers := LayersRenderFromWindows(windows, terminalSizeActual)
 	fmt.Println("layers in test:", layers)
+
+	for _, layer := range layers {
+		layer.print()
+	}
 }
 
 func compare_str_pair(callerInfo, received, wanted string, t *testing.T) {

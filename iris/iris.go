@@ -74,9 +74,21 @@ func (w Window) print() {
 type ScreenLayers []ScreenLayer_CharMatrix
 
 type ScreenLayer_CharMatrix struct {
-	xLeft  int
-	yTop   int
-	matrix []ScreenColumn
+	xLeft        int
+	yTop         int
+	matrix       []ScreenColumn
+	creationinfo string
+}
+
+func (sl ScreenLayer_CharMatrix) print() {
+	fmt.Println("\nlayerId:", sl.creationinfo)
+	matrixHeight := len(sl.matrix[0])
+	for y := 0; y < matrixHeight; y++ {
+		for _, column := range sl.matrix {
+			fmt.Print(column[y])
+		}
+		fmt.Println()
+	}
 }
 
 func (layer ScreenLayer_CharMatrix) layerToTxt(lineSep string) string {
@@ -145,9 +157,9 @@ func UserInterfaceStart(ch_data_input chan MessageAndCharacters, dataInputLineSe
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TESTED
-func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string) ScreenLayer_CharMatrix {
+func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string, creationInfo string) ScreenLayer_CharMatrix {
 	// fmt.Println("screen layer create:", xLeft, yTop, width, height)
-	screenLayerNew := ScreenLayer_CharMatrix{xLeft: xLeft, yTop: yTop}
+	screenLayerNew := ScreenLayer_CharMatrix{xLeft: xLeft, yTop: yTop, creationinfo: creationInfo}
 	defaultRune := 'r'
 	if len(txtLayerDefault) > 0 {
 		defaultRune = rune(txtLayerDefault[0])
@@ -168,7 +180,7 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 	layerBackground := LayerCreate(
 		0, 0,
 		terminalSize[0],
-		terminalSize[1], ".")
+		terminalSize[1], ".", "layerBackground")
 
 	layers := ScreenLayers{layerBackground}
 
@@ -176,7 +188,7 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 		fmt.Println("render: winId >", win.winId, "< xLeft:", win.xLeft, "yTop:", win.yTop, "width:", win.width, "height:", win.height)
 		screenNow := LayerCreate(
 			win.xLeft, win.yTop,
-			win.width, win.height, win.backgroundDefault)
+			win.width, win.height, win.backgroundDefault, win.winId)
 
 		// structure the character input into one COLUMN, (a visible structure)
 		textBlockVisible := []Line{Line{}}
@@ -253,7 +265,7 @@ func layersDisplayAll(layers ScreenLayers, newlineSeparator string, loopCounter 
 
 	screenMerged := LayerCreate(
 		0, 0,
-		widthMax, heightMax, " ")
+		widthMax, heightMax, " ", "screenMerged")
 
 	for _, layerStruct := range layers {
 		matrix := layerStruct.matrix
