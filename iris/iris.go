@@ -10,6 +10,8 @@ import (
 var TimeIntervalUserInterfaceRefreshTimeMillisec = 1000 // 10 is the prod value
 var TimeIntervalTerminalSizeDetectMillisec = 100        // 100 is the prod value
 
+// Char is the smallest object.
+// Future: a complex obj with foreground/bg colors, display attributes
 type Char struct {
 	runeVal rune
 }
@@ -17,6 +19,8 @@ type Char struct {
 func (c Char) display() rune {
 	return c.runeVal
 }
+
+/////////////////////////////////////////////////////////////////
 
 type Line []Char
 
@@ -35,11 +39,14 @@ func LineFromStr(txt string) Line {
 	return Line
 }
 
+/////////////////////////////////////////////////////////////////
+
 type MessageAndCharacters struct {
 	msg     string
 	addLine Line
 }
 
+// ///////////////////////////////////////////////////////////////
 type Windows map[string]Window
 
 func (wins Windows) printAll() {
@@ -70,6 +77,8 @@ func (w Window) print() {
 		fmt.Println("winLine:", line.LineToStr())
 	}
 }
+
+/////////////////////////////////////////////////////////////////
 
 type ScreenLayers []ScreenLayer_CharMatrix
 
@@ -110,6 +119,8 @@ func (layer ScreenLayer_CharMatrix) layerToTxt(lineSep string) string {
 }
 
 type ScreenColumn []Char
+
+/////////////////////////////////////////////////////////////////
 
 func UserInterfaceStart(ch_data_input chan MessageAndCharacters, dataInputLineSeparator string) {
 	ui_init()

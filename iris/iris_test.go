@@ -55,7 +55,7 @@ func Test_layer_render(t *testing.T) {
 						set:yTop:2
 						set:width:4
 						set:height:4 `,
-		addLine: LineFromStr("secondTxt")}
+		addLine: LineFromStr("secondText")}
 	dataInputProcessLineByLine(data_input2, &windows, "\n")
 
 	windows.printAll()

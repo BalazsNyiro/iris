@@ -15,10 +15,10 @@ func main() {
 	ch_data_input <- MessageAndCharacters{
 		msg: `	select:win:logs-left
 						msgId:1
-						set:top:5
-						set:bottom:22
-						set:left:4
-						set:right:33`,
+						set:yTop:5
+						set:height:22
+						set:xLeft:4
+						set:width:33`,
 		addLine: Line{},
 	}
 
