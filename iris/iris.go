@@ -16,8 +16,8 @@ type Char struct {
 	runeVal rune
 }
 
-func (c Char) display() rune {
-	return c.runeVal
+func (c Char) display() string {
+	return string(c.runeVal)
 }
 
 /////////////////////////////////////////////////////////////////
@@ -89,14 +89,14 @@ type ScreenLayer_CharMatrix struct {
 	creationinfo string
 }
 
-func (sl ScreenLayer_CharMatrix) print() {
+func (sl ScreenLayer_CharMatrix) print(dataInputLineSeparator string) {
 	fmt.Println("\nlayerId:", sl.creationinfo)
 	matrixHeight := len(sl.matrix[0])
 	for y := 0; y < matrixHeight; y++ {
 		for _, column := range sl.matrix {
-			fmt.Print(column[y])
+			fmt.Print(column[y].display())
 		}
-		fmt.Println()
+		fmt.Print(dataInputLineSeparator)
 	}
 }
 
@@ -104,18 +104,16 @@ func (layer ScreenLayer_CharMatrix) layerToTxt(lineSep string) string {
 	yMax := len(layer.matrix[0])
 	columns := layer.matrix
 
-	outputRunes := []rune{}
+	output := []string{}
 	for y := 0; y < yMax; y++ {
 		for _, column := range columns {
-			outputRunes = append(outputRunes, column[y].display())
+			output = append(output, column[y].display())
 		}
 		if y < yMax-1 {
-			for _, r := range []rune(lineSep) { // theoretically the line separator
-				outputRunes = append(outputRunes, r) // can be  \r\n, too, more than one char
-			}
+			output = append(output, lineSep)
 		}
 	}
-	return string(outputRunes)
+	return strings.Join(output, "")
 }
 
 type ScreenColumn []Char

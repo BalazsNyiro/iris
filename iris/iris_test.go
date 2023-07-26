@@ -37,7 +37,7 @@ func Test_layer_create(t *testing.T) {
 
 func Test_layer_render(t *testing.T) {
 	windows := Windows{} // modified/updated ONLY here:
-
+	dataInputLineSeparator := "\n"
 	data_input := MessageAndCharacters{
 		msg: `select:win:logs-left
 						msgId:1
@@ -46,7 +46,7 @@ func Test_layer_render(t *testing.T) {
 						set:width:8
 						set:height:6 `,
 		addLine: LineFromStr("testRender1")}
-	dataInputProcessLineByLine(data_input, &windows, "\n")
+	dataInputProcessLineByLine(data_input, &windows, dataInputLineSeparator)
 
 	data_input2 := MessageAndCharacters{
 		msg: `select:win:second
@@ -56,7 +56,7 @@ func Test_layer_render(t *testing.T) {
 						set:width:4
 						set:height:4 `,
 		addLine: LineFromStr("secondText")}
-	dataInputProcessLineByLine(data_input2, &windows, "\n")
+	dataInputProcessLineByLine(data_input2, &windows, dataInputLineSeparator)
 
 	windows.printAll()
 	terminalSizeActual := [2]int{9, 6}
@@ -64,7 +64,7 @@ func Test_layer_render(t *testing.T) {
 	fmt.Println("layers in test:", layers)
 
 	for _, layer := range layers {
-		layer.print()
+		layer.print(dataInputLineSeparator)
 	}
 }
 
