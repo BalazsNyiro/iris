@@ -22,17 +22,17 @@ func (c Char) display() string {
 
 /////////////////////////////////////////////////////////////////
 
-type Line []Char
+type LineChars []Char
 
-func (line Line) LineToStr() string {
-	out := []rune{}
+func (line LineChars) LineToStr() string {
+	out := []string{}
 	for _, Char := range line {
-		out = append(out, Char.runeVal)
+		out = append(out, Char.display())
 	}
-	return string(out)
+	return strings.Join(out, "")
 }
-func LineFromStr(txt string) Line {
-	Line := Line{}
+func LineCharsFromStr(txt string) LineChars {
+	Line := LineChars{}
 	for _, runeVal := range txt {
 		Line = append(Line, Char{runeVal: runeVal})
 	}
@@ -41,9 +41,9 @@ func LineFromStr(txt string) Line {
 
 /////////////////////////////////////////////////////////////////
 
-type MessageAndCharacters struct {
+type MessageAndCharactersForWindowsUpdate struct {
 	msg     string
-	addLine Line
+	addLine LineChars
 }
 
 // ///////////////////////////////////////////////////////////////
@@ -66,7 +66,7 @@ type Window struct {
 	xLeft             int
 	width             int
 	height            int
-	lines             []Line
+	lines             []LineChars
 	backgroundDefault string
 	winId             string
 }
@@ -120,7 +120,7 @@ type ScreenColumn []Char
 
 /////////////////////////////////////////////////////////////////
 
-func UserInterfaceStart(ch_data_input chan MessageAndCharacters, dataInputLineSeparator string) {
+func UserInterfaceStart(ch_data_input chan MessageAndCharactersForWindowsUpdate, dataInputLineSeparator string) {
 	ui_init()
 	ch_user_input := make(chan string)
 	go channel_read_user_input(ch_user_input)
@@ -200,7 +200,7 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 			win.width, win.height, win.backgroundDefault, win.winId)
 
 		// structure the character input into one COLUMN, (a visible structure)
-		textBlockVisible := []Line{Line{}}
+		textBlockVisible := []LineChars{LineChars{}}
 		lineNumFirstVisible := len(win.lines) - win.height
 
 		// this solution handles the too long lines, and flow the text into the next line
@@ -214,14 +214,14 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 					// if we are in the last available column now:
 					if len(LineActual) == len(screenNow.matrix) {
 						textBlockVisible[textBlockLastLineId] = LineActual
-						textBlockVisible = append(textBlockVisible, Line{})
+						textBlockVisible = append(textBlockVisible, LineChars{})
 						textBlockLastLineId = len(textBlockVisible) - 1
 						LineActual = textBlockVisible[textBlockLastLineId]
 					}
 
 				}
 				textBlockVisible[textBlockLastLineId] = LineActual
-				textBlockVisible = append(textBlockVisible, Line{})
+				textBlockVisible = append(textBlockVisible, LineChars{})
 			}
 		}
 
@@ -301,7 +301,7 @@ func layersDisplayAll(layers ScreenLayers, newlineSeparator string, loopCounter 
 	}
 }
 
-func dataInputInterpret(ch_data_input chan MessageAndCharacters, windows *Windows, dataInputLineSeparator string) {
+func dataInputInterpret(ch_data_input chan MessageAndCharactersForWindowsUpdate, windows *Windows, dataInputLineSeparator string) {
 	for {
 		select {
 		case dataInput, _ := <-ch_data_input:
@@ -315,7 +315,7 @@ func dataInputInterpret(ch_data_input chan MessageAndCharacters, windows *Window
 	}
 }
 
-func dataInputProcessLineByLine(dataInput MessageAndCharacters, windows *Windows, dataInputLineSeparator string) string {
+func dataInputProcessLineByLine(dataInput MessageAndCharactersForWindowsUpdate, windows *Windows, dataInputLineSeparator string) string {
 	winId := ""
 
 	for _, lineOrig := range strings.Split(dataInput.msg, dataInputLineSeparator) {

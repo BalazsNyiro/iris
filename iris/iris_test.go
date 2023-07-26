@@ -38,24 +38,24 @@ func Test_layer_create(t *testing.T) {
 func Test_layer_render(t *testing.T) {
 	windows := Windows{} // modified/updated ONLY here:
 	dataInputLineSeparator := "\n"
-	data_input := MessageAndCharacters{
+	data_input := MessageAndCharactersForWindowsUpdateForWindowsUpdateForWindowsUpdate{
 		msg: `select:win:logs-left
 						msgId:1
 						set:xLeft:2
 						set:yTop:3
 						set:width:8
 						set:height:6 `,
-		addLine: LineFromStr("testRender1")}
+		addLine: LineCharsFromStr("testRender1")}
 	dataInputProcessLineByLine(data_input, &windows, dataInputLineSeparator)
 
-	data_input2 := MessageAndCharacters{
+	data_input2 := MessageAndCharactersForWindowsUpdateForWindowsUpdate{
 		msg: `select:win:second
 						msgId:2
 						set:xLeft:1
 						set:yTop:2
 						set:width:4
 						set:height:4 `,
-		addLine: LineFromStr("secondText")}
+		addLine: LineCharsFromStr("secondText")}
 	dataInputProcessLineByLine(data_input2, &windows, dataInputLineSeparator)
 
 	windows.printAll()
