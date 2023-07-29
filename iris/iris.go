@@ -220,9 +220,11 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 		// this solution handles the too long lines, and flow the text into the next line
 		for lineNumInWin, lineReceived := range win.lines {
 			if lineNumInWin >= lineNumFirstVisible {
+
 				if len(textBlockVisible) > 0 {
 					// if we have a previous line, add a new empty one,
-					// and we can fill it up with characters
+					// and we can fill it up with characters in the next for loop
+					// this adding happens only from the 2nd received line.
 					textBlockVisible = append(textBlockVisible, LineChars{})
 				}
 
@@ -238,7 +240,6 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 						textBlockLastLineId = len(textBlockVisible) - 1
 						LineActual = textBlockVisible[textBlockLastLineId]
 					}
-
 				}
 				textBlockVisible[textBlockLastLineId] = LineActual
 			}
