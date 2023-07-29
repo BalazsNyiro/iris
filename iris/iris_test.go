@@ -21,6 +21,8 @@ import (
 }
 */
 
+var newline = "\n"
+
 func Test_layer_create(t *testing.T) {
 	xLeft := 2
 	yTop := 3
@@ -29,16 +31,16 @@ func Test_layer_create(t *testing.T) {
 	txtlayerDefault := "L"
 
 	layer := LayerCreate(xLeft, yTop, width, height, txtlayerDefault, "testLayerCreate")
-	layerRendered := layer.layerToTxt("\n")
+	layerRendered := layer.layerToTxt(newline)
 	fmt.Println(layerRendered)
 
-	compare_str_pair("Test_layer_create 1", layerRendered, "LLLL\nLLLL", t)
+	compare_str_pair("Test_layer_create 1", layerRendered, "LLLL"+newline+"LLLL", t)
 }
 
 func Test_layer_render(t *testing.T) {
 	windows := Windows{} // modified/updated ONLY here:
 	dataInputLineSeparator := "\n"
-	data_input := MessageAndCharactersForWindowsUpdateForWindowsUpdateForWindowsUpdate{
+	data_input := MessageAndCharactersForWindowsUpdate{
 		msg: `select:win:logs-left
 						msgId:1
 						set:xLeft:2
@@ -48,17 +50,17 @@ func Test_layer_render(t *testing.T) {
 		addLine: LineCharsFromStr("testRender1")}
 	dataInputProcessLineByLine(data_input, &windows, dataInputLineSeparator)
 
-	data_input2 := MessageAndCharactersForWindowsUpdateForWindowsUpdate{
+	data_input2 := MessageAndCharactersForWindowsUpdate{
 		msg: `select:win:second
 						msgId:2
 						set:xLeft:1
 						set:yTop:2
 						set:width:4
 						set:height:4 `,
-		addLine: LineCharsFromStr("secondText")}
+		addLine: LineCharsFromStr("secondTextWithMoreLetters")}
 	dataInputProcessLineByLine(data_input2, &windows, dataInputLineSeparator)
 
-	windows.printAll()
+	// windows.printAll()
 	terminalSizeActual := [2]int{9, 6}
 	layers := LayersRenderFromWindows(windows, terminalSizeActual)
 	fmt.Println("layers in test:", layers)
@@ -66,6 +68,15 @@ func Test_layer_render(t *testing.T) {
 	for _, layer := range layers {
 		layer.print(dataInputLineSeparator)
 	}
+
+	layerSecond, err := layers.getLayer("second")
+	if err == nil {
+		wanted := "thMo" + newline + "reLe" + newline + "tter" + newline + "srrr"
+		compare_str_pair("Test layer SECOND, rendered txt", layerSecond.layerToTxt(newline), wanted, t)
+	} else {
+		fmt.Println("ERROR:", err)
+	}
+
 }
 
 func compare_str_pair(callerInfo, received, wanted string, t *testing.T) {

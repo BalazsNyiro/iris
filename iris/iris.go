@@ -2,6 +2,7 @@
 package iris
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -82,15 +83,24 @@ func (w Window) print() {
 
 type ScreenLayers []ScreenLayer_CharMatrix
 
+func (layers ScreenLayers) getLayer(layerIdWanted string) (ScreenLayer_CharMatrix, error) {
+	for _, layer := range layers {
+		if layerIdWanted == layer.layerId {
+			return layer, nil
+		}
+	}
+	return LayerEmtpyIfWeHaveErrors(), errors.New("unknown layerId")
+}
+
 type ScreenLayer_CharMatrix struct {
-	xLeft        int
-	yTop         int
-	matrix       []ScreenColumn
-	creationinfo string
+	xLeft   int
+	yTop    int
+	matrix  []ScreenColumn
+	layerId string
 }
 
 func (sl ScreenLayer_CharMatrix) print(dataInputLineSeparator string) {
-	fmt.Println("\nlayerId:", sl.creationinfo)
+	fmt.Println("\nlayerId:", sl.layerId)
 	matrixHeight := len(sl.matrix[0])
 	for y := 0; y < matrixHeight; y++ {
 		for _, column := range sl.matrix {
@@ -166,9 +176,13 @@ func UserInterfaceStart(ch_data_input chan MessageAndCharactersForWindowsUpdate,
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // TESTED
-func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string, creationInfo string) ScreenLayer_CharMatrix {
+func LayerEmtpyIfWeHaveErrors() ScreenLayer_CharMatrix {
+	return LayerCreate(0, 0, 1, 1, "e", "emptyLayer")
+}
+
+func LayerCreate(xLeft, yTop, width, height int, txtLayerDefault string, layerId string) ScreenLayer_CharMatrix {
 	// fmt.Println("screen layer create:", xLeft, yTop, width, height)
-	screenLayerNew := ScreenLayer_CharMatrix{xLeft: xLeft, yTop: yTop, creationinfo: creationInfo}
+	screenLayerNew := ScreenLayer_CharMatrix{xLeft: xLeft, yTop: yTop, layerId: layerId}
 	defaultRune := 'r'
 	if len(txtLayerDefault) > 0 {
 		defaultRune = rune(txtLayerDefault[0])
