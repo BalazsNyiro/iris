@@ -220,12 +220,18 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 		// this solution handles the too long lines, and flow the text into the next line
 		for lineNumInWin, lineReceived := range win.lines {
 			if lineNumInWin >= lineNumFirstVisible {
+				if len(textBlockVisible) > 0 {
+					// if we have a previous line, add a new empty one,
+					// and we can fill it up with characters
+					textBlockVisible = append(textBlockVisible, LineChars{})
+				}
+
 				textBlockLastLineId := len(textBlockVisible) - 1
 				LineActual := textBlockVisible[textBlockLastLineId]
 
 				for _, charNow := range lineReceived {
 					LineActual = append(LineActual, charNow)
-					// if we are in the last available column now:
+					// if LineActual is filled with chars maximally
 					if len(LineActual) == len(screenNow.matrix) {
 						textBlockVisible[textBlockLastLineId] = LineActual
 						textBlockVisible = append(textBlockVisible, LineChars{})
@@ -235,15 +241,29 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 
 				}
 				textBlockVisible[textBlockLastLineId] = LineActual
-				textBlockVisible = append(textBlockVisible, LineChars{})
 			}
 		}
 
+		for _, lineCharsVisible := range textBlockVisible {
+			fmt.Println("DEBUG LINE:", lineCharsVisible)
+		}
 		// Load the theoretically visible text into the windows' column structure
 		len_textBlockVisible := len(textBlockVisible)
 		lineNumFirstVisibleInWindows := 0
 		if len_textBlockVisible > win.height {
-			lineNumFirstVisibleInWindows = len_textBlockVisible - win.height
+
+			// win.height +1 explanation:
+			/* if we have 5 lines, and the window height is 4:
+			1
+			2 VISIBLE
+			3 VISIBLE
+			4 VISIBLE
+			5 VISIBLE
+			so if we have 5 lines, then -win.height+1 -> 5 - 4 + 1 = 2 the correct first visible value
+			*/
+
+			// last -1:  because the numbering is 0 based, not 1
+			lineNumFirstVisibleInWindows = (len_textBlockVisible - win.height + 1) - 1
 		}
 
 		// fmt.Println("len textBlockVisible:", len_textBlockVisible)
