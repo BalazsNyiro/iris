@@ -1,4 +1,13 @@
-// author: Balazs Nyiro, balazs.nyiro.ca@gmail.com
+/*
+author: Balazs Nyiro, balazs.nyiro.ca@gmail.com
+
+Copyright (c) 2023, Balazs Nyiro
+All rights reserved.
+
+This source code (all file in this repo) is licensed
+under the Apache-2 style license found in the
+LICENSE file in the root directory of this source tree.
+*/
 package iris
 
 import (
@@ -14,6 +23,8 @@ import (
 )
 
 var Digits = "0123456789"
+
+func NewLine() string { return "\n" } // basic fun
 
 type winsize struct {
 	Row    uint16
@@ -147,4 +158,27 @@ func TimeSleep(interval_millisec int) { // basic fun
 	time.Sleep(time.Millisecond * time.Duration(interval_millisec))
 }
 
-func NewLine() string { return "\n" } // basic fun
+// /////////////////////////////////////////////////
+// keypress detection is based on this example:
+// https://stackoverflow.com/questions/54422309/how-to-catch-keypress-without-enter-in-golang-loop
+// thank you.
+func channel_read_user_input(ch chan string) {
+	var b []byte = make([]byte, 1)
+	for {
+		os.Stdin.Read(b)
+		ch <- string(b)
+	}
+} ///////////////////////////////////////////////////
+
+func channel_read_terminal_size_change_detect(ch chan [2]int) {
+	widthSys, heightSys := 0, 0
+	for {
+		widthSysNow, heightSysNow := TerminalDimensionsWithSyscall()
+		if widthSysNow != widthSys || heightSysNow != heightSys {
+			widthSys = widthSysNow
+			heightSys = heightSysNow
+			ch <- [2]int{widthSys, heightSys}
+		}
+		TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
+	}
+}
