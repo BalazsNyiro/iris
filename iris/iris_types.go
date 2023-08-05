@@ -78,6 +78,11 @@ type Window struct {
 	lines             []LineChars
 	backgroundDefault string
 	winId             string
+
+	// every decorator receives the decorator-section, when decorators are split with the decorator separator,
+	// \n is the decorator-sections separator,
+	// \t is the decorator elem separator
+	decorators string // decoratorFun:borderSimple\tborder_left:|\tborder_right:|\ndecoratorFun:Other/key:val/key2:val2
 }
 
 func (w Window) print() {

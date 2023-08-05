@@ -179,6 +179,7 @@ func LayersRenderFromWindows(windowsRO Windows, terminalSize [2]int) ScreenLayer
 			}
 
 		}
+
 		layers = append(layers, screenNow)
 	}
 	return layers
