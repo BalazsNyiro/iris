@@ -9,23 +9,30 @@ func main() {
 	widthSys, heightSys := iris.TerminalDimensionsWithSyscall()
 	fmt.Println("syscall:", widthSys, heightSys)
 
-	ch_data_input := make(chan string)
+	ch_data_input := make(chan iris.MessageAndCharactersForWindowsUpdate)
 	go iris.UserInterfaceStart(ch_data_input)
 
-	// useThisIdInReply: if the sender wants to get answer,
+	// msgId: if the sender wants to get answer,
 	// use this id in the reply message
-	ch_data_input <- `	select:win:logs-left
-						useThisIdInReply:1
-						set:top:5
-						set:bottom:22
-						set:left:4
-						set:right:33`
+	ch_data_input <- iris.MessageAndCharactersForWindowsUpdate{
+		msg: `	select:win:logs-left
+						msgId:1
+						set:yTop:5
+						set:height:22
+						set:xLeft:4
+						set:width:33`,
+		addLine: Line{},
+	}
 
 	for i := 1; i < 5; i++ {
 		// everything after the 'add:simpleText:' is the part of the text
-		ch_data_input <- `select:win:logs-left
-						add:simpleText:AddEverythingAfterColon` + fmt.Sprintf("%d", i)
+		ch_data_input <- iris.MessageAndCharactersForWindowsUpdate{
+			msg: `select:win:logs-left`,
+		}
+		// addLine: iris.LineCharsFromStr(fmt.Sprintf("%d sample", i)),
 		iris.TimeSleep(2000)
 	}
 	iris.UserInterfaceExit()
+}
+
 }

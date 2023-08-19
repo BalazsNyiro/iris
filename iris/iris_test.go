@@ -38,7 +38,7 @@ func Test_layer_create(t *testing.T) {
 	height := 2
 	txtlayerDefault := "L"
 
-	layer := LayerCreate(xLeft, yTop, width, height, txtlayerDefault, "testLayerCreate")
+	layer := ScreenLayerCreate(xLeft, yTop, width, height, txtlayerDefault, "testLayerCreate")
 	layerRendered := layer.layerToTxt(newline)
 	fmt.Println(layerRendered)
 
@@ -70,7 +70,7 @@ func Test_layer_render(t *testing.T) {
 
 	// windows.printAll()
 	terminalSizeActual := [2]int{9, 6}
-	layers := LayersRenderFromWindows(windows, terminalSizeActual)
+	layers := ScreenLayersRenderFromWindows(windows, terminalSizeActual)
 	fmt.Println("layers in test:", layers)
 
 	for _, layer := range layers {

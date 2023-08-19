@@ -79,6 +79,17 @@ type Window struct {
 	backgroundDefault string
 	winId             string
 
+	// Left/rigth borderchars can be longer than one, they ar rendered from left to right
+	// example: borderLeft = "AB" - if the borderwith = 2, AB will be on left
+	borderLeft        string
+	borderRight       string
+	borderTop         string
+	borderBottom      string
+	borderLeftTop     string
+	borderRightTop    string
+	borderLeftBottom  string
+	borderRightBottom string
+
 	// every decorator receives the decorator-section, when decorators are split with the decorator separator,
 	// \n is the decorator-sections separator,
 	// \t is the decorator elem separator
@@ -102,14 +113,15 @@ func (layers ScreenLayers) getLayer(layerIdWanted string) (ScreenLayer_CharMatri
 			return layer, nil
 		}
 	}
-	return LayerEmtpyIfWeHaveErrors(), errors.New("unknown layerId")
+	return ScreenLayerEmtpyIfWeHaveErrors(), errors.New("unknown layerId")
 }
 
 type ScreenLayer_CharMatrix struct {
-	xLeft   int
-	yTop    int
-	matrix  []ScreenColumn
-	layerId string
+	xLeft       int
+	yTop        int
+	matrix      []ScreenColumn
+	layerId     string
+	defaultRune rune
 }
 
 func (sl ScreenLayer_CharMatrix) print(dataInputLineSeparator string) {

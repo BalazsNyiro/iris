@@ -1,4 +1,3 @@
-# github.com/BalazsNyiro/iris v0.0.0-20230705002541-952489f8d500
+# github.com/BalazsNyiro/iris v0.0.0-20230711202006-03a38986d80c
 ## explicit; go 1.18
 github.com/BalazsNyiro/iris/iris
-github.com/BalazsNyiro/iris/iris/TRASH_OLD_VERSION

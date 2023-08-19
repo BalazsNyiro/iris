@@ -158,27 +158,3 @@ func TimeSleep(interval_millisec int) { // basic fun
 	time.Sleep(time.Millisecond * time.Duration(interval_millisec))
 }
 
-// /////////////////////////////////////////////////
-// keypress detection is based on this example:
-// https://stackoverflow.com/questions/54422309/how-to-catch-keypress-without-enter-in-golang-loop
-// thank you.
-func channel_read_user_input(ch chan string) {
-	var b []byte = make([]byte, 1)
-	for {
-		os.Stdin.Read(b)
-		ch <- string(b)
-	}
-} ///////////////////////////////////////////////////
-
-func channel_read_terminal_size_change_detect(ch chan [2]int) {
-	widthSys, heightSys := 0, 0
-	for {
-		widthSysNow, heightSysNow := TerminalDimensionsWithSyscall()
-		if widthSysNow != widthSys || heightSysNow != heightSys {
-			widthSys = widthSysNow
-			heightSys = heightSysNow
-			ch <- [2]int{widthSys, heightSys}
-		}
-		TimeSleep(TimeIntervalTerminalSizeDetectMillisec)
-	}
-}
