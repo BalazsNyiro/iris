@@ -196,9 +196,16 @@ func ScreenLayerBorderRender(screen ScreenLayer_CharMatrix, winParent Window) Sc
 		}
 	}
 
-	for y := 0; y < borderSizeBottom; y++ {
+	for bottomCharPos := 0; bottomCharPos < borderSizeBottom; bottomCharPos++ {
+		//                step back. if the border has 3 char, step back with 2 chars
+		//                because if the borderSize==1, you don't need to move back
+		//                 vvvvvvvvvvvvvvvvvvvvvv
+		// 0 base last id:
+		y := (height - 1) - (borderSizeBottom - 1) + bottomCharPos
+		fmt.Println("bottomCharPos", bottomCharPos, "  y:", y, "  width:", width)
+
 		for x := 0; x < width; x++ {
-			runeInserted := rune(winParent.borderBottom[y])
+			runeInserted := rune(winParent.borderBottom[bottomCharPos])
 			charInserted := Char{runeVal: runeInserted}
 			screenBordered.matrix[x][y] = charInserted
 		}

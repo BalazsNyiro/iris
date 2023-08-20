@@ -75,7 +75,7 @@ func dataInputProcessLineByLine(dataInput MessageAndCharactersForWindowsUpdate, 
 
 						// A is outer, C is inner
 						borderTop:    "ABC", //"-v", // - is outer, v is inner
-						borderBottom: "^-",  // ^ is inner, - is outer
+						borderBottom: ".:|", // . is inner, :middle, | is outer
 
 						// from left-Top to right-down:  L
 						borderLeftTop: "Lt", //           t
