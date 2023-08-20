@@ -124,6 +124,17 @@ type ScreenLayer_CharMatrix struct {
 	defaultRune rune
 }
 
+func (sl ScreenLayer_CharMatrix) width() int {
+	return len(sl.matrix)
+}
+func (sl ScreenLayer_CharMatrix) height() int {
+	// if it has minimum one column, and in the column minimum one row
+	if (len(sl.matrix) > 0) && (len(sl.matrix[0]) > 0) {
+		return len(sl.matrix[0])
+	}
+	return 0
+}
+
 func (sl ScreenLayer_CharMatrix) print(dataInputLineSeparator string) {
 	fmt.Println("\nlayerId:", sl.layerId)
 	matrixHeight := len(sl.matrix[0])

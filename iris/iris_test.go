@@ -74,6 +74,9 @@ func Test_layer_render(t *testing.T) {
 						set:borderTop:Oo.
 
 						set:borderBottom:.:|
+
+						TODO: the corner elems can be defined,
+                        TODO: but they are not important now to render them
 						set:borderLeftTop:abc
 						set:borderRightTop:fed
 						set:borderLeftBottom:ghi

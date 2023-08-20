@@ -254,11 +254,15 @@ func ScreenLayersDisplayAll(layers ScreenLayers, newlineSeparator string, loopCo
 		}
 	}
 
-	///////// DISPLAY merged layer //////////////////
-	for y := 0; y < heightMax; y++ {
-		for x := 0; x < widthMax; x++ {
-			fmt.Print(screenMerged.matrix[x][y].display())
+	ScreenLayerDisplay(screenMerged, newlineSeparator)
+}
+
+func ScreenLayerDisplay(screenLayer ScreenLayer_CharMatrix, newlineSeparator string) {
+	for y := 0; y < screenLayer.height(); y++ {
+		for x := 0; x < screenLayer.width(); x++ {
+			fmt.Print(screenLayer.matrix[x][y].display())
 		}
 		fmt.Print(newlineSeparator)
 	}
+
 }
