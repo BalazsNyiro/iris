@@ -64,7 +64,21 @@ func Test_layer_render(t *testing.T) {
 						set:xLeft:1
 						set:yTop:2
 						set:width:4
-						set:height:4 `,
+						set:height:4 
+
+                        comment:in right directions, the inner is in left, outer is in right
+                        comment: the set:borderXXX elems know that they can accept
+                        comment every character, the separator char, too, after the border:
+						set:borderLeft:[=>
+						set:borderRight:<=]
+						set:borderTop:Oo.
+
+						set:borderBottom:.:|
+						set:borderLeftTop:abc
+						set:borderRightTop:fed
+						set:borderLeftBottom:ghi
+						set:borderRightBottom:lkj`,
+
 		addLine: LineCharsFromStr("secondTextWithMoreLetters")}
 	dataInputProcessLineByLine(data_input2, &windows, dataInputLineSeparator)
 
@@ -79,7 +93,17 @@ func Test_layer_render(t *testing.T) {
 
 	layerSecond, err := layers.getLayer("second")
 	if err == nil {
-		wanted := "thMo" + newline + "reLe" + newline + "tter" + newline + "srrr"
+		wanted := "" + // without "", the auto-format breaks these code lines:
+			"OOOOOOOOOO" + newline +
+			"oooooooooo" + newline +
+			".........." + newline +
+			"[=>thMo<=]" + newline +
+			"[=>reLe<=]" + newline +
+			"[=>tter<=]" + newline +
+			"[=>srrr<=]" + newline +
+			".........." + newline +
+			"::::::::::" + newline +
+			"||||||||||"
 		compare_str_pair("Test layer SECOND, rendered txt", layerSecond.layerToTxt(newline), wanted, t)
 	} else {
 		fmt.Println("ERROR:", err)

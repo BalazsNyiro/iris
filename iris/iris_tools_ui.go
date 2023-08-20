@@ -58,67 +58,98 @@ func channelRead_dataInputInterpret(ch_data_input chan MessageAndCharactersForWi
 
 func dataInputProcessLineByLine(dataInput MessageAndCharactersForWindowsUpdate, windows *Windows, dataInputLineSeparator string) string {
 	winId := ""
+	fieldSeparator := ":"
+
+	/*
+				when an attribute is set, the line is split by separators,
+			    to get the path what we need to do.
+				For example:
+				set:borderBottom:=
+
+				it means: set borderBottom =
+				so set the borderBottom value to =
+
+				but what if we want to use the possible separator char, too?
+				it can be escaped, for example, but it is ugly.
+
+				So after a 'set:borderBottom:' the program knows that every char is accepted,
+		        There is NO MORE SEPARATOR CHAR splitting.
+
+	*/
+	everythingIsValueFromHere := func(elems []string, useEverythingfromHere int) string {
+		return strings.Join(elems[useEverythingfromHere:], fieldSeparator)
+	}
 
 	for _, lineOrig := range strings.Split(dataInput.msg, dataInputLineSeparator) {
 		line := strings.TrimSpace(lineOrig)
-		elems := strings.Split(line, ":")
+		elems := strings.Split(line, fieldSeparator)
 
-		if len(elems) == 3 {
-
-			// select:win:nameOfWin
-			if elems[0] == "select" && elems[1] == "win" {
-				winId = strings.TrimSpace(elems[2])
-				if _, exist := (*windows)[winId]; !exist {
-					(*windows)[winId] = Window{winId: winId,
-						borderLeft:  "[>", // direction: from left to right
-						borderRight: "<]", // < is inner, ] is outer
-
-						// A is outer, C is inner
-						borderTop:    "ABC", //"-v", // - is outer, v is inner
-						borderBottom: ".:|", // . is inner, :middle, | is outer
-
-						// from left-Top to right-down:  L
-						borderLeftTop: "Lt", //           t
-
-						// from right-top to left-down  R
-						borderRightTop: "Rt", //       t
-
-						//                            b
-						borderLeftBottom: "Lb", // L
-
-						//                            b
-						borderRightBottom: "bR", //   R
-					}
-				}
-
-				// process only the first line here, then later add all other lines, too
-				if len(dataInput.addLine) > 0 {
-					win := (*windows)[winId]
-					win.lines = append(win.lines, dataInput.addLine)
-					(*windows)[winId] = win
-				}
-
+		// select:win:nameOfWin
+		if elems[0] == "select" && elems[1] == "win" {
+			winId = strings.TrimSpace(elems[2])
+			if _, exist := (*windows)[winId]; !exist {
+				(*windows)[winId] = Window{winId: winId}
 			}
 
-			win := (*windows)[winId]
-			if elems[0] == "set" && elems[1] == "backgroundDefault" {
-				win.backgroundDefault = elems[2]
+			// process only the first line here, then later add all other lines, too
+			if len(dataInput.addLine) > 0 {
+				win := (*windows)[winId]
+				win.lines = append(win.lines, dataInput.addLine)
+				(*windows)[winId] = win
 			}
-			if elems[0] == "set" && elems[1] == "xLeft" {
-				win.xLeft = Str2Int(elems[2])
-			}
-			if elems[0] == "set" && elems[1] == "width" {
-				win.width = Str2Int(elems[2])
-			}
-			if elems[0] == "set" && elems[1] == "yTop" {
-				win.yTop = Str2Int(elems[2])
-			}
-			if elems[0] == "set" && elems[1] == "height" {
-				win.height = Str2Int(elems[2])
-			}
-			(*windows)[winId] = win
 
 		}
+
+		win := (*windows)[winId]
+
+		if elems[0] == "set" {
+			if elems[1] == "backgroundDefault" {
+				win.backgroundDefault = elems[2]
+			}
+			if elems[1] == "xLeft" {
+				win.xLeft = Str2Int(elems[2])
+			}
+			if elems[1] == "width" {
+				win.width = Str2Int(elems[2])
+			}
+			if elems[1] == "yTop" {
+				win.yTop = Str2Int(elems[2])
+			}
+			if elems[1] == "height" {
+				win.height = Str2Int(elems[2])
+			}
+
+			// ######## borders ###############
+			if elems[1] == "borderLeft" {
+				// "[=>", [ is outer, > is inner
+				win.borderLeft = elems[2]
+			}
+
+			// in right directions, the inner is in left, outer is in right
+			if elems[1] == "borderRight" { // "<=]" < is inner, ] is outer
+				win.borderRight = everythingIsValueFromHere(elems, 2)
+			}
+			if elems[1] == "borderTop" { // "Oo." O is outer, . is inner
+				win.borderTop = everythingIsValueFromHere(elems, 2)
+			}
+			if elems[1] == "borderBottom" { // .:| . is inner, :middle, | is outer
+				win.borderBottom = everythingIsValueFromHere(elems, 2)
+			}
+			if elems[1] == "borderLeftTop" { // abc a is outer, c is inner
+				win.borderLeftTop = everythingIsValueFromHere(elems, 2)
+			}
+			if elems[1] == "borderRightTop" { // def  f is inner, d is outer
+				win.borderRightTop = everythingIsValueFromHere(elems, 2)
+			}
+			if elems[1] == "borderLeftBottom" { // ghi g is outer, i is inner
+				win.borderLeftBottom = everythingIsValueFromHere(elems, 2)
+			}
+			if elems[1] == "borderRightBottom" { // lkj  l is inner, j is outer
+				win.borderRightBottom = everythingIsValueFromHere(elems, 2)
+			}
+		}
+
+		(*windows)[winId] = win
 
 		if winId == "" {
 			continue
