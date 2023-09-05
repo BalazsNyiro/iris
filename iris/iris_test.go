@@ -28,7 +28,7 @@ func Test_lines_create(t *testing.T) {
 func Test_text_create(t *testing.T) {
 	funName := "Test_text_create"
 
-	text := TextFromStr("a\nbc\ndef")
+	text := TextBlockFromStr("a\nbc\ndef")
 	compare_int_pair(funName, len(text.Lines), 3, t)
 	compare_int_pair(funName, len(text.Lines[0].Chars), 1, t)
 	compare_int_pair(funName, len(text.Lines[1].Chars), 2, t)
@@ -38,6 +38,8 @@ func Test_text_create(t *testing.T) {
 	compare_rune_pair(funName, text.Lines[2].Chars[2].runeVal, 'f', t)
 
 }
+
+// TODO: test: TextAppend
 
 func compare_int_pair(callerInfo string, received, wanted int, t *testing.T) {
 	if received != wanted {
