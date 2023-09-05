@@ -46,14 +46,15 @@ func LineCharsFromStr(text string, lineNum int) LineChars {
 
 // maybe it has to be an object, with attributes
 type Text struct {
-	lines       []LineChars
-	nextLineNum int
+	Lines       []LineChars
+	NextLineNum int
 }
 
-func LinesFromStr(txtWithNewlines string) Text {
+func TextFromStr(txtWithNewlines string) Text {
 	text := Text{}
 	for _, line := range strings.Split(txtWithNewlines, TextProcessingNewlineSeparator) {
-		text.lines = append(text.lines, LineCharsFromStr(line, text.nextLineNum))
+		text.Lines = append(text.Lines, LineCharsFromStr(line, text.NextLineNum))
+		text.NextLineNum += 1
 	}
 	return text
 }
