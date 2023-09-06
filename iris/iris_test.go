@@ -39,7 +39,19 @@ func Test_text_create(t *testing.T) {
 
 }
 
-// TODO: test: TextAppend
+func Test_text_append(t *testing.T) {
+	funName := "Test_text_append"
+	text := TextBlockFromStr("a\nbc\ndef")
+	TextAppendIntoLastLine("ghi", &text)
+
+	compare_int_pair(funName, len(text.Lines), 3, t)
+	compare_int_pair(funName, len(text.Lines[2].Chars), 6, t)
+
+	TextAppendIntoNewNextLine("jklmn", &text)
+	compare_int_pair(funName, len(text.Lines), 4, t)
+	compare_int_pair(funName, len(text.Lines[3].Chars), 5, t)
+
+}
 
 func compare_int_pair(callerInfo string, received, wanted int, t *testing.T) {
 	if received != wanted {

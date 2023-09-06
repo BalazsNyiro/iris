@@ -59,12 +59,31 @@ func TextBlockFromStr(txt string) TextBlock {
 	return text
 }
 
-func TextAppend(txtNew string, textBlockPtr *TextBlock) {
+func TextAppendIntoLastLine(txtNew string, textBlockPtr *TextBlock) {
+	nextLineNum := len(textBlockPtr.Lines)
+
+	firstNewline := true
+	for _, line := range strings.Split(txtNew, TextProcessingNewlineSeparator) {
+		lineCharsNew := LineCharsFromStr(line, nextLineNum)
+		if firstNewline {
+			lineNumLastId := len(textBlockPtr.Lines) - 1
+			for _, char := range lineCharsNew.Chars {
+				textBlockPtr.Lines[lineNumLastId].Chars =
+					append(textBlockPtr.Lines[lineNumLastId].Chars, char)
+			}
+		} else {
+			textBlockPtr.Lines = append(textBlockPtr.Lines, lineCharsNew)
+			textBlockPtr.NextLineNum += 1
+			firstNewline = false
+		}
+	}
+}
+
+func TextAppendIntoNewNextLine(txtNew string, textBlockPtr *TextBlock) {
 	nextLineNum := len(textBlockPtr.Lines)
 
 	for _, line := range strings.Split(txtNew, TextProcessingNewlineSeparator) {
 		textBlockPtr.Lines = append(textBlockPtr.Lines, LineCharsFromStr(line, nextLineNum))
 		textBlockPtr.NextLineNum += 1
 	}
-
 }
