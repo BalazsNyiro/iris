@@ -16,9 +16,6 @@ package iris
 
 import "fmt"
 
-type ColumnChars []Char
-type MatrixChars []ColumnChars // 2 dimensional Char structure
-
 type Window struct {
 	id string
 
@@ -42,7 +39,7 @@ func (w Window) print() {
 	}
 }
 func (w Window) render() {
-	// TODO: matrix := Matrix_empty()
+	matrix := MatrixNew(w.width, w.height)
 
 	/* How can we render? :-) This is a game!
 
