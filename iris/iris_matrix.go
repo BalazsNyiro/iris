@@ -11,7 +11,10 @@ LICENSE file in the root directory of this source tree.
 
 package iris
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type ColumnChars []Char
 type MatrixChars struct {
@@ -39,6 +42,17 @@ func (mx MatrixChars) DisplayInConsoleToDebugOrAnalyse() {
 		}
 		fmt.Println()
 	}
+}
+func (mx MatrixChars) lines_representation_to_test_comparison() []string {
+	output := []string{}
+	for y := 0; y < mx.height; y++ {
+		line := []string{}
+		for x := 0; x < mx.width; x++ {
+			line = append(line, mx.matrix[x][y].display())
+		}
+		output = append(output, strings.Join(line[:], ""))
+	}
+	return output
 }
 
 func MatrixNew(width, height int, backgroundDefault string) MatrixChars {

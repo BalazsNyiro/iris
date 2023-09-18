@@ -78,8 +78,16 @@ func Test_windows_render(t *testing.T) {
 	win.print()
 
 	matrixOfWin := win.render()
+
 	fmt.Println("MATRIX DISPLAY AFTER WIN RENDER")
 	matrixOfWin.DisplayInConsoleToDebugOrAnalyse()
+
+	mxLines := matrixOfWin.lines_representation_to_test_comparison()
+	compare_str_pair("mxRender0", mxLines[0], "2bc.", t)
+	compare_str_pair("mxRender0", mxLines[1], "3def", t)
+	compare_str_pair("mxRender0", mxLines[2], "4ghi", t)
+	compare_str_pair("mxRender0", mxLines[3], "jklm", t)
+	compare_str_pair("mxRender0", mxLines[4], "no..", t)
 }
 
 func Test_window_row_start_end_positions(t *testing.T) {
