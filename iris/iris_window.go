@@ -39,7 +39,7 @@ func (w Window) print() {
 	}
 }
 
-func text_line_last_displayed_segment(lenText int, winWidth int) (int, int) {
+func text_line_last_displayed_segment__startIncluded_endIncluded(lenText int, winWidth int) (int, int) {
 	// this fun assumes that the text length is minimum 1 char.
 	// in that case, the start=0, end=0 is the minimum possible range, that could be given back
 	// if the text length is less, so there is no text, return with -1, -1 by definition
@@ -87,8 +87,7 @@ func text_line_last_displayed_segment(lenText int, winWidth int) (int, int) {
 	return -2, -2
 }
 
-func (w Window) render() {
-	//matrix := MatrixNew(w.width, w.height)
+func (w Window) render() MatrixChars {
 
 	/* How can we render? :-) This is a game!
 
@@ -112,19 +111,25 @@ func (w Window) render() {
 	sections, and in reverse orders we need to upload the lines.
 
 	1: Loop over the lines in reversed order, from last to the first ones
-	2:
+	2: Fill the matrix from bottom to top
 	*/
+
+	// fill the matrix from bottom to top
+	matrixObj := MatrixNew(w.width, w.height, ".")
+	matrixLineActual := w.height - 1 // select the last to fill it first
 
 	fmt.Println("RENDER")
 	fmt.Println("win render, textBlock lineNum", len(w.textBlockPtr.Lines))
 	for i := len(w.textBlockPtr.Lines) - 1; i >= 0; i-- {
+
 		line := w.textBlockPtr.Lines[i]
 		lineStr := line.LineToStr()
 		fmt.Println("winLine:", i, lineStr)
 
 		widthSmallerAndSmaller := len(lineStr)
 		for true {
-			lastSegmentIndexStart, lastSegmentIndexEnd := text_line_last_displayed_segment(widthSmallerAndSmaller, w.width)
+
+			lastSegmentIndexStart, lastSegmentIndexEnd := text_line_last_displayed_segment__startIncluded_endIncluded(widthSmallerAndSmaller, w.width)
 			if lastSegmentIndexStart < 0 {
 				break
 			}
@@ -133,8 +138,18 @@ func (w Window) render() {
 			// the lastSegmentIndexStart is the last segment's start point.
 			// because the indexes are zero based, the new width (which is 1 based)
 			// is equal width the last 0 based start
+
+			// the slice's start is included, end is EXCLUDED so I have to add +1
+			matrixObj.LineFill(line.Chars[lastSegmentIndexStart:lastSegmentIndexEnd+1], matrixLineActual)
+
+			matrixLineActual -= 1
+			if matrixLineActual < 0 {
+				return matrixObj
+			}
+
 		}
 	}
+	return matrixObj
 }
 
 func window_row_start_end_positions(lengtOfTextBlockLine int, windowWidth int) [][2]int {

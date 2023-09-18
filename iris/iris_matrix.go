@@ -11,10 +11,34 @@ LICENSE file in the root directory of this source tree.
 
 package iris
 
+import "fmt"
+
 type ColumnChars []Char
 type MatrixChars struct {
 	matrix      []ColumnChars
 	defaultRune rune
+	width       int
+	height      int
+}
+
+func (mx MatrixChars) LineFill(characters []Char, lineNumZeroBased int) {
+	matrixWidth := len(mx.matrix)
+	for id, lineChar := range characters {
+		if id >= matrixWidth {
+			break
+		}
+		mx.matrix[id][lineNumZeroBased] = lineChar
+	}
+}
+
+func (mx MatrixChars) DisplayInConsoleToDebugOrAnalyse() {
+	fmt.Println("matrix width:", mx.width, "matrix height:", mx.height)
+	for y := 0; y < mx.height; y++ {
+		for x := 0; x < mx.width; x++ {
+			fmt.Print(mx.matrix[x][y].display())
+		}
+		fmt.Println()
+	}
 }
 
 func MatrixNew(width, height int, backgroundDefault string) MatrixChars {
@@ -22,7 +46,7 @@ func MatrixNew(width, height int, backgroundDefault string) MatrixChars {
 	if len(backgroundDefault) > 0 {
 		defaultRune = rune(backgroundDefault[0])
 	}
-	matrixNew := MatrixChars{defaultRune: defaultRune}
+	matrixNew := MatrixChars{defaultRune: defaultRune, width: width, height: height}
 	for x := 0; x < width; x++ {
 		column := ColumnChars{}
 		for y := 0; y < height; y++ {

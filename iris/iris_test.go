@@ -11,6 +11,7 @@ LICENSE file in the root directory of this source tree.
 package iris
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -55,16 +56,16 @@ func Test_text_append(t *testing.T) {
 
 func Test_text_line_split_into_window_width_get_indexes(t *testing.T) {
 	/* split a long text into a smaller window - find the last index */
-	indexStart, indexEnd := text_line_last_displayed_segment(0, 4)
+	indexStart, indexEnd := text_line_last_displayed_segment__startIncluded_endIncluded(0, 4)
 	compare_int_tuples("segment 1", []int{indexStart, indexEnd}, []int{-1, -1}, t)
 
-	indexStart, indexEnd = text_line_last_displayed_segment(4, 4)
+	indexStart, indexEnd = text_line_last_displayed_segment__startIncluded_endIncluded(4, 4)
 	compare_int_tuples("segment 2", []int{indexStart, indexEnd}, []int{0, 3}, t)
 
-	indexStart, indexEnd = text_line_last_displayed_segment(8, 4)
+	indexStart, indexEnd = text_line_last_displayed_segment__startIncluded_endIncluded(8, 4)
 	compare_int_tuples("segment 2", []int{indexStart, indexEnd}, []int{4, 7}, t)
 
-	indexStart, indexEnd = text_line_last_displayed_segment(14, 4)
+	indexStart, indexEnd = text_line_last_displayed_segment__startIncluded_endIncluded(14, 4)
 	compare_int_tuples("segment 2", []int{indexStart, indexEnd}, []int{12, 13}, t)
 }
 
@@ -73,11 +74,12 @@ func Test_windows_render(t *testing.T) {
 	textBlock := TextBlockFromStr("1a\n2bc\n3def\n4ghijklmno")
 	winId := 0
 
-	win := Window{yTop: 0, xLeft: 0, width: 4, height: 3, textBlockPtr: &textBlock, backgroundDefault: "b", winIdNum: winId}
+	win := Window{yTop: 0, xLeft: 0, width: 4, height: 5, textBlockPtr: &textBlock, backgroundDefault: "b", winIdNum: winId}
 	win.print()
 
-	win.render()
-
+	matrixOfWin := win.render()
+	fmt.Println("MATRIX DISPLAY AFTER WIN RENDER")
+	matrixOfWin.DisplayInConsoleToDebugOrAnalyse()
 }
 
 func Test_window_row_start_end_positions(t *testing.T) {
