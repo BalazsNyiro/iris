@@ -53,6 +53,21 @@ func Test_text_append(t *testing.T) {
 
 }
 
+func Test_text_line_split_into_window_width_get_indexes(t *testing.T) {
+	/* split a long text into a smaller window - find the last index */
+	indexStart, indexEnd := text_line_last_displayed_segment(0, 4)
+	compare_int_tuples("segment 1", []int{indexStart, indexEnd}, []int{-1, -1}, t)
+
+	indexStart, indexEnd = text_line_last_displayed_segment(4, 4)
+	compare_int_tuples("segment 2", []int{indexStart, indexEnd}, []int{0, 3}, t)
+
+	indexStart, indexEnd = text_line_last_displayed_segment(8, 4)
+	compare_int_tuples("segment 2", []int{indexStart, indexEnd}, []int{4, 7}, t)
+
+	indexStart, indexEnd = text_line_last_displayed_segment(14, 4)
+	compare_int_tuples("segment 2", []int{indexStart, indexEnd}, []int{12, 13}, t)
+}
+
 func Test_windows_render(t *testing.T) {
 	//funName := " Test_windows_display"
 	textBlock := TextBlockFromStr("1a\n2bc\n3def\n4ghijklmno")
@@ -83,6 +98,18 @@ func Test_window_row_start_end_positions(t *testing.T) {
 	compare_int_pair("rowStartEndPos6", windowRowPositions[2][1], 7, t)
 	compare_int_pair("rowStartEndPos7", windowRowPositions[3][0], 0, t)
 	compare_int_pair("rowStartEndPos8", windowRowPositions[3][1], 3, t)
+}
+func compare_int_tuples(callerInfo string, received, wanted []int, t *testing.T) {
+	if len(received) != len(wanted) {
+		t.Fatalf("\nErr: %s received int tuple: %v\n  wanted int tuple: %v, error, different length, not comparable", callerInfo, received, wanted)
+	}
+
+	for i := 0; i < len(received); i++ {
+		if received[i] != wanted[i] {
+			t.Fatalf("\nErr: %s (id %v) received int in tuple: %v\n  wanted int in tuple: %v, error", callerInfo, i, received, wanted)
+		}
+
+	}
 }
 
 func compare_int_pair(callerInfo string, received, wanted int, t *testing.T) {

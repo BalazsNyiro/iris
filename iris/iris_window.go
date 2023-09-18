@@ -38,8 +38,57 @@ func (w Window) print() {
 		fmt.Println("winLine:", line.LineToStr())
 	}
 }
+
+func text_line_last_displayed_segment(lenText int, winWidth int) (int, int) {
+	// this fun assumes that the text length is minimum 1 char.
+	// in that case, the start=0, end=0 is the minimum possible range, that could be given back
+	// if the text length is less, so there is no text, return with -1, -1 by definition
+
+	if lenText <= 0 {
+		return -1, -1
+	}
+	if lenText == 1 {
+		return 0, 0
+	}
+	if lenText > 1 && lenText <= winWidth {
+		return 0, lenText - 1
+	}
+
+	if lenText > winWidth {
+		numOfCharsInLastNotFullLine := lenText % winWidth
+
+		// if winWidth == 4, lenText == 4, 8, 12, 16 -
+		// so there is no empty line, everything is filled
+		if numOfCharsInLastNotFullLine == 0 {
+			indexStart := (lenText - 1) - (winWidth - 1)
+			indexEnd := lenText - 1
+			return indexStart, indexEnd
+		} else {
+			/*
+					2 ....      ABCD  <- totally filled FIRST window row
+					3 ....	    EFGH  <- totally filled       window row
+					4 ....	    IJKL  <- totally filled       window row
+					5 ....	    MN    <- partial              window row
+
+					so in this case, the last line has partial chars, the window line is not filled.
+				    numOfCharsInLastNotFullLine == 2
+
+					in this case, the end is the last char, the first is the beginning
+					of the reminder/numOfCharsInLastNotFullLine
+			*/
+			indexStart := (lenText - 1) - (numOfCharsInLastNotFullLine - 1)
+			indexEnd := lenText - 1
+			return indexStart, indexEnd
+		}
+
+	}
+
+	// in worst case, if nothing is matching, return with this :-)
+	return -2, -2
+}
+
 func (w Window) render() {
-	matrix := MatrixNew(w.width, w.height)
+	//matrix := MatrixNew(w.width, w.height)
 
 	/* How can we render? :-) This is a game!
 
@@ -57,17 +106,34 @@ func (w Window) render() {
 	4 ....	    IJKL  <- totally filled       window row
 	5 ....	    MN    <- partial              window row
 
-	one text line can fille more window row.
+	one text line can fill more window row.
 
 	so the textBlock.Lines needs to be splitted up smaller
 	sections, and in reverse orders we need to upload the lines.
+
+	1: Loop over the lines in reversed order, from last to the first ones
+	2:
 	*/
 
 	fmt.Println("RENDER")
-	fmt.Println("textBlock lineNum", len(w.textBlockPtr.Lines))
+	fmt.Println("win render, textBlock lineNum", len(w.textBlockPtr.Lines))
 	for i := len(w.textBlockPtr.Lines) - 1; i >= 0; i-- {
 		line := w.textBlockPtr.Lines[i]
-		fmt.Println("winLine:", i, line.LineToStr())
+		lineStr := line.LineToStr()
+		fmt.Println("winLine:", i, lineStr)
+
+		widthSmallerAndSmaller := len(lineStr)
+		for true {
+			lastSegmentIndexStart, lastSegmentIndexEnd := text_line_last_displayed_segment(widthSmallerAndSmaller, w.width)
+			if lastSegmentIndexStart < 0 {
+				break
+			}
+			fmt.Println("lastSegment start:", lastSegmentIndexStart, " end:", lastSegmentIndexEnd)
+			widthSmallerAndSmaller = lastSegmentIndexStart
+			// the lastSegmentIndexStart is the last segment's start point.
+			// because the indexes are zero based, the new width (which is 1 based)
+			// is equal width the last 0 based start
+		}
 	}
 }
 
