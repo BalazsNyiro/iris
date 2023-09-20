@@ -16,6 +16,8 @@ package iris
 
 import "fmt"
 
+// A window: a selector for a TextBlock.
+// A matrix: the rendered representation of a window.
 type Window struct {
 	id string
 
@@ -28,6 +30,7 @@ type Window struct {
 	backgroundDefault string
 	winIdNum          int
 	winHumanName      string
+	matrix            MatrixChars
 }
 
 func (w Window) print() {
@@ -87,15 +90,15 @@ func text_line_last_displayed_segment__startIncluded_endIncluded(lenText int, wi
 	return -2, -2
 }
 
-func (w Window) render() MatrixChars {
+func (w Window) matrixRender() MatrixChars {
 
-	/* How can we render? :-) This is a game!
+	/* How can we matrixRender? :-) This is a game!
 
 	an example textBlock.Lines (2 lines:)
 	abcdefghijklm
 	ABCDEFGHIJKLMN
 
-	How can we render this? the window width = 4, height = 5
+	How can we matrixRender this? the window width = 4, height = 5
 
 	A window map:
 	  1234   the last line needs to be broken to win.width sections:
@@ -119,7 +122,7 @@ func (w Window) render() MatrixChars {
 	matrixLineActual := w.height - 1 // select the last to fill it first
 
 	fmt.Println("RENDER")
-	fmt.Println("win render, textBlock lineNum", len(w.textBlockPtr.Lines))
+	fmt.Println("win matrixRender, textBlock lineNum", len(w.textBlockPtr.Lines))
 	for i := len(w.textBlockPtr.Lines) - 1; i >= 0; i-- {
 
 		line := w.textBlockPtr.Lines[i]

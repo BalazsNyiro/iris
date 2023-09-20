@@ -71,3 +71,7 @@ func MatrixNew(width, height int, backgroundDefault string) MatrixChars {
 	// fmt.Println("new layer:", matrixNew)
 	return matrixNew
 }
+
+func MatrixMerge(matrixBase, matrixInsertAboveBase MatrixChars) MatrixChars {
+
+}

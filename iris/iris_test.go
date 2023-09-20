@@ -72,12 +72,13 @@ func Test_text_line_split_into_window_width_get_indexes(t *testing.T) {
 func Test_windows_render(t *testing.T) {
 	//funName := " Test_windows_display"
 	textBlock := TextBlockFromStr("1a\n2bc\n3def\n4ghijklmno")
-	winId := 0
 
-	win := Window{yTop: 0, xLeft: 0, width: 4, height: 5, textBlockPtr: &textBlock, backgroundDefault: "b", winIdNum: winId}
+	winId := 0
+	win := Window{yTop: 0, xLeft: 0, width: 4, height: 5,
+		textBlockPtr: &textBlock, backgroundDefault: "b", winIdNum: winId}
 	win.print()
 
-	matrixOfWin := win.render()
+	matrixOfWin := win.matrixRender()
 
 	fmt.Println("MATRIX DISPLAY AFTER WIN RENDER")
 	matrixOfWin.DisplayInConsoleToDebugOrAnalyse()
@@ -88,6 +89,34 @@ func Test_windows_render(t *testing.T) {
 	compare_str_pair("mxRender0", mxLines[2], "4ghi", t)
 	compare_str_pair("mxRender0", mxLines[3], "jklm", t)
 	compare_str_pair("mxRender0", mxLines[4], "no..", t)
+}
+
+func Test_root_matrix_and_windows_merged(t *testing.T) {
+
+	// create a root matrix
+	// create 2 windows.
+	// matrixRender 2 matrixes from the window
+	// merge everything
+	// 	display it
+
+	matrixRoot := MatrixNew(10, 8, "r")
+
+	textBlock1 := TextBlockFromStr("1a\n2bc\n3def\n4ghijklmno")
+	textBlock2 := TextBlockFromStr("1A\n2BC\n3DEF\n4GHIJKLMNO")
+
+	winId := 0
+	win0 := Window{yTop: 1, xLeft: 1, width: 5, height: 4, textBlockPtr: &textBlock1, backgroundDefault: ".", winIdNum: winId}
+
+	winId = 1
+	win1 := Window{yTop: 3, xLeft: 4, width: 4, height: 5, textBlockPtr: &textBlock2, backgroundDefault: "_", winIdNum: winId}
+
+	matrixWin0 := win0.matrixRender()
+	matrixWin1 := win1.matrixRender()
+
+	matrixMerged0 := MatrixMerge(matrixRoot, matrixWin0)
+	matrixMerged1 := MatrixMerge(matrixMerged0, matrixWin1)
+
+	matrixMerged1.DisplayInConsoleToDebugOrAnalyse()
 }
 
 func Test_window_row_start_end_positions(t *testing.T) {
