@@ -43,7 +43,8 @@ func (mx MatrixChars) DisplayInConsoleToDebugOrAnalyse() {
 		fmt.Println()
 	}
 }
-func (mx MatrixChars) lines_representation_to_test_comparison() []string {
+func (mx MatrixChars) Lines_representation_to_test_comparison() []string {
+	// list of lines
 	output := []string{}
 	for y := 0; y < mx.height; y++ {
 		line := []string{}
@@ -72,6 +73,18 @@ func MatrixNew(width, height int, backgroundDefault string) MatrixChars {
 	return matrixNew
 }
 
-func MatrixMerge(matrixBase, matrixInsertAboveBase MatrixChars) MatrixChars {
-
+func MatrixAdd(matrixBase, matrixAdded MatrixChars, insertX, insertY int) MatrixChars {
+	// loop over Added matrix, and insert the points into Base
+	for addedY := 0; addedY < matrixAdded.height; addedY++ {
+		for addedX := 0; addedX < matrixAdded.width; addedX++ {
+			calculatedXInBase := insertX + addedX
+			calculatedYInBase := insertY + addedY
+			if calculatedXInBase >= 0 && calculatedXInBase < matrixBase.width {
+				if calculatedYInBase >= 0 && calculatedYInBase < matrixBase.height {
+					matrixBase.matrix[calculatedXInBase][calculatedYInBase] = matrixAdded.matrix[addedX][addedY]
+				}
+			}
+		}
+	}
+	return matrixBase
 }

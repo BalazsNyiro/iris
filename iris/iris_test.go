@@ -12,6 +12,7 @@ package iris
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -75,7 +76,7 @@ func Test_windows_render(t *testing.T) {
 
 	winId := 0
 	win := Window{yTop: 0, xLeft: 0, width: 4, height: 5,
-		textBlockPtr: &textBlock, backgroundDefault: "b", winIdNum: winId}
+		textBlockPtr: &textBlock, backgroundDefault: ".", winIdNum: winId}
 	win.print()
 
 	matrixOfWin := win.matrixRender()
@@ -83,12 +84,13 @@ func Test_windows_render(t *testing.T) {
 	fmt.Println("MATRIX DISPLAY AFTER WIN RENDER")
 	matrixOfWin.DisplayInConsoleToDebugOrAnalyse()
 
-	mxLines := matrixOfWin.lines_representation_to_test_comparison()
-	compare_str_pair("mxRender0", mxLines[0], "2bc.", t)
-	compare_str_pair("mxRender0", mxLines[1], "3def", t)
-	compare_str_pair("mxRender0", mxLines[2], "4ghi", t)
-	compare_str_pair("mxRender0", mxLines[3], "jklm", t)
-	compare_str_pair("mxRender0", mxLines[4], "no..", t)
+	wantedRenderedOutput := `2bc.
+	                         3def
+	                         4ghi
+	                         jklm
+	                         no.. `
+	compare_str_block("windowsRender1",
+		matrixOfWin.Lines_representation_to_test_comparison(), wantedRenderedOutput, t)
 }
 
 func Test_root_matrix_and_windows_merged(t *testing.T) {
@@ -97,26 +99,48 @@ func Test_root_matrix_and_windows_merged(t *testing.T) {
 	// create 2 windows.
 	// matrixRender 2 matrixes from the window
 	// merge everything
-	// 	display it
+	// display it
 
-	matrixRoot := MatrixNew(10, 8, "r")
+	matrixRoot := MatrixNew(10, 8, "#")
 
-	textBlock1 := TextBlockFromStr("1a\n2bc\n3def\n4ghijklmno")
-	textBlock2 := TextBlockFromStr("1A\n2BC\n3DEF\n4GHIJKLMNO")
+	textBlock1 := TextBlockFromStr("1")
+	textBlock2 := TextBlockFromStr("2")
 
 	winId := 0
-	win0 := Window{yTop: 1, xLeft: 1, width: 5, height: 4, textBlockPtr: &textBlock1, backgroundDefault: ".", winIdNum: winId}
+	win0 := Window{xLeft: 1, yTop: 1, width: 5, height: 4, textBlockPtr: &textBlock1, backgroundDefault: "?", winIdNum: winId}
 
 	winId = 1
-	win1 := Window{yTop: 3, xLeft: 4, width: 4, height: 5, textBlockPtr: &textBlock2, backgroundDefault: "_", winIdNum: winId}
+	win1 := Window{xLeft: 4, yTop: 3, width: 4, height: 5, textBlockPtr: &textBlock2, backgroundDefault: "-", winIdNum: winId}
 
 	matrixWin0 := win0.matrixRender()
 	matrixWin1 := win1.matrixRender()
 
-	matrixMerged0 := MatrixMerge(matrixRoot, matrixWin0)
-	matrixMerged1 := MatrixMerge(matrixMerged0, matrixWin1)
+	matrixMerged0 := MatrixAdd(matrixRoot, matrixWin0, win0.xLeft, win0.yTop)
+	matrixMerged1 := MatrixAdd(matrixMerged0, matrixWin1, win1.xLeft, win1.yTop)
 
 	matrixMerged1.DisplayInConsoleToDebugOrAnalyse()
+
+	wantedRenderedOutput := `##########
+						   	 #?????####
+						  	 #?????####
+						  	 #???----##
+						  	 #1??----##
+						 	 ####----##
+						 	 ####----##
+						 	 ####2---## `
+
+	compare_str_block("matrixRenderTest1",
+		matrixMerged1.Lines_representation_to_test_comparison(), wantedRenderedOutput, t)
+}
+
+func compare_str_block(callerInfo string, received []string, wanted string, t *testing.T) {
+	// in the tests,  I use \n as a line separator, in wanted
+	// detect lines in wanted, then compare lines
+	for lineNum, lineWanted := range strings.Split(wanted, "\n") {
+		lineWanted = strings.TrimSpace(lineWanted)
+		lineReceived := received[lineNum]
+		compare_str_pair(callerInfo, lineReceived, lineWanted, t)
+	}
 }
 
 func Test_window_row_start_end_positions(t *testing.T) {

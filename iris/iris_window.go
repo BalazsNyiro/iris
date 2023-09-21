@@ -118,7 +118,7 @@ func (w Window) matrixRender() MatrixChars {
 	*/
 
 	// fill the matrix from bottom to top
-	matrixObj := MatrixNew(w.width, w.height, ".")
+	matrixObj := MatrixNew(w.width, w.height, w.backgroundDefault)
 	matrixLineActual := w.height - 1 // select the last to fill it first
 
 	fmt.Println("RENDER")
