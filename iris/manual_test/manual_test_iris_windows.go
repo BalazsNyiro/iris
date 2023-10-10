@@ -9,10 +9,10 @@ func main() {
 	widthSys, heightSys := TerminalDimensionsWithSyscall()
 	fmt.Println("syscall:", widthSys, heightSys)
 
-	ch_data_input := make(chan MessageAndCharactersForWindowsUpdate)
+	ch_data_input := make(chan MessageAndCharactersForTextBlockUpdate)
 	go UserInterfaceStartThread(ch_data_input, "\n")
 
-	ch_data_input <- MessageAndCharactersForWindowsUpdate{
+	ch_data_input <- MessageAndCharactersForTextBlockUpdate{
 		msg: `	select:textBlock:logs-left
 						msgId:1
 `,
@@ -21,7 +21,7 @@ func main() {
 
 	for i := 0; i < 8; i++ {
 		// everything after the 'add:simpleText:' is the part of the text
-		ch_data_input <- MessageAndCharactersForWindowsUpdate{
+		ch_data_input <- MessageAndCharactersForTextBlockUpdate{
 			msg:     `select:textBlock:logs-left`,
 			addLine: LineCharsFromStr(fmt.Sprintf("%d sample", i), i),
 		}

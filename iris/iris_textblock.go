@@ -14,6 +14,7 @@ import "strings"
 
 var TextProcessingNewlineSeparator = "\n"
 
+// Char: basic Character object
 type Char struct {
 	runeVal rune
 }
@@ -24,6 +25,12 @@ func (c Char) display() string {
 
 /////////////////////////////////////////////////////////////////
 
+// LineChars: Horizontal character representation.
+// LineNum can be important, because to save memory, early lines can be removed
+// from the TextBlock - and in this situation you cannot know the original line number of the
+// inserted lines.
+// the first line's LineNum is 0.
+// if LineNum == -1, it means that the real line number is unknown at the moment of LineNum creation
 type LineChars struct {
 	Chars   []Char
 	LineNum int
@@ -47,17 +54,26 @@ func LineCharsFromStr(text string, lineNum int) LineChars {
 
 /////////////////////////////////////////////////////////////////
 
-type MessageAndCharactersForWindowsUpdate struct {
+// MessageAndCharactersForTextBlockUpdate is a channel transported message for the TextBlocks.
+// it can contain statements/commands to manage TextBlocks,
+// and it has a character container 'addLine' if you want to pass characters to the TextBlock
+type MessageAndCharactersForTextBlockUpdate struct {
 	msg     string
 	addLine LineChars
 }
 
 // ///////////////////////////////////////////////////////////////
 
+// TextBlock: the most important data structure, a logical unit of lines.
+// one TextBlock can be displayed in more Windows, and in these Windows you can see
+// different parts of the same TextBlock
 type TextBlock struct {
 	Lines       []LineChars
 	NextLineNum int
 }
+
+// TextBlocks: key based TextBlock storage
+type TextBlocks map[string]TextBlock
 
 func TextBlockFromStr(txt string) TextBlock {
 	text := TextBlock{}

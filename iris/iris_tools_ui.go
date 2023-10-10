@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-func channelRead_dataInputInterpret(ch_data_input chan MessageAndCharactersForWindowsUpdate, textBlocks *TextBlocks, dataInputLineSeparator string) {
+func channelRead_dataInputInterpret(ch_data_input chan MessageAndCharactersForTextBlockUpdate, textBlocks *TextBlocks, dataInputLineSeparator string) {
 	for {
 		select {
 		case dataInput, _ := <-ch_data_input:
@@ -30,7 +30,7 @@ func channelRead_dataInputInterpret(ch_data_input chan MessageAndCharactersForWi
 	}
 }
 
-func dataInputProcessLineByLine(dataInput MessageAndCharactersForWindowsUpdate, textBlocks *TextBlocks, dataInputLineSeparator string) string {
+func dataInputProcessLineByLine(dataInput MessageAndCharactersForTextBlockUpdate, textBlocks *TextBlocks, dataInputLineSeparator string) string {
 	winId := ""
 	fieldSeparator := ":"
 

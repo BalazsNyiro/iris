@@ -11,9 +11,7 @@ LICENSE file in the root directory of this source tree.
 
 package iris
 
-type TextBlocks map[string]TextBlock
-
-func UserInterfaceStartThread(ch_data_input chan MessageAndCharactersForWindowsUpdate, dataInputLineSeparator string) {
+func UserInterfaceStartThread(ch_data_input chan MessageAndCharactersForTextBlockUpdate, dataInputLineSeparator string) {
 	userInterfaceInit()
 	// ch_user_input := make(chan string)
 	// ch_terminal_size_change_detect := make(chan [2]int)
