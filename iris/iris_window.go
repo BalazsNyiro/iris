@@ -16,6 +16,14 @@ package iris
 
 import "fmt"
 
+type Windows map[string]Window
+
+func (wins Windows) printAll() {
+	for _, win := range wins {
+		win.print()
+	}
+}
+
 // A window: a selector for a TextBlock.
 // A matrix: the rendered representation of a window.
 type Window struct {

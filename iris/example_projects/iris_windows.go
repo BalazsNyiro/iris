@@ -29,7 +29,7 @@ func main() {
 		ch_data_input <- iris.MessageAndCharactersForWindowsUpdate{
 			msg: `select:win:logs-left`,
 		}
-		// addLine: iris.LineCharsFromStr(fmt.Sprintf("%d sample", i)),
+		// addLine: iris.LineChars  FromStr(fmt.Sprintf("%d sample", i)),
 		iris.TimeSleep(2000)
 	}
 	iris.UserInterfaceExit()

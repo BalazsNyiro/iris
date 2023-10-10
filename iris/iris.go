@@ -11,10 +11,15 @@ LICENSE file in the root directory of this source tree.
 
 package iris
 
-func UserInterfaceStart(ch_data_input chan MessageAndCharactersForWindowsUpdate, dataInputLineSeparator string) {
+type TextBlocks map[string]TextBlock
+
+func UserInterfaceStartThread(ch_data_input chan MessageAndCharactersForWindowsUpdate, dataInputLineSeparator string) {
 	userInterfaceInit()
 	// ch_user_input := make(chan string)
 	// ch_terminal_size_change_detect := make(chan [2]int)
+
+	textBlocks := TextBlocks{}
+	go channelRead_dataInputInterpret(ch_data_input, &textBlocks, dataInputLineSeparator)
 
 }
 
@@ -24,7 +29,7 @@ func userInterfaceInit() {
 	terminal_console_character_hide()
 }
 
-func UserInterfaceExit() {
+func UserInterfaceExitThread() {
 	terminal_console_character_show()
 	terminal_console_input_buffering_enable()
 }

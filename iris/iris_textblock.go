@@ -37,6 +37,7 @@ func (line LineChars) LineToStr() string {
 	return strings.Join(out, "")
 }
 func LineCharsFromStr(text string, lineNum int) LineChars {
+	// if lineNum == -1 it means the lineNum is unknown
 	line := LineChars{LineNum: lineNum}
 	for _, runeVal := range text {
 		line.Chars = append(line.Chars, Char{runeVal: runeVal})
@@ -44,7 +45,15 @@ func LineCharsFromStr(text string, lineNum int) LineChars {
 	return line
 }
 
-// maybe it has to be an object, with attributes
+/////////////////////////////////////////////////////////////////
+
+type MessageAndCharactersForWindowsUpdate struct {
+	msg     string
+	addLine LineChars
+}
+
+// ///////////////////////////////////////////////////////////////
+
 type TextBlock struct {
 	Lines       []LineChars
 	NextLineNum int
