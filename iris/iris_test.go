@@ -16,8 +16,6 @@ import (
 	"testing"
 )
 
-var newline = "\n"
-
 func Test_lines_create(t *testing.T) {
 	funName := "test_lines_create"
 

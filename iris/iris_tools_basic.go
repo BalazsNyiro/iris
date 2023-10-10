@@ -22,10 +22,6 @@ import (
 	"time"
 )
 
-var Digits = "0123456789"
-
-func NewLine() string { return "\n" } // basic fun
-
 type winsize struct {
 	Row    uint16
 	Col    uint16
