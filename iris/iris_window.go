@@ -162,33 +162,3 @@ func (w Window) matrixRender() MatrixChars {
 	}
 	return matrixObj
 }
-
-func window_row_start_end_positions(lengtOfTextBlockLine int, windowWidth int) [][2]int {
-
-	positionValues := [][2]int{}
-	lengthActual := lengtOfTextBlockLine
-
-	for true {
-		positionEnd := lengthActual - 1
-		positionStart := positionEnd // a default value only, overwritten in if{}
-		partialNotFullWindowRow_text_length := lengthActual % windowWidth
-
-		if partialNotFullWindowRow_text_length > 0 {
-			positionStart = positionEnd - partialNotFullWindowRow_text_length + 1
-		} else {
-			positionStart = positionEnd - windowWidth + 1
-		}
-		/*Concrete example: position 13 and position 14 are the partials.
-		so we need to select (13, 14) first. but the length will be
-		decreased with 2:  14-13+1 = 2
-		*/
-		lengthActual = lengthActual - (positionEnd - positionStart + 1)
-
-		positionValues = append(positionValues, [2]int{positionStart, positionEnd})
-		if positionStart == 0 {
-			break
-		}
-	}
-
-	return positionValues
-}

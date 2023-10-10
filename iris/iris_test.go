@@ -141,25 +141,6 @@ func compare_str_block(callerInfo string, received []string, wanted string, t *t
 	}
 }
 
-func Test_window_row_start_end_positions(t *testing.T) {
-	windowWidth := 4
-	windowRowPositions := window_row_start_end_positions(14, windowWidth)
-	/*  good answers:
-	position: [12 13]
-	position: [8 11]
-	position: [4 7]
-	position: [0 3]
-	*/
-
-	compare_int_pair("rowStartEndPos1", windowRowPositions[0][0], 12, t)
-	compare_int_pair("rowStartEndPos2", windowRowPositions[0][1], 13, t)
-	compare_int_pair("rowStartEndPos3", windowRowPositions[1][0], 8, t)
-	compare_int_pair("rowStartEndPos4", windowRowPositions[1][1], 11, t)
-	compare_int_pair("rowStartEndPos5", windowRowPositions[2][0], 4, t)
-	compare_int_pair("rowStartEndPos6", windowRowPositions[2][1], 7, t)
-	compare_int_pair("rowStartEndPos7", windowRowPositions[3][0], 0, t)
-	compare_int_pair("rowStartEndPos8", windowRowPositions[3][1], 3, t)
-}
 func compare_int_tuples(callerInfo string, received, wanted []int, t *testing.T) {
 	if len(received) != len(wanted) {
 		t.Fatalf("\nErr: %s received int tuple: %v\n  wanted int tuple: %v, error, different length, not comparable", callerInfo, received, wanted)
