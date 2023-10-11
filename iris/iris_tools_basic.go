@@ -108,11 +108,12 @@ func OsDetect() string {
 	// return "unknown"
 }
 
-// wrapper, not tested
+// Int2Str - convert an int to a string (wrapper)
 func Int2Str(i int) string {
 	return strconv.Itoa(i)
 }
 
+// IntMax - return with the maximum of the values
 func IntMax(a, b int) int {
 	if a > b {
 		return a
@@ -120,7 +121,7 @@ func IntMax(a, b int) int {
 	return b
 }
 
-// wrapper, not tested
+// Str2Int - convert a string to an int
 func Str2Int(txt string) int {
 	num, error := strconv.Atoi(txt)
 	if error == nil {
@@ -130,6 +131,7 @@ func Str2Int(txt string) int {
 	return 0
 }
 
+// StrDoubleSpacesRemove - remove double spaces
 func StrDoubleSpacesRemove(txt string) string {
 	for strings.Contains(txt, "  ") {
 		txt = strings.Replace(txt, "  ", " ", -1)
@@ -137,7 +139,8 @@ func StrDoubleSpacesRemove(txt string) string {
 	return txt
 }
 
-func StrListRemoveEmptyElems(list []string, useTrim bool) []string {
+// StrListRemoveEmptyElemsWithoutRealValue - remove the elems where there is no real value, only whitespaces
+func StrListRemoveEmptyElemsWithoutRealValue(list []string, useTrim bool) []string {
 	cleaned := []string{}
 	for _, elem := range list {
 		if useTrim {
@@ -150,6 +153,7 @@ func StrListRemoveEmptyElems(list []string, useTrim bool) []string {
 	return cleaned
 }
 
+// TimeSleep - wait/sleep for a given time
 func TimeSleep(interval_millisec int) { // basic fun
 	time.Sleep(time.Millisecond * time.Duration(interval_millisec))
 }

@@ -24,8 +24,11 @@ func (wins Windows) printAll() {
 	}
 }
 
-// A window: a selector for a TextBlock.
+// Window: a selector for a TextBlock.
 // A matrix: the rendered representation of a window.
+// in a window a section of TextBlock is displayed.
+// more than one window can display the same TextBlock,
+// and different parts of TextBlock
 type Window struct {
 	id string
 

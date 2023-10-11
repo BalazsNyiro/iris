@@ -16,7 +16,12 @@ import (
 	"strings"
 )
 
+// ColumnChars: vertical characters representation
 type ColumnChars []Char
+
+// MatrixChars is a visible character layer on the screen.
+// it is a rendered window, with linebreaks, plus possible
+// rendered windows elements (borders, buttons) - everything that the user can see.
 type MatrixChars struct {
 	matrix      []ColumnChars
 	defaultRune rune

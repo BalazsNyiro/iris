@@ -27,8 +27,7 @@ func (c Char) display() string {
 
 // LineChars: Horizontal character representation.
 // LineNum can be important, because to save memory, early lines can be removed
-// from the TextBlock - and in this situation you cannot know the original line number of the
-// inserted lines.
+// from the TextBlock - and in this situation you cannot know the original line number of the inserted lines.
 // the first line's LineNum is 0.
 // if LineNum == -1, it means that the real line number is unknown at the moment of LineNum creation
 type LineChars struct {
